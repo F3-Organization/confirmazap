@@ -9,6 +9,7 @@ async function bootstrap() {
         // Initialize controllers (which register routes)
         factory.controller.app();
         factory.controller.auth();
+        factory.controller.calendar();
 
         // Start the server
         factory.adapters.fastify().listen();

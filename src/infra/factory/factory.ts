@@ -3,12 +3,16 @@ import { EvolutionApiAdapter } from "../adapters/evolution-api.adapter";
 import { GoogleCalendarAdapter } from "../adapters/google-calendar.adapter";
 import { AppController } from "../controller/app.controller";
 import { AuthController } from "../controller/auth.controller";
+import { CalendarController } from "../controller/calendar.controller";
 import { UserRepository } from "../database/repositories/user.repository";
 import { ClientRepository } from "../database/repositories/client.repository";
 import { ScheduleRepository } from "../database/repositories/schedule.repository";
 import { UserConfigRepository } from "../database/repositories/user-config.repository";
 import { GenerateGoogleAuthUrlUseCase } from "../../usecase/auth/generate-google-auth-url.usecase";
 import { ExchangeGoogleCodeUseCase } from "../../usecase/auth/exchange-google-code.usecase";
+import { SyncCalendarUseCase } from "../../usecase/calendar/sync-calendar.usecase";
+import { SyncCalendarQueue } from "../queue/sync-calendar.queue";
+import { SyncCalendarWorker } from "../queue/sync-calendar.worker";
 
 const adapterInstance = new FastifyAdapter();
 const evolutionAdapter = new EvolutionApiAdapter();
@@ -21,6 +25,11 @@ const userConfigRepository = new UserConfigRepository();
 // UseCases
 const generateGoogleAuthUrlUseCase = new GenerateGoogleAuthUrlUseCase(googleCalendarAdapter);
 const exchangeGoogleCodeUseCase = new ExchangeGoogleCodeUseCase(googleCalendarAdapter, userConfigRepository);
+const syncCalendarUseCase = new SyncCalendarUseCase(googleCalendarAdapter, scheduleRepository, userConfigRepository);
+
+// Queues & Workers
+const syncCalendarQueue = new SyncCalendarQueue();
+const syncCalendarWorker = new SyncCalendarWorker(syncCalendarUseCase);
 
 const repositories = {
     user: () => userRepository,
@@ -42,6 +51,10 @@ const controllers = {
         generateGoogleAuthUrlUseCase,
         exchangeGoogleCodeUseCase,
         userRepository
+    ),
+    calendar: () => new CalendarController(
+        adapterInstance,
+        syncCalendarQueue
     )
 }
 

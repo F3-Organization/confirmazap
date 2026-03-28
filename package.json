@@ -18,7 +18,8 @@
     "fastify": "^5.8.4",
     "pg": "^8.20.0",
     "reflect-metadata": "^0.2.2",
-    "typeorm": "^0.3.28"
+    "typeorm": "^0.3.28",
+    "bullmq": "^5.41.0"
   },
   "devDependencies": {
     "@types/dotenv": "^6.1.1",
