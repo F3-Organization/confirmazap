@@ -11,8 +11,11 @@ import { UserConfigRepository } from "../database/repositories/user-config.repos
 import { GenerateGoogleAuthUrlUseCase } from "../../usecase/auth/generate-google-auth-url.usecase";
 import { ExchangeGoogleCodeUseCase } from "../../usecase/auth/exchange-google-code.usecase";
 import { SyncCalendarUseCase } from "../../usecase/calendar/sync-calendar.usecase";
+import { NotifyUpcomingAppointmentsUseCase } from "../../usecase/notification/notify-upcoming-appointments.usecase";
 import { SyncCalendarQueue } from "../queue/sync-calendar.queue";
 import { SyncCalendarWorker } from "../queue/sync-calendar.worker";
+import { NotifyQueue } from "../queue/notify.queue";
+import { NotifyWorker } from "../queue/notify.worker";
 
 const adapterInstance = new FastifyAdapter();
 const evolutionAdapter = new EvolutionApiAdapter();
@@ -26,10 +29,17 @@ const userConfigRepository = new UserConfigRepository();
 const generateGoogleAuthUrlUseCase = new GenerateGoogleAuthUrlUseCase(googleCalendarAdapter);
 const exchangeGoogleCodeUseCase = new ExchangeGoogleCodeUseCase(googleCalendarAdapter, userConfigRepository);
 const syncCalendarUseCase = new SyncCalendarUseCase(googleCalendarAdapter, scheduleRepository, userConfigRepository);
+const notifyUpcomingAppointmentsUseCase = new NotifyUpcomingAppointmentsUseCase(
+    scheduleRepository,
+    userConfigRepository,
+    evolutionAdapter
+);
 
 // Queues & Workers
 const syncCalendarQueue = new SyncCalendarQueue();
 const syncCalendarWorker = new SyncCalendarWorker(syncCalendarUseCase);
+const notifyQueue = new NotifyQueue();
+const notifyWorker = new NotifyWorker(notifyUpcomingAppointmentsUseCase, userConfigRepository);
 
 const repositories = {
     user: () => userRepository,
@@ -54,12 +64,17 @@ const controllers = {
     ),
     calendar: () => new CalendarController(
         adapterInstance,
-        syncCalendarQueue
+        syncCalendarQueue,
+        notifyQueue
     )
 }
 
 export const factory = {
     adapters: adapters,
     repositories: repositories,
-    controller: controllers
+    controller: controllers,
+    queues: {
+        sync: () => syncCalendarQueue,
+        notify: () => notifyQueue
+    }
 }

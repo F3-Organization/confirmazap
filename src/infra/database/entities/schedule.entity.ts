@@ -35,6 +35,9 @@ export class Schedule {
     })
     status!: ScheduleStatus;
 
+    @Column({ name: "is_notified", default: false })
+    isNotified!: boolean;
+
     @Column({ name: "user_id" })
     userId!: string;
 

@@ -6,4 +6,5 @@ export interface IScheduleRepository {
     findByUserId(userId: string): Promise<Schedule[]>;
     findNextToNotify(userId: string, startRange: Date, endRange: Date): Promise<Schedule[]>;
     updateStatus(id: string, status: ScheduleStatus): Promise<void>;
+    updateNotified(id: string, isNotified: boolean): Promise<void>;
 }

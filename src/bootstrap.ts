@@ -11,6 +11,10 @@ async function bootstrap() {
         factory.controller.auth();
         factory.controller.calendar();
 
+        // Start workers
+        factory.queues.sync();
+        factory.queues.notify();
+
         // Start the server
         factory.adapters.fastify().listen();
     } catch (err) {

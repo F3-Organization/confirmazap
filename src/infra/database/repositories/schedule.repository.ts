@@ -28,11 +28,16 @@ export class ScheduleRepository implements IScheduleRepository {
                 userId,
                 startAt: Between(startRange, endRange),
                 status: ScheduleStatus.PENDING,
+                isNotified: false
             },
         });
     }
 
     async updateStatus(id: string, status: ScheduleStatus): Promise<void> {
         await this.repository.update(id, { status });
+    }
+
+    async updateNotified(id: string, isNotified: boolean): Promise<void> {
+        await this.repository.update(id, { isNotified });
     }
 }
