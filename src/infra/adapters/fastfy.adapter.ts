@@ -1,6 +1,12 @@
 import Fastify, { FastifyInstance, FastifyReply, FastifyRequest, HTTPMethods } from 'fastify'
 import { fastifySwagger } from '@fastify/swagger'
 import { fastifySwaggerUi } from '@fastify/swagger-ui'
+// @ts-ignore - Types installed during docker build
+import fastifyCors from '@fastify/cors'
+// @ts-ignore - Types installed during docker build
+import fastifyHelmet from '@fastify/helmet'
+// @ts-ignore - Types installed during docker build
+import fastifyRateLimit from '@fastify/rate-limit'
 import { env } from '../config/configs'
 
 export class FastifyAdapter {
@@ -8,7 +14,9 @@ export class FastifyAdapter {
 
     public constructor() {
         this.app = Fastify({
-            logger: true,
+            logger: {
+                level: env.logLevel
+            },
             ajv: {
                 customOptions: {
                     keywords: ['example']
@@ -18,6 +26,25 @@ export class FastifyAdapter {
     }
 
     public async setup() {
+        // ── Segurança ──────────────────────────────────────────
+        await this.app.register(fastifyCors, {
+            origin: env.isProduction()
+                ? [`https://${env.domain}`]
+                : true,
+            credentials: true
+        });
+
+        await this.app.register(fastifyHelmet, {
+            contentSecurityPolicy: false // Desativado para permitir Swagger UI
+        });
+
+        await this.app.register(fastifyRateLimit, {
+            max: 100,
+            timeWindow: '1 minute',
+            allowList: ['127.0.0.1'] // Localhost para health checks
+        });
+
+        // ── Documentação ───────────────────────────────────────
         await this.app.register(fastifySwagger, {
             mode: 'dynamic',
             openapi: {
@@ -42,8 +69,12 @@ export class FastifyAdapter {
                 },
                 servers: [
                     { 
-                        url: `http://localhost:${env.port}`,
-                        description: 'Servidor de Desenvolvimento Local' 
+                        url: env.isProduction() 
+                            ? `https://${env.domain}` 
+                            : `http://localhost:${env.port}`,
+                        description: env.isProduction() 
+                            ? 'Servidor de Produção' 
+                            : 'Servidor de Desenvolvimento Local'
                     }
                 ],
                 tags: [
@@ -65,6 +96,22 @@ export class FastifyAdapter {
             transformStaticCSP: (header) => header
         })
 
+        // ── Error Handler Global ───────────────────────────────
+        this.app.setErrorHandler((error: any, request, reply) => {
+            const statusCode = error.statusCode || 500;
+
+            request.log.error({
+                err: error,
+                req: { method: request.method, url: request.url }
+            });
+
+            reply.code(statusCode).send({
+                error: statusCode >= 500 ? 'Erro interno do servidor' : error.message,
+                statusCode,
+                ...(env.debug() && { stack: error.stack })
+            });
+        });
+
         await this.app.after();
     }
 
@@ -80,8 +127,6 @@ export class FastifyAdapter {
             schema: schema
         });
     }
-
-    // Remove the redundant ready method as it's part of the async setup
 
     public listen() {
         this.app.listen({

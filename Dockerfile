@@ -14,7 +14,6 @@ FROM dependencies AS build
 COPY . .
 RUN npm run build
 
-
 FROM base AS prod
 ENV NODE_ENV=production
 
@@ -22,5 +21,8 @@ RUN npm ci --omit=dev
 
 COPY --from=build /usr/src/app/dist ./dist
 
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+    CMD wget -qO- http://localhost:3000/api/health || exit 1
+
 EXPOSE 3000
-CMD ["node", "dist/bootstrap.js"]
+CMD ["npm", "start"]

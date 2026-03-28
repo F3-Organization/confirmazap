@@ -2,8 +2,11 @@ import 'dotenv/config'
 
 export const env = {
     environment: process.env.NODE_ENV || 'development',
+    isProduction: () => env.environment === 'production',
     debug: () => env.environment === 'development',
+    logLevel: (process.env.LOG_LEVEL || 'info') as 'fatal' | 'error' | 'warn' | 'info' | 'debug' | 'trace',
     port: parseInt(process.env.PORT || '3000'),
+    domain: process.env.DOMAIN || 'localhost',
     database: {
         host: process.env.DB_HOST || 'localhost',
         port: parseInt(process.env.DB_PORT || '5432'),

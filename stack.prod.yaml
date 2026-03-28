@@ -1,0 +1,114 @@
+version: "3.8"
+
+services:
+  api:
+    image: agendaok:latest
+    build:
+      context: .
+      target: prod
+    environment:
+      - NODE_ENV=production
+      - PORT=${PORT:-3000}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - DOMAIN=${DOMAIN}
+      # Database (bare metal no host)
+      - DB_HOST=host.docker.internal
+      - DB_PORT=${DB_PORT:-5432}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME:-agendaok}
+      # Redis (container)
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-}
+      # Google OAuth
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - GOOGLE_REDIRECT_URI=https://${DOMAIN}/api/auth/google/callback
+      # Evolution API
+      - EVO_API_KEY=${EVO_API_KEY}
+      - EVOLUTION_API_URL=http://evolution-api:8080
+      - EVO_SERVER_URL=https://${EVO_DOMAIN:-evo.${DOMAIN}}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - internal
+      - traefik-public
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.agendaok-api.rule=Host(`${DOMAIN}`)"
+        - "traefik.http.routers.agendaok-api.entrypoints=websecure"
+        - "traefik.http.routers.agendaok-api.tls.certresolver=letsencrypt"
+        - "traefik.http.services.agendaok-api.loadbalancer.server.port=${PORT:-3000}"
+        # Middleware de rate limit via Traefik (camada extra)
+        - "traefik.http.middlewares.agendaok-ratelimit.ratelimit.average=50"
+        - "traefik.http.middlewares.agendaok-ratelimit.ratelimit.burst=100"
+        - "traefik.http.routers.agendaok-api.middlewares=agendaok-ratelimit"
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --save 60 1 --requirepass ${REDIS_PASSWORD:-}
+    volumes:
+      - redis_data:/data
+    networks:
+      - internal
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+  evolution-api:
+    image: atendai/evolution-api:v2.1.1
+    environment:
+      - SERVER_TYPE=http
+      - SERVER_URL=https://${EVO_DOMAIN:-evo.${DOMAIN}}
+      - AUTHENTICATION_API_KEY=${EVO_API_KEY}
+      # Database (bare metal no host)
+      - DATABASE_ENABLED=true
+      - DATABASE_PROVIDER=postgresql
+      - DATABASE_CONNECTION_URI=postgresql://${DB_USER}:${DB_PASSWORD}@host.docker.internal:${DB_PORT:-5432}/${EVO_DATABASE_NAME:-evolution}?schema=public
+      - DATABASE_CONNECTION_CLIENT_NAME=evolution-agendaok
+      # Redis
+      - CACHE_REDIS_ENABLED=true
+      - CACHE_REDIS_URI=redis://${REDIS_PASSWORD:+:${REDIS_PASSWORD}@}redis:6379
+      - CACHE_REDIS_PREFIX_KEY=evolution
+      # Persistência
+      - DATABASE_SAVE_DATA_INSTANCE=true
+      - DATABASE_SAVE_DATA_NEW_MESSAGE=true
+      - DATABASE_SAVE_MESSAGE_UPDATE=true
+      - DATABASE_SAVE_DATA_CONTACTS=true
+      - DATABASE_SAVE_DATA_CHATS=true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - internal
+      - traefik-public
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.evolution-api.rule=Host(`${EVO_DOMAIN:-evo.${DOMAIN}}`)"
+        - "traefik.http.routers.evolution-api.entrypoints=websecure"
+        - "traefik.http.routers.evolution-api.tls.certresolver=letsencrypt"
+        - "traefik.http.services.evolution-api.loadbalancer.server.port=8080"
+    depends_on:
+      - redis
+
+volumes:
+  redis_data:
+
+networks:
+  internal:
+    driver: overlay
+  traefik-public:
+    external: true

@@ -6,16 +6,23 @@
   "scripts": {
     "dev": "ts-node src/bootstrap.ts",
     "build": "tsc",
-    "start": "node dist/bootstrap.js",
+    "start": "npm run migration:run && node dist/bootstrap.js",
+    "start:no-migrate": "node dist/bootstrap.js",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "migration:generate": "typeorm migration:generate -d dist/infra/config/data-source.js",
+    "migration:run": "typeorm migration:run -d dist/infra/config/data-source.js",
+    "migration:revert": "typeorm migration:revert -d dist/infra/config/data-source.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@fastify/cors": "^11.0.0",
+    "@fastify/helmet": "^13.0.0",
+    "@fastify/rate-limit": "^10.2.0",
     "@fastify/swagger": "^9.7.0",
     "@fastify/swagger-ui": "^5.2.5",
     "@types/pg": "^8.20.0",

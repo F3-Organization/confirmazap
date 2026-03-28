@@ -1,5 +1,6 @@
 import { FastifyAdapter } from "../adapters/fastfy.adapter";
 import { HandleEvolutionWebhookUseCase } from "../../usecase/notification/handle-evolution-webhook.usecase";
+import { env } from "../config/configs";
 
 export class EvolutionWebhookController {
     constructor(
@@ -11,9 +12,14 @@ export class EvolutionWebhookController {
 
     private registerRoutes() {
         this.fastify.addRoute("POST", "/webhook/evolution", async (request, reply) => {
-            const payload = request.body;
+            const payload = request.body as any;
             
             try {
+                // Validar apikey em produção
+                if (env.isProduction() && payload?.apikey !== env.evolution.apiKey) {
+                    return reply.code(401).send({ error: "Unauthorized webhook call" });
+                }
+
                 // Processamento assíncrono para não travar o webhook
                 this.handleWebhook.execute(payload).catch(err => {
                     console.error("[WebhookController] Async processing failed:", err);
@@ -21,7 +27,7 @@ export class EvolutionWebhookController {
 
                 reply.send({ status: "received" });
             } catch (error: any) {
-                console.error("[WebhookController] Webhook registration failed:", error);
+                console.error("[WebhookController] Webhook processing failed:", error);
                 reply.code(500).send({ error: "Webhook processing error" });
             }
         }, {
