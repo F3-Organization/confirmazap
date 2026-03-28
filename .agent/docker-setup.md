@@ -17,29 +17,34 @@ O projeto utiliza um `Dockerfile` multi-estágio para otimizar o tamanho da imag
 
 O arquivo `compose.yaml` (ou `docker-compose.yml`) gerencia os serviços necessários:
 
-- **api**: A aplicação Node.js. Depende do banco de dados.
-- **database**: Banco de Dados PostgreSQL (v16). Persiste dados no volume `postgres_data`.
+- **api**: A aplicação Node.js (AgendaOk). Depende de `database` e `redis`.
+- **database**: PostgreSQL (v16). Gerencia dois bancos de dados: `agendaok` (app) e `evolution` (WhatsApp).
+- **redis**: Cache e Message Broker para BullMQ e Evolution API.
+- **evolution-api**: Gateway de WhatsApp (v2.x).
+
+### Inicialização do Banco de Dados
+
+Como a imagem padrão do PostgreSQL cria apenas um banco, adicionamos um script em `./docker/db/create-multiple-databases.sh` que é montado em `/docker-entrypoint-initdb.d/`. Ele garante a criação automática do banco `evolution` na primeira execução.
+
+> [!WARNING]
+> Se você já rodou o contêiner `database` antes desse ajuste, precisará deletar o volume (`docker compose down -v`) ou criar o banco `evolution` manualmente para que a Evolution API consiga se conectar.
 
 ### Como Rodar:
 
-**Desenvolvimento (com hot-reload):**
+**Desenvolvimento:**
 ```bash
 docker compose up --build
 ```
 
-**Produção (Imagem otimizada):**
-Para rodar a imagem de produção localmente (para testes), você pode usar:
-```bash
-docker build --target prod -t agendaok-prod .
-docker run -p 3000:3000 --env-file .env agendaok-prod
-```
+A Evolution API estará acessível externamente em `http://localhost:8080`. Internamente (para a `api`), use `http://evolution-api:8080`.
 
-## 3. Variáveis de Ambiente
+## 3. Variáveis de Ambiente e Rede
 
-O Docker Compose utiliza o arquivo `.env` da raiz do projeto. Certifique-se de que variáveis como `DB_HOST`, `DB_PORT`, `DB_USER` e `DB_PASSWORD` estejam configuradas para apontar para o serviço `database` definido no compose.
+As variáveis foram atualizadas para o padrão Evolution v2:
+- `DATABASE_PROVIDER=postgresql`
+- `EVO_SERVER_URL`: Define o domínio base da API.
+- `EVO_DATABASE_NAME`: Define o banco separado para o Prisma da Evolution.
 
-- `DB_HOST=database` (dentro da rede do Docker)
-- `DB_PORT=5432`
 
 ---
 
