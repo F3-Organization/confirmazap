@@ -5,6 +5,7 @@ services:
       - .env
     ports:
       - '${PORT}:${PORT}'
+    restart: always
     depends_on:
       - database
 

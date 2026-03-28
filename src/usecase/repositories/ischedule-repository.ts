@@ -1,0 +1,9 @@
+import { Schedule, ScheduleStatus } from "../../infra/database/entities/schedule.entity";
+
+export interface IScheduleRepository {
+    save(schedule: Schedule): Promise<Schedule>;
+    findByGoogleEventId(googleEventId: string): Promise<Schedule | null>;
+    findByUserId(userId: string): Promise<Schedule[]>;
+    findNextToNotify(userId: string, startRange: Date, endRange: Date): Promise<Schedule[]>;
+    updateStatus(id: string, status: ScheduleStatus): Promise<void>;
+}
