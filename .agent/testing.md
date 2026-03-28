@@ -39,9 +39,11 @@ Para manter o projeto pragmático e rápido, recomendamos a seguinte stack de te
 
 ## 🚦 Regras de Execução
 
+- **Implementação Segue o Teste:** Os testes devem ser criados ou atualizados IMEDIATAMENTE após qualquer implementação de funcionalidade ou correção de bug.
+- **Sucesso Obrigatório:** Todos os testes (Unidade, Integração e E2E) devem rodar com **100% de sucesso** após qualquer alteração no código. Nenhuma tarefa é considerada concluída se houver um único teste falhando.
 - **Nomes de Arquivo:** `{nome}.spec.ts` para unidade e `{nome}.test.ts` para integração/e2e.
 - **Localização:** Idealmente ao lado do arquivo sendo testado ou em uma pasta `__tests__` paralela.
-- **CI/CD:** Todos os testes devem passar localmente antes de qualquer push para a `main`.
+- **Verificação Local:** O desenvolvedor deve rodar a suite completa localmente antes de solicitar qualquer revisão ou realizar push.
 
 ---
 
