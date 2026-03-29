@@ -67,7 +67,8 @@ const cancelAppointmentUseCase = new CancelAppointmentUseCase(
 const handleEvolutionWebhookUseCase = new HandleEvolutionWebhookUseCase(
     userConfigRepository,
     confirmAppointmentUseCase,
-    cancelAppointmentUseCase
+    cancelAppointmentUseCase,
+    evolutionAdapter
 );
 
 // UseCases - Subscription

@@ -19,13 +19,16 @@ describe("ExchangeGoogleCodeUseCase", () => {
             }),
             refreshAccessToken: vi.fn(),
             listEvents: vi.fn(),
-            updateEvent: vi.fn()
+            updateEvent: vi.fn(),
+            getUserProfile: vi.fn()
         };
 
         userConfigRepository = {
             findByUserId: vi.fn(),
             save: vi.fn(),
-            update: vi.fn()
+            update: vi.fn(),
+            findByInstanceName: vi.fn(),
+            findAllActive: vi.fn()
         };
 
         sut = new ExchangeGoogleCodeUseCase(googleService, userConfigRepository);
@@ -34,9 +37,11 @@ describe("ExchangeGoogleCodeUseCase", () => {
     it("deve criar uma nova configuração se não existir para o usuário", async () => {
         vi.mocked(userConfigRepository.findByUserId).mockResolvedValueOnce(null);
 
-        await sut.execute("user-1", "code-123");
-
-        expect(googleService.getTokens).toHaveBeenCalledWith("code-123");
+        await sut.execute("user-1", {
+            access_token: "access-123",
+            refresh_token: "refresh-123",
+            expires_in: 3600
+        });
         expect(userConfigRepository.save).toHaveBeenCalledWith(expect.objectContaining({
             userId: "user-1",
             googleAccessToken: "access-123",
@@ -51,13 +56,11 @@ describe("ExchangeGoogleCodeUseCase", () => {
         } as UserConfig;
 
         vi.mocked(userConfigRepository.findByUserId).mockResolvedValueOnce(existing);
-        vi.mocked(googleService.getTokens).mockResolvedValueOnce({
+        await sut.execute("user-1", {
             access_token: "new-access",
             expires_in: 3600
-            // sem refresh_token (comportamento padrão do Google em re-auth sem prompt=consent)
+            // sem refresh_token
         });
-
-        await sut.execute("user-1", "code-123");
 
         expect(userConfigRepository.save).toHaveBeenCalledWith(expect.objectContaining({
             googleAccessToken: "new-access",
@@ -72,7 +75,10 @@ describe("ExchangeGoogleCodeUseCase", () => {
         vi.useFakeTimers();
         vi.setSystemTime(now);
 
-        await sut.execute("user-1", "code-123");
+        await sut.execute("user-1", {
+            access_token: "access-123",
+            expires_in: 3600
+        });
 
         const expectedExpiry = new Date(now + 3600 * 1000);
         

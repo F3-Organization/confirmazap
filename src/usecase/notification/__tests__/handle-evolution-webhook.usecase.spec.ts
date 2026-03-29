@@ -10,6 +10,7 @@ describe("HandleEvolutionWebhookUseCase", () => {
     let userConfigRepository: IUserConfigRepository;
     let confirmAppointment: ConfirmAppointmentUseCase;
     let cancelAppointment: CancelAppointmentUseCase;
+    let evolutionService: any;
 
     const mockConfig = {
         userId: "user-1",
@@ -33,10 +34,15 @@ describe("HandleEvolutionWebhookUseCase", () => {
             execute: vi.fn()
         } as any;
 
+        evolutionService = {
+            sendText: vi.fn()
+        };
+
         sut = new HandleEvolutionWebhookUseCase(
             userConfigRepository, 
             confirmAppointment,
-            cancelAppointment
+            cancelAppointment,
+            evolutionService
         );
     });
 

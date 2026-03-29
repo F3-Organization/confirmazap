@@ -1,4 +1,5 @@
 import { IUserConfigRepository } from "../repositories/iuser-config-repository";
+import { IEvolutionService } from "../ports/ievolution-service";
 import { ConfirmAppointmentUseCase } from "../calendar/confirm-appointment.usecase";
 import { CancelAppointmentUseCase } from "../calendar/cancel-appointment.usecase";
 
@@ -6,7 +7,8 @@ export class HandleEvolutionWebhookUseCase {
     constructor(
         private readonly userConfigRepository: IUserConfigRepository,
         private readonly confirmAppointment: ConfirmAppointmentUseCase,
-        private readonly cancelAppointment: CancelAppointmentUseCase
+        private readonly cancelAppointment: CancelAppointmentUseCase,
+        private readonly evolutionService: IEvolutionService
     ) {}
 
     async execute(payload: any): Promise<void> {
@@ -24,9 +26,19 @@ export class HandleEvolutionWebhookUseCase {
         const messageText = data.message?.conversation || data.message?.extendedTextMessage?.text || "";
 
         if (this.isConfirmation(messageText)) {
-            await this.confirmAppointment.execute(config.userId, phoneNumber);
+            try {
+                await this.confirmAppointment.execute(config.userId, phoneNumber);
+                await this.evolutionService.sendText(instanceName, phoneNumber, "✅ Ótimo! Seu agendamento foi confirmado com sucesso. Te esperamos!");
+            } catch (error) {
+                console.error("[Webhook] Failed to confirm appointment", error);
+            }
         } else if (this.isCancellation(messageText)) {
-            await this.cancelAppointment.execute(config.userId, phoneNumber);
+            try {
+                await this.cancelAppointment.execute(config.userId, phoneNumber);
+                await this.evolutionService.sendText(instanceName, phoneNumber, "❌ Certo, seu agendamento foi cancelado. Entre em contato para remarcar quando puder.");
+            } catch (error) {
+                console.error("[Webhook] Failed to cancel appointment", error);
+            }
         }
     }
 
