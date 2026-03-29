@@ -1,4 +1,8 @@
-# API Mapping & State Management hooks
+# API Mapping & Shared Type Safety
+
+The Monorepo allows for **End-to-End Type Safety** by sharing Zod schemas between the Fastify backend and the React frontend via the `@shared` alias.
+
+## API Hooks Mapping
 
 Mapping of frontend feature hooks to backend Fastify routes.
 

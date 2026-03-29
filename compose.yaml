@@ -9,6 +9,9 @@ services:
     depends_on:
       - database
       - redis
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
 
   database:
     image: postgres:16-alpine
@@ -66,6 +69,22 @@ services:
       - redis
     volumes:
       - evolution_instances:/evolution/instances
+
+  web:
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+      target: dev
+    ports:
+      - '5173:5173'
+    environment:
+      - VITE_API_URL=http://localhost:3000
+    volumes:
+      - ./web:/usr/src/app
+      - ./shared:/usr/src/shared
+      - /usr/src/app/node_modules
+    depends_on:
+      - api
 
 volumes:
   postgres_data:

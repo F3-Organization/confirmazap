@@ -1,10 +1,15 @@
-# Tech Stack (Senior SaaS)
+# Tech Stack (Senior SaaS Monorepo)
 
-Selected technologies for the frontend of AgendaOk.
+Selected technologies for the full ConfirmaZap ecosystem, optimized for high performance and horizontal scaling.
+
+## Infrastructure & Orchestration
+- **Docker Compose**: Unified orchestration for API, Web, Evolution API, Postgres, and Redis.
+- **Monorepo (Shared Directory)**: Centralized `@shared/schemas` and `@shared/types` to avoid duplication.
 
 ## Core
 - **React 18 + TypeScript**: Baseline for type-safe and modern component development.
 - **Vite**: Ultra-fast build tool and development server.
+
 
 ## Data Fetching & State
 - **TanStack Query (React Query)**: Handles all server state. Replaces global loading states and manual `useEffect` fetching.
