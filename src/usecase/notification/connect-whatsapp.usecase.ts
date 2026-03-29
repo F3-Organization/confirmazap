@@ -11,7 +11,7 @@ export class ConnectWhatsappUseCase {
     async execute(userId: string): Promise<EvolutionConnectResponse> {
         const config = await this.userConfigRepository.findByUserId(userId);
         if (!config) {
-            throw new Error("Configuração de usuário não encontrada.");
+            throw new Error("User configuration not found");
         }
 
         const instanceName = `agent_${userId.replace(/-/g, "").substring(0, 10)}`;

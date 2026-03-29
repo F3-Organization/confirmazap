@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { CreateSubscriptionCheckoutUseCase } from "../create-checkout.usecase";
 import { UserRepository } from "../../../infra/database/repositories/user.repository";
 import { SubscriptionRepository } from "../../../infra/database/repositories/subscription.repository";
+import { UserConfigRepository } from "../../../infra/database/repositories/user-config.repository";
 import { IPaymentGateway } from "../../ports/ipayment-gateway";
 import { SubscriptionStatus } from "../../../infra/database/entities/subscription.entity";
 
@@ -9,6 +10,7 @@ describe("CreateSubscriptionCheckoutUseCase", () => {
     let sut: CreateSubscriptionCheckoutUseCase;
     let userRepository: UserRepository;
     let subscriptionRepository: SubscriptionRepository;
+    let userConfigRepository: UserConfigRepository;
     let paymentGateway: IPaymentGateway;
 
     beforeEach(() => {
@@ -23,6 +25,10 @@ describe("CreateSubscriptionCheckoutUseCase", () => {
             createOrUpdate: vi.fn()
         } as any;
 
+        userConfigRepository = {
+            findByUserId: vi.fn()
+        } as any;
+
         paymentGateway = {
             createCustomer: vi.fn(),
             createBilling: vi.fn(),
@@ -32,6 +38,7 @@ describe("CreateSubscriptionCheckoutUseCase", () => {
         sut = new CreateSubscriptionCheckoutUseCase(
             userRepository,
             subscriptionRepository,
+            userConfigRepository,
             paymentGateway
         );
     });
@@ -58,6 +65,10 @@ describe("CreateSubscriptionCheckoutUseCase", () => {
     it("deve criar novo customer se não existir um customerId", async () => {
         vi.mocked(userRepository.findById).mockResolvedValueOnce({ id: "user-1", name: "User", email: "user@test.com" } as any);
         vi.mocked(subscriptionRepository.findByUserId).mockResolvedValueOnce(null);
+        vi.mocked(userConfigRepository.findByUserId).mockResolvedValueOnce({
+            whatsappNumber: "5511999999999",
+            taxId: "123.456.789-00"
+        } as any);
         vi.mocked(paymentGateway.createCustomer).mockResolvedValueOnce({ id: "customer-123" });
         vi.mocked(paymentGateway.createBilling).mockResolvedValueOnce({ id: "billing-123", url: "https://new-checkout.url" });
 

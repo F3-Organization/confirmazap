@@ -72,6 +72,7 @@ const handleEvolutionWebhookUseCase = new HandleEvolutionWebhookUseCase(
 const createSubscriptionCheckoutUseCase = new CreateSubscriptionCheckoutUseCase(
     userRepository,
     subscriptionRepository,
+    userConfigRepository,
     abacatePayAdapter
 );
 const handleAbacatePayWebhookUseCase = new HandleAbacatePayWebhookUseCase(

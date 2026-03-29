@@ -19,6 +19,9 @@ export class UserConfig {
     @Column({ name: "whatsapp_instance_name", nullable: true })
     whatsappInstanceName?: string;
 
+    @Column({ name: "tax_id", nullable: true })
+    taxId?: string;
+
     @Column({ name: "google_access_token", type: "text", nullable: true })
     googleAccessToken?: string;
 

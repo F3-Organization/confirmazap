@@ -34,7 +34,12 @@
 - **Código Limpo (Clean Code):** O código deve ser autoexplicativo através de nomes semânticos de variáveis, funções e classes.
 - **SEM COMENTÁRIOS:** Não deixe comentários no código explicando "o que" ele faz. Se um trecho precisa de explicação, ele deve ser refatorado para ser mais legível. Comentários só são permitidos em casos EXTREMAMENTE raros para explicar o "porquê" de uma decisão técnica obscura ou workaround.
 
+## 6. Segurança e Dados Hardcoded
+- **PROIBIDO Placeholder de Produção:** Nunca utilize strings como `"000.000.000-00"`, `"00000000000"`, `"test@test.com"`, ou `"123456"` em código que possa ir para produção. Se um dado é obrigatório mas opcional no cadastro, o Use Case deve validar sua presença e lançar um erro amigável, orientando o usuário a completar o cadastro.
+- **Segredos no `.env`:** Chaves de API, senhas e tokens devem estar EXCLUSIVAMENTE em variáveis de ambiente, acessadas via objeto `env` centralizado em `src/infra/config/configs.ts`.
+- **Sanitização:** Sempre utilize bibliotecas de validação (Zod) para garantir que dados sensíveis sigam o formato esperado.
+
 ---
 
-## 6. Definição de Pronto (Definition of Done)
+## 7. Definição de Pronto (Definition of Done)
 Após finalizar qualquer implementação, siga obrigatoriamente o **[Checklist de Revisão](file:///home/felipe/Repositories/personal/agendaOk/.agent/review-checklist.md)** para garantir a qualidade, ausência de bugs e aderência aos princípios SOLID.

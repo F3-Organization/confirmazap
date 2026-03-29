@@ -2,12 +2,14 @@ import { SubscriptionRepository } from "../../infra/database/repositories/subscr
 import { UserRepository } from "../../infra/database/repositories/user.repository";
 import { IPaymentGateway } from "../ports/ipayment-gateway";
 import { env } from "../../infra/config/configs";
+import { UserConfigRepository } from "../../infra/database/repositories/user-config.repository";
 import { SubscriptionStatus } from "../../infra/database/entities/subscription.entity";
 
 export class CreateSubscriptionCheckoutUseCase {
     constructor(
         private readonly userRepository: UserRepository,
         private readonly subscriptionRepository: SubscriptionRepository,
+        private readonly userConfigRepository: UserConfigRepository,
         private readonly paymentGateway: IPaymentGateway
     ) {}
 
@@ -25,11 +27,17 @@ export class CreateSubscriptionCheckoutUseCase {
         // Criar customer no gateway se necessário
         let customerId = subscription?.abacateCustomerId;
         if (!customerId) {
+            const userConfig = await this.userConfigRepository.findByUserId(userId);
+
+            if (!userConfig?.whatsappNumber || !userConfig?.taxId) {
+                throw new Error("User must configure WhatsApp Number and Tax ID (CPF/CNPJ) before checkout.");
+            }
+
             const customer = await this.paymentGateway.createCustomer({
                 name: user.name,
                 email: user.email,
-                cellphone: "00000000000", // Placeholder ou pegar do UserConfig se disponível
-                taxId: "000.000.000-00" // Placeholder — Abacate v1 exige taxId
+                cellphone: userConfig.whatsappNumber,
+                taxId: userConfig.taxId
             });
             customerId = customer.id;
         }
