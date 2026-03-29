@@ -17,7 +17,6 @@ export class AuthController {
     }
 
     private registerRoutes() {
-        // 1. Rota para iniciar o fluxo
         this.fastify.addRoute("GET", "/auth/google", async (request, reply) => {
             const url = this.generateAuthUrl.execute();
             reply.redirect(url);
@@ -33,7 +32,6 @@ export class AuthController {
             }
         });
 
-        // 2. Rota de callback do Google
         this.fastify.addRoute("GET", "/auth/google/callback", async (request, reply) => {
             const { code } = request.query as { code: string };
 
@@ -42,13 +40,10 @@ export class AuthController {
             }
 
             try {
-                // Trocar código por tokens
                 const tokens = await this.googleService.getTokens(code);
                 
-                // Buscar perfil do usuário no Google
                 const profile = await this.googleService.getUserProfile(tokens.access_token);
 
-                // Buscar ou criar o usuário local
                 let user = await this.userRepo.findByGoogleId(profile.id);
                 if (!user) {
                     user = new User();
@@ -58,10 +53,8 @@ export class AuthController {
                     user = await this.userRepo.save(user);
                 }
 
-                // Salvar os tokens do Google para o usuário (UserConfig)
-                await this.exchangeCode.execute(user.id, code);
+                await this.exchangeCode.execute(user.id, tokens);
 
-                // Gerar JWT do AgendaOk
                 const token = this.fastify.sign({ 
                     id: user.id, 
                     email: user.email, 

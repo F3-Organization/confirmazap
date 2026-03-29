@@ -26,15 +26,20 @@ export class FastifyAdapter {
     public async setup() {
         // ── Segurança ──────────────────────────────────────────
         await this.app.register(fastifyCors, {
-            origin: env.isProduction()
-                ? [`https://${env.domain}`]
-                : true,
+            origin: env.isProduction() 
+                ? [`https://${env.domain}`] 
+                : true, // Em dev, reflete a origem. Fundamental para CORS com credentials.
+            methods: ['GET', 'PUT', 'POST', 'DELETE', 'OPTIONS', 'PATCH'],
+            allowedHeaders: ['Content-Type', 'Authorization', 'apikey'],
             credentials: true
         });
 
-        await this.app.register(fastifyHelmet, {
-            contentSecurityPolicy: false // Desativado para permitir Swagger UI
-        });
+        if (env.isProduction()) {
+            await this.app.register(fastifyHelmet, {
+                contentSecurityPolicy: false,
+                crossOriginResourcePolicy: { policy: "same-origin" }
+            });
+        }
 
         await this.app.register(fastifyRateLimit, {
             max: 100,
@@ -63,36 +68,7 @@ export class FastifyAdapter {
                     title: 'AgendaOk API',
                     description: 'Solução SaaS pragmática para automação de agendamentos e notificações via WhatsApp integrando Google Calendar e Evolution API.',
                     version: '1.0.0',
-                    contact: {
-                        name: 'Suporte AgendaOk',
-                        email: 'suporte@agendaok.com.br',
-                        url: 'https://agendaok.com.br/contato'
-                    },
-                    license: {
-                        name: 'MIT',
-                        url: 'https://opensource.org/licenses/MIT'
-                    }
                 },
-                externalDocs: {
-                    description: 'Documentação Técnica Completa',
-                    url: 'https://docs.agendaok.com.br'
-                },
-                servers: [
-                    { 
-                        url: env.isProduction() 
-                            ? `https://${env.domain}` 
-                            : `http://localhost:${env.port}`,
-                        description: env.isProduction() 
-                            ? 'Servidor de Produção' 
-                            : 'Servidor de Desenvolvimento Local'
-                    }
-                ],
-                tags: [
-                    { name: 'Auth', description: 'Gerenciamento de autenticação via Google OAuth2' },
-                    { name: 'Calendar', description: 'Operações de sincronização e tarefas de calendário' },
-                    { name: 'Webhook', description: 'Receptores de eventos assíncronos (Evolution API)' },
-                    { name: 'System', description: 'Monitoramento e status operacional' }
-                ],
                 components: {
                     securitySchemes: {
                         bearerAuth: {
@@ -109,10 +85,10 @@ export class FastifyAdapter {
             routePrefix: '/api/documentation',
             uiConfig: {
                 docExpansion: 'list',
-                deepLinking: false
+                deepLinking: false,
+                validatorUrl: null
             },
-            staticCSP: true,
-            transformStaticCSP: (header) => header
+            staticCSP: false
         })
 
         // ── Error Handler Global ───────────────────────────────

@@ -8,9 +8,7 @@ export class ExchangeGoogleCodeUseCase {
         private readonly userConfigRepository: IUserConfigRepository
     ) {}
 
-    async execute(userId: string, code: string): Promise<void> {
-        const tokens = await this.googleService.getTokens(code);
-
+    async execute(userId: string, tokens: any): Promise<void> {
         const expiryDate = new Date();
         if (tokens.expires_in) {
             expiryDate.setSeconds(expiryDate.getSeconds() + tokens.expires_in);
