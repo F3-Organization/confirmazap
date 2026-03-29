@@ -41,6 +41,7 @@ describe("NotifyUpcomingAppointmentsUseCase", () => {
         evolutionService = {
             sendText: vi.fn(),
             createInstance: vi.fn(),
+            connectInstance: vi.fn(),
             setWebhook: vi.fn(),
             logoutInstance: vi.fn(),
             deleteInstance: vi.fn()
@@ -85,7 +86,7 @@ describe("NotifyUpcomingAppointmentsUseCase", () => {
             "5511988887777",
             expect.stringContaining("Corte João")
         );
-        expect(scheduleRepository.updateNotified).toHaveBeenCalledWith("1", true);
+        expect(scheduleRepository.updateNotified).toHaveBeenCalledWith("1", "user-1", true);
     });
 
     it("deve extrair o número mesmo se estiver na descrição", async () => {
@@ -135,7 +136,7 @@ describe("NotifyUpcomingAppointmentsUseCase", () => {
 
         expect(evolutionService.sendText).toHaveBeenCalledTimes(2);
         expect(scheduleRepository.updateNotified).toHaveBeenCalledTimes(1); // Somente o segundo app
-        expect(scheduleRepository.updateNotified).toHaveBeenCalledWith("2", true);
+        expect(scheduleRepository.updateNotified).toHaveBeenCalledWith("2", "user-1", true);
     });
 
     it("não deve enviar mensagens se estiver na janela de silêncio (ex: 22h)", async () => {
@@ -162,7 +163,7 @@ describe("NotifyUpcomingAppointmentsUseCase", () => {
 
         await sut.execute("user-1");
 
-        expect(clientRepository.findById).toHaveBeenCalledWith("client-1");
+        expect(clientRepository.findById).toHaveBeenCalledWith("client-1", "user-1");
         expect(evolutionService.sendText).toHaveBeenCalledWith(
             "instancia-1",
             "5511999998888",

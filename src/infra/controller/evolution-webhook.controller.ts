@@ -1,6 +1,7 @@
 import { FastifyAdapter } from "../adapters/fastfy.adapter";
 import { HandleEvolutionWebhookUseCase } from "../../usecase/notification/handle-evolution-webhook.usecase";
 import { env } from "../config/configs";
+import { z } from "zod";
 
 export class EvolutionWebhookController {
     constructor(
@@ -12,11 +13,31 @@ export class EvolutionWebhookController {
 
     private registerRoutes() {
         this.fastify.addRoute("POST", "/webhook/evolution", async (request, reply) => {
-            const payload = request.body as any;
+            const evolutionSchema = z.object({
+                event: z.enum(['messages.upsert', 'messages.update', 'connection.update', 'qrcode.updated']),
+                instance: z.string(),
+                data: z.object({
+                    key: z.object({
+                        remoteJid: z.string(),
+                        fromMe: z.boolean(),
+                        id: z.string()
+                    }).optional(),
+                    pushName: z.string().nullable().optional(),
+                    message: z.any().optional()
+                }).passthrough(),
+                apikey: z.string().optional()
+            }).passthrough();
+
+            const parseResult = evolutionSchema.safeParse(request.body);
+            if (!parseResult.success) {
+                return reply.code(400).send({ error: "Invalid payload", details: parseResult.error.format() });
+            }
+
+            const payload = parseResult.data;
             
             try {
-                // Validar apikey em produção
-                if (env.isProduction() && payload?.apikey !== env.evolution.apiKey) {
+                // Verify apikey in production
+                if (env.isProduction() && payload.apikey !== env.evolution.apiKey) {
                     return reply.code(401).send({ error: "Unauthorized webhook call" });
                 }
 

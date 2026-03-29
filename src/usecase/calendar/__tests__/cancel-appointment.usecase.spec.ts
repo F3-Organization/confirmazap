@@ -55,7 +55,7 @@ describe("CancelAppointmentUseCase", () => {
 
         await sut.execute("user-1", "5511999999999");
 
-        expect(scheduleRepository.updateStatus).toHaveBeenCalledWith("1", ScheduleStatus.CANCELLED);
+        expect(scheduleRepository.updateStatus).toHaveBeenCalledWith("1", "user-1", ScheduleStatus.CANCELLED);
         expect(googleService.updateEvent).toHaveBeenCalledWith("valid-token", "google-1", expect.objectContaining({
             summary: expect.stringContaining("❌")
         }));

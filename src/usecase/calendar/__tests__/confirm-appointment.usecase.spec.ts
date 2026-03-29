@@ -63,7 +63,7 @@ describe("ConfirmAppointmentUseCase", () => {
 
         await sut.execute("user-1", "5511988887777");
 
-        expect(scheduleRepository.updateStatus).toHaveBeenCalledWith("schedule-123", ScheduleStatus.CONFIRMED);
+        expect(scheduleRepository.updateStatus).toHaveBeenCalledWith("schedule-123", "user-1", ScheduleStatus.CONFIRMED);
         expect(googleService.updateEvent).toHaveBeenCalledWith(
             "token-123",
             "google-123",

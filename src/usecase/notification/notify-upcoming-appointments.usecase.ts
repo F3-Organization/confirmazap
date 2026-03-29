@@ -32,7 +32,7 @@ export class NotifyUpcomingAppointmentsUseCase {
             let phoneNumber = this.extractPhoneNumber(`${appointment.title} ${appointment.description || ""}`);
             
             if (!phoneNumber && appointment.clientId) {
-                const client = await this.clientRepository.findById(appointment.clientId);
+                const client = await this.clientRepository.findById(appointment.clientId, userId);
                 if (client?.phone) {
                     phoneNumber = client.phone;
                 }

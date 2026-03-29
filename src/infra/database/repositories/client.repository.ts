@@ -14,8 +14,8 @@ export class ClientRepository implements IClientRepository {
         return await this.repository.save(client);
     }
 
-    async findById(id: string): Promise<Client | null> {
-        return await this.repository.findOne({ where: { id } });
+    async findById(id: string, userId: string): Promise<Client | null> {
+        return await this.repository.findOne({ where: { id, userId } });
     }
 
     async findByUserId(userId: string): Promise<Client[]> {

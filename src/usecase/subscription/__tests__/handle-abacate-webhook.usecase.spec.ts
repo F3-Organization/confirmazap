@@ -31,6 +31,7 @@ describe("HandleAbacatePayWebhookUseCase", () => {
 
         expect(subscriptionRepository.updateStatus).toHaveBeenCalledWith(
             "sub-1",
+            "user-1",
             SubscriptionStatus.ACTIVE,
             expect.any(Date)
         );

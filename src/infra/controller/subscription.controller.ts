@@ -5,6 +5,7 @@ import { SubscriptionRepository } from "../database/repositories/subscription.re
 import { SubscriptionStatus } from "../database/entities/subscription.entity";
 import { env } from "../config/configs";
 import { createHmac } from "crypto";
+import { z } from "zod";
 
 export class SubscriptionController {
     constructor(
@@ -75,8 +76,21 @@ export class SubscriptionController {
         // 3. Webhook do Abacate Pay (Público)
         this.fastify.addRoute("POST", "/webhook/abacatepay", async (request, reply) => {
             const signature = request.headers["x-abacatepay-signature"] as string;
-            const payload = request.body;
-            const rawBody = JSON.stringify(payload);
+            
+            const webhookSchema = z.object({
+                event: z.string(),
+                data: z.object({
+                    id: z.string()
+                }).passthrough()
+            }).passthrough();
+
+            const parseResult = webhookSchema.safeParse(request.body);
+            if (!parseResult.success) {
+                return reply.code(400).send({ error: "Invalid payload", details: parseResult.error.format() });
+            }
+
+            const payload = parseResult.data;
+            const rawBody = JSON.stringify(request.body);
 
             if (!signature && env.isProduction()) {
                 return reply.code(401).send({ error: "Missing signature" });

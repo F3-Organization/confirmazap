@@ -4,6 +4,7 @@ import { ExchangeGoogleCodeUseCase } from "../../usecase/auth/exchange-google-co
 import { UserRepository } from "../database/repositories/user.repository";
 import { User } from "../database/entities/user.entity";
 import { IGoogleCalendarService } from "../../usecase/ports/igoogle-calendar-service";
+import { z } from "zod";
 
 export class AuthController {
     constructor(
@@ -33,11 +34,20 @@ export class AuthController {
         });
 
         this.fastify.addRoute("GET", "/auth/google/callback", async (request, reply) => {
-            const { code } = request.query as { code: string };
+            const callbackSchema = z.object({
+                code: z.string().min(1)
+            });
 
-            if (!code) {
-                return reply.code(400).send({ error: "Code not provided by Google" });
+            const parseResult = callbackSchema.safeParse(request.query);
+            
+            if (!parseResult.success) {
+                return reply.code(400).send({ 
+                    error: "Invalid request", 
+                    details: parseResult.error.format() 
+                });
             }
+
+            const { code } = parseResult.data;
 
             try {
                 const tokens = await this.googleService.getTokens(code);
