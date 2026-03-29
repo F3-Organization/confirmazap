@@ -1,6 +1,27 @@
+export interface EvolutionInstanceResponse {
+    instance: {
+        instanceName: string;
+        instanceId: string;
+        status: string;
+    };
+    hash: {
+        apikey: string;
+    };
+    qrcode?: {
+        code: string;
+        base64: string;
+    };
+}
+
+export interface EvolutionConnectResponse {
+    instance: string;
+    base64: string;
+    code: string;
+}
+
 export interface IEvolutionService {
-    createInstance(instanceName: string): Promise<void>;
-    connectInstance(instanceName: string): Promise<{ base64: string }>;
+    createInstance(instanceName: string): Promise<EvolutionInstanceResponse>;
+    connectInstance(instanceName: string): Promise<EvolutionConnectResponse>;
     sendText(instanceName: string, number: string, text: string): Promise<void>;
     setWebhook(instanceName: string, url: string): Promise<void>;
     logoutInstance(instanceName: string): Promise<void>;

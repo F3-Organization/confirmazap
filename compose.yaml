@@ -34,14 +34,16 @@ services:
       - redis_data:/data
 
   evolution-api:
-    image: atendai/evolution-api:v2.1.1
+    image: atendai/evolution-api:v2.2.3
     restart: always
     ports:
       - '8080:8080'
     environment:
       - SERVER_TYPE=http
       - SERVER_URL=${EVO_SERVER_URL}
+      - AUTHENTICATION_TYPE=apikey
       - AUTHENTICATION_API_KEY=${EVO_API_KEY}
+      - QRCODE_LIMIT=30
       - DATABASE_ENABLED=true
       - DATABASE_PROVIDER=postgresql
       - DATABASE_CONNECTION_URI=postgresql://${DB_USER}:${DB_PASSWORD}@database:5432/${EVO_DATABASE_NAME}?schema=public
@@ -49,16 +51,23 @@ services:
       - CACHE_REDIS_ENABLED=true
       - CACHE_REDIS_URI=redis://redis:6379
       - CACHE_REDIS_PREFIX_KEY=evolution
-      # Persistência de Dados (V2)
+      # Persistência de Dados (V2) - Recomendado modo Banco de Dados puro
       - DATABASE_SAVE_DATA_INSTANCE=true
       - DATABASE_SAVE_DATA_NEW_MESSAGE=true
       - DATABASE_SAVE_MESSAGE_UPDATE=true
       - DATABASE_SAVE_DATA_CONTACTS=true
       - DATABASE_SAVE_DATA_CHATS=true
+      - DATABASE_SAVE_DATA_LABELS=true
+      - DATABASE_SAVE_DATA_HISTORIC=true
+      - DEL_INSTANCE=false
+      - CONFIG_SESSION_PHONE_VERSION=${CONFIG_SESSION_PHONE_VERSION}
     depends_on:
       - database
       - redis
+    volumes:
+      - evolution_instances:/evolution/instances
 
 volumes:
   postgres_data:
   redis_data:
+  evolution_instances:

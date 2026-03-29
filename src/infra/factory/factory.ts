@@ -42,11 +42,9 @@ const scheduleRepository = new ScheduleRepository();
 const userConfigRepository = new UserConfigRepository();
 const subscriptionRepository = new SubscriptionRepository();
 
-// UseCases - Auth
 const generateGoogleAuthUrlUseCase = new GenerateGoogleAuthUrlUseCase(googleCalendarAdapter);
 const exchangeGoogleCodeUseCase = new ExchangeGoogleCodeUseCase(googleCalendarAdapter, userConfigRepository);
 
-// UseCases - Calendar & Notification
 const syncCalendarUseCase = new SyncCalendarUseCase(googleCalendarAdapter, scheduleRepository, userConfigRepository);
 const notifyUpcomingAppointmentsUseCase = new NotifyUpcomingAppointmentsUseCase(
     scheduleRepository,
@@ -71,7 +69,6 @@ const handleEvolutionWebhookUseCase = new HandleEvolutionWebhookUseCase(
     evolutionAdapter
 );
 
-// UseCases - Subscription
 const createSubscriptionCheckoutUseCase = new CreateSubscriptionCheckoutUseCase(
     userRepository,
     subscriptionRepository,
@@ -91,13 +88,11 @@ const disconnectWhatsappUseCase = new DisconnectWhatsappUseCase(
     evolutionAdapter
 );
 
-// Queues & Workers
 const syncCalendarQueue = new SyncCalendarQueue();
 const syncCalendarWorker = new SyncCalendarWorker(syncCalendarUseCase);
 const notifyQueue = new NotifyQueue();
 const notifyWorker = new NotifyWorker(notifyUpcomingAppointmentsUseCase, userConfigRepository);
 
-// Middlewares
 const subMiddleware = subscriptionMiddleware(subscriptionRepository);
 
 const repositories = {

@@ -19,50 +19,39 @@ export class WhatsappController {
         if (this.subMiddleware) connectMiddlewares.push(this.subMiddleware);
 
         this.fastify.addProtectedRoute("POST", "/whatsapp/connect", async (request, reply) => {
-            const userId = (request.user as any).id;
+            const userId = (request.user as { id: string }).id;
+            
             try {
                 const qr = await this.connectUseCase.execute(userId);
-                reply.send(qr);
+                return reply.send(qr);
             } catch (error: any) {
-                console.error("[WhatsappController] Connection failed:", error);
-                reply.code(500).send({ error: "Erro ao conectar WhatsApp", message: error.message });
+                return reply.code(error.status || 500).send({ 
+                    error: "Erro de Conexão", 
+                    message: "Não foi possível gerar o QR Code. Tente novamente mais tarde." 
+                });
             }
         }, {
             tags: ["WhatsApp"],
             summary: "Gera um QR Code para conexão do WhatsApp",
-            description: "Cria uma instância na Evolution API e retorna o QR Code em Base64. Requer Token JWT, Role ADMIN e Assinatura Ativa.",
-            response: {
-                200: {
-                    type: 'object',
-                    properties: {
-                        base64: { type: 'string', description: 'QR Code em formato Base64' }
-                    }
-                }
-            }
+            description: "Cria ou recupera uma instância na Evolution API e retorna o QR Code em Base64 para pareamento."
         }, connectMiddlewares);
 
         this.fastify.addProtectedRoute("DELETE", "/whatsapp/disconnect", async (request, reply) => {
-            const userId = (request.user as any).id;
+            const userId = (request.user as { id: string }).id;
+            
             try {
                 await this.disconnectUseCase.execute(userId);
-                reply.send({ status: "success", message: "WhatsApp desconectado com sucesso" });
+                return reply.send({ status: "success", message: "WhatsApp desconectado com sucesso." });
             } catch (error: any) {
-                console.error("[WhatsappController] Disconnection failed:", error);
-                reply.code(500).send({ error: "Erro ao desconectar WhatsApp", message: error.message });
+                return reply.code(500).send({ 
+                    error: "Erro de Desconexão", 
+                    message: "Houve um erro ao tentar desconectar o WhatsApp." 
+                });
             }
         }, {
             tags: ["WhatsApp"],
             summary: "Remove a conexão do WhatsApp",
-            description: "Desloga e deleta a instância na Evolution API. Requer Token JWT e Role ADMIN.",
-            response: {
-                200: {
-                    type: 'object',
-                    properties: {
-                        status: { type: 'string' },
-                        message: { type: 'string' }
-                    }
-                }
-            }
+            description: "Finaliza a sessão do WhatsApp e remove a instância vinculada ao usuário."
         }, this.adminMiddleware);
     }
 }
