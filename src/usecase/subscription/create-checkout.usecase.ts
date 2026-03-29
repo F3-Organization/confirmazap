@@ -12,19 +12,17 @@ export class CreateSubscriptionCheckoutUseCase {
         private readonly userConfigRepository: UserConfigRepository,
         private readonly paymentGateway: IPaymentGateway
     ) {}
-
     async execute(userId: string) {
         const user = await this.userRepository.findById(userId);
         if (!user) throw new Error("User not found");
 
+        const baseUrl = env.domain.startsWith('http') ? env.domain : `https://${env.domain}`;
         let subscription = await this.subscriptionRepository.findByUserId(userId);
 
-        // Se já tem assinatura ativa, não cria nova
         if (subscription?.status === SubscriptionStatus.ACTIVE) {
-            return { url: subscription.checkoutUrl || `${env.domain}/dashboard` };
+            return { url: subscription.checkoutUrl || `${baseUrl}/dashboard` };
         }
 
-        // Criar customer no gateway se necessário
         let customerId = subscription?.abacateCustomerId;
         if (!customerId) {
             const userConfig = await this.userConfigRepository.findByUserId(userId);
@@ -47,10 +45,10 @@ export class CreateSubscriptionCheckoutUseCase {
             customerId,
             externalId: `sub_${userId}_${Date.now()}`,
             name: env.abacatePay.planName,
-            description: "Plano de assinatura mensal AgendaOk",
+            description: "Plano de assinatura mensal ConfirmaZap",
             price: env.abacatePay.planPrice,
-            returnUrl: `https://${env.domain}/dashboard`,
-            completionUrl: `https://${env.domain}/dashboard`
+            returnUrl: `${baseUrl}/dashboard`,
+            completionUrl: `${baseUrl}/dashboard`
         });
 
         // Salvar/Atualizar subscription
