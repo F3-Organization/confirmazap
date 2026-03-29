@@ -1,24 +1,36 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-
-// No futuro, estes componentes virão das suas pastas features/pages
-const TempDashboard = () => <div className="p-8"><h1>Dashboard (Sincronizando com Google...)</h1></div>;
-const TempLogin = () => <div className="h-screen flex items-center justify-center"><h1>Login (Google Auth)</h1></div>;
+import { LoginPage } from '../pages/LoginPage';
+import { DashboardPage } from '../pages/DashboardPage';
+import { WhatsAppPage } from '../pages/WhatsAppPage';
+import { SubscriptionPage } from '../pages/SubscriptionPage';
 
 export const AppRouter = () => {
-  const isAuthenticated = !!localStorage.getItem('auth_token');
+  // Para fins de demonstração do design, vamos considerar autenticado por padrão
+  // No futuro, isso será controlado pelo estado de autenticação real
+  const isAuthenticated = true;
 
   return (
     <Routes>
-      <Route path="/login" element={<TempLogin />} />
+      <Route path="/login" element={<LoginPage />} />
+      
+      {/* Protected Routes */}
       <Route 
         path="/dashboard" 
-        element={isAuthenticated ? <TempDashboard /> : <Navigate to="/login" />} 
+        element={isAuthenticated ? <DashboardPage /> : <Navigate to="/login" />} 
+      />
+      <Route 
+        path="/whatsapp" 
+        element={isAuthenticated ? <WhatsAppPage /> : <Navigate to="/login" />} 
+      />
+      <Route 
+        path="/subscription" 
+        element={isAuthenticated ? <SubscriptionPage /> : <Navigate to="/login" />} 
       />
       
-      {/* Rota raiz redireciona para o dashboard ou login */}
+      {/* Redirects */}
       <Route path="/" element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} />} />
       
-      {/* 404 */}
+      {/* Fallback */}
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>
   );
