@@ -99,7 +99,10 @@ export const Sidebar = () => {
           {i18n.language === 'pt' ? 'English' : 'Português'}
         </button>
 
-        <button className="flex items-center gap-3 px-4 py-3 w-full rounded-lg text-sm font-medium text-muted-foreground hover:bg-red-500/10 hover:text-red-400 transition-all group">
+        <button 
+          onClick={() => logout()}
+          className="flex items-center gap-3 px-4 py-3 w-full rounded-lg text-sm font-medium text-muted-foreground hover:bg-red-500/10 hover:text-red-400 transition-all group"
+        >
           <LogOut className="w-4 h-4" />
           {t('common.signOut')}
         </button>
