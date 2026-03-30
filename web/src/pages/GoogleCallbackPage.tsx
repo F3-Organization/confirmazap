@@ -20,17 +20,34 @@ export const GoogleCallbackPage = () => {
       authService.exchangeCode(code)
         .then((data) => {
           console.log('[GoogleCallbackPage] Exchange successful');
-          setAuth(data.user, data.token);
-          navigate('/dashboard');
+          if (window.opener) {
+            window.opener.postMessage(
+              { type: 'GOOGLE_AUTH_SUCCESS', payload: { user: data.user, token: data.token } },
+              window.location.origin
+            );
+            window.close();
+          } else {
+            setAuth(data.user, data.token);
+            navigate('/dashboard');
+          }
         })
         .catch((err) => {
           console.error('[GoogleCallbackPage] Authentication failed', err);
           // If exchange failed, reset to allow retry (though codes are single-use anyway)
           isExchanging.current = false;
-          navigate('/login');
+          
+          if (window.opener) {
+            window.close();
+          } else {
+            navigate('/login');
+          }
         });
     } else if (!code) {
-      navigate('/login');
+      if (window.opener) {
+        window.close();
+      } else {
+        navigate('/login');
+      }
     }
   }, [searchParams, navigate, setAuth]);
 
