@@ -139,4 +139,19 @@ export class GoogleCalendarAdapter implements IGoogleCalendarService {
 
         return await response.json();
     }
+
+    async deleteEvent(accessToken: string, eventId: string): Promise<void> {
+        const response = await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events/${eventId}`, {
+            method: "DELETE",
+            headers: {
+                Authorization: `Bearer ${accessToken}`
+            }
+        });
+
+        // 204 No Content is the expected success response for DELETE
+        if (!response.ok && response.status !== 204 && response.status !== 404) {
+            // Se for 404, o evento já não existe lá, então ignoramos o erro de exclusão.
+            throw new Error(`Google Delete Event Error: ${await response.text()}`);
+        }
+    }
 }

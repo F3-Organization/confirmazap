@@ -4,6 +4,8 @@ import { SyncCalendarQueue } from "../queue/sync-calendar.queue";
 import { NotifyQueue } from "../queue/notify.queue";
 import { GetAppointmentsUseCase } from "../../usecase/calendar/get-appointments.usecase";
 import { CreateAppointmentUseCase } from "../../usecase/calendar/create-appointment.usecase";
+import { UpdateAppointmentUseCase } from "../../usecase/calendar/update-appointment.usecase";
+import { DeleteAppointmentUseCase } from "../../usecase/calendar/delete-appointment.usecase";
 import { AuthUserPayload } from "../types/auth.types";
 
 export class CalendarController {
@@ -13,6 +15,8 @@ export class CalendarController {
         private readonly notifyQueue: NotifyQueue,
         private readonly getAppointments: GetAppointmentsUseCase,
         private readonly createAppointment: CreateAppointmentUseCase,
+        private readonly updateAppointment: UpdateAppointmentUseCase,
+        private readonly deleteAppointment: DeleteAppointmentUseCase,
         private readonly subMiddleware?: any
     ) {
         this.fastify.logInfo("[CalendarController] Initializing and registering routes...");
@@ -152,13 +156,65 @@ export class CalendarController {
                 type: "object",
                 required: ["title", "clientName", "clientPhone", "startAt", "endAt"],
                 properties: {
-                    title: { type: "string" },
-                    clientName: { type: "string" },
-                    clientPhone: { type: "string" },
+                    title: { type: "string", minLength: 1 },
+                    clientName: { type: "string", minLength: 1 },
+                    clientPhone: { type: "string", pattern: "^\\d{10,15}$" },
                     startAt: { type: "string", format: "date-time" },
                     endAt: { type: "string", format: "date-time" }
                 }
             }
         }); // Livre para o plano Free (sem this.subMiddleware)
+
+        this.fastify.addProtectedRoute("PUT", "/calendar/appointments/:id", async (request: FastifyRequest, reply: FastifyReply) => {
+            const user = request.user as AuthUserPayload;
+            const inputData = request.body as any;
+            const { id } = request.params as { id: string };
+            
+            try {
+                const appointment = await this.updateAppointment.execute({
+                    id,
+                    title: inputData.title,
+                    clientName: inputData.clientName,
+                    clientPhone: inputData.clientPhone,
+                    startAt: new Date(inputData.startAt),
+                    endAt: new Date(inputData.endAt),
+                    userId: user.id
+                });
+                reply.send(appointment);
+            } catch (error: any) {
+                console.error("[CalendarController] Update Appointment Error:", error);
+                reply.code(400).send({ error: "Erro ao atualizar agendamento", message: error.message });
+            }
+        }, {
+            tags: ["Calendar"],
+            summary: "Atualiza um agendamento",
+            body: {
+                type: "object",
+                required: ["title", "clientName", "clientPhone", "startAt", "endAt"],
+                properties: {
+                    title: { type: "string", minLength: 1 },
+                    clientName: { type: "string", minLength: 1 },
+                    clientPhone: { type: "string", pattern: "^\\d{10,15}$" },
+                    startAt: { type: "string", format: "date-time" },
+                    endAt: { type: "string", format: "date-time" }
+                }
+            }
+        });
+
+        this.fastify.addProtectedRoute("DELETE", "/calendar/appointments/:id", async (request: FastifyRequest, reply: FastifyReply) => {
+            const user = request.user as AuthUserPayload;
+            const { id } = request.params as { id: string };
+
+            try {
+                await this.deleteAppointment.execute(id, user.id);
+                reply.code(204).send();
+            } catch (error: any) {
+                console.error("[CalendarController] Delete Appointment Error:", error);
+                reply.code(400).send({ error: "Erro ao deletar agendamento", message: error.message });
+            }
+        }, {
+            tags: ["Calendar"],
+            summary: "Deleta um agendamento",
+        });
     }
 }

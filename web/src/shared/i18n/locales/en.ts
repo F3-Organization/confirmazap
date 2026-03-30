@@ -18,10 +18,13 @@ export const en = {
     requestAccess: 'Request Access',
     privacyPolicy: 'Privacy Policy',
     termsOfService: 'Terms of Service',
+    edit: 'Edit',
+    delete: 'Delete',
     viewAll: 'View all',
     confirmed: 'Confirmed',
     pending: 'Pending',
     cancelled: 'Cancelled',
+    cancel: 'Cancel',
     connect: 'Connect',
     contactSales: 'Contact Sales',
     currentPlan: 'Current Plan',
@@ -59,6 +62,7 @@ export const en = {
   dashboard: {
     title: 'Overview',
     subtitle: 'Manage your automated appointment confirmations and track communication performance.',
+    deleteConfirmation: 'Are you sure you want to permanently delete this appointment?',
     stats: {
       confirmations: 'Total Confirmations Sent',
       conversionRate: 'Conversion Rate',
@@ -77,7 +81,8 @@ export const en = {
     noAppointments: 'No appointments found. Sync your calendar to start.',
     newAppointment: {
       button: 'New Appointment',
-      title: 'Create New Appointment',
+      title: 'Schedule Appointment',
+      editTitle: 'Edit Appointment',
       serviceName: 'Service Name / Title',
       clientName: 'Client Name',
       clientPhone: 'Client Phone (WhatsApp)',

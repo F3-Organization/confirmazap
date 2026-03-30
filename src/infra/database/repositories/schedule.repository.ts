@@ -14,6 +14,10 @@ export class ScheduleRepository implements IScheduleRepository {
         return await this.repository.save(schedule);
     }
 
+    async findById(id: string, userId: string): Promise<Schedule | null> {
+        return await this.repository.findOne({ where: { id, userId } });
+    }
+
     async findByGoogleEventId(googleEventId: string): Promise<Schedule | null> {
         return await this.repository.findOneBy({ googleEventId });
     }
@@ -51,5 +55,9 @@ export class ScheduleRepository implements IScheduleRepository {
                 notifiedAt: Between(startDate, endDate)
             }
         });
+    }
+
+    async delete(id: string, userId: string): Promise<void> {
+        await this.repository.delete({ id, userId });
     }
 }

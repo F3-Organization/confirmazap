@@ -33,6 +33,8 @@ import { DashboardController } from "../controller/dashboard.controller";
 import { GetDashboardStatsUseCase } from "../../usecase/dashboard/get-dashboard-stats.usecase";
 import { GetAppointmentsUseCase } from "../../usecase/calendar/get-appointments.usecase";
 import { CreateAppointmentUseCase } from "../../usecase/calendar/create-appointment.usecase";
+import { UpdateAppointmentUseCase } from "../../usecase/calendar/update-appointment.usecase";
+import { DeleteAppointmentUseCase } from "../../usecase/calendar/delete-appointment.usecase";
 import { RegisterUserUseCase } from "../../usecase/auth/register-user.usecase";
 import { LoginUseCase } from "../../usecase/auth/login.usecase";
 import { AuthenticateGoogleUseCase } from "../../usecase/auth/authenticate-google.usecase";
@@ -171,6 +173,16 @@ const getUseCase = {
         getRepo.schedule(),
         getRepo.userConfig()
     ),
+    updateAppointment: () => new UpdateAppointmentUseCase(
+        googleCalendarAdapter,
+        getRepo.schedule(),
+        getRepo.userConfig()
+    ),
+    deleteAppointment: () => new DeleteAppointmentUseCase(
+        googleCalendarAdapter,
+        getRepo.schedule(),
+        getRepo.userConfig()
+    ),
     registerUser: () => new RegisterUserUseCase(
         getRepo.user()
     ),
@@ -221,6 +233,8 @@ export const factory = {
             factory.queues.notify(),
             getUseCase.getAppointments(),
             getUseCase.createAppointment(),
+            getUseCase.updateAppointment(),
+            getUseCase.deleteAppointment(),
             getMiddleware.subscription()
         ),
         webhook: () => new EvolutionWebhookController(

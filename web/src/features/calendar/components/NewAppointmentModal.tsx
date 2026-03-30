@@ -1,25 +1,42 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X, CalendarPlus, Loader2 } from 'lucide-react';
 import { Input } from '../../../shared/ui/Input';
 import { Button } from '../../../shared/ui/Button';
-import { calendarService, type CreateAppointmentDto } from '../calendar.service';
+import { calendarService, type CreateAppointmentDto, type Appointment } from '../calendar.service';
 
 interface NewAppointmentModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialData?: Appointment | null;
 }
 
-export const NewAppointmentModal = ({ isOpen, onClose }: NewAppointmentModalProps) => {
+export const NewAppointmentModal = ({ isOpen, onClose, initialData }: NewAppointmentModalProps) => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
-  
-  const { register, handleSubmit, reset } = useForm<CreateAppointmentDto>();
+  const isEditMode = !!initialData;
 
-  const mutation = useMutation({
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<CreateAppointmentDto>();
+
+  // Set default values when modal opens or initialData changes
+  useEffect(() => {
+    if (initialData && isOpen) {
+      reset({
+        title: initialData.title,
+        clientName: initialData.clientName,
+        clientPhone: initialData.clientPhone,
+        startAt: new Date(initialData.startAt).toISOString().slice(0, 16),
+        endAt: new Date(initialData.endAt).toISOString().slice(0, 16),
+      });
+    } else if (!isOpen) {
+      reset({ title: '', clientName: '', clientPhone: '', startAt: '', endAt: '' });
+    }
+  }, [initialData, isOpen, reset]);
+
+  const mutationCreate = useMutation({
     mutationFn: calendarService.createAppointment,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['appointments'] });
@@ -32,9 +49,33 @@ export const NewAppointmentModal = ({ isOpen, onClose }: NewAppointmentModalProp
     }
   });
 
+  const mutationUpdate = useMutation({
+    mutationFn: (data: CreateAppointmentDto) => calendarService.updateAppointment(initialData!.id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+      onClose();
+    },
+    onError: (err: any) => {
+      setError(err.response?.data?.error || t('dashboard.newAppointment.error'));
+    }
+  });
+
+  const isPending = mutationCreate.isPending || mutationUpdate.isPending;
+
   const onSubmit = (data: CreateAppointmentDto) => {
     setError(null);
-    mutation.mutate(data);
+    const formattedData = {
+      ...data,
+      startAt: new Date(data.startAt).toISOString(),
+      endAt: new Date(data.endAt).toISOString(),
+      clientPhone: data.clientPhone.replace(/\D/g, '') // Remove non-digits to keep only DDD+Number
+    };
+    if (isEditMode) {
+      mutationUpdate.mutate(formattedData);
+    } else {
+      mutationCreate.mutate(formattedData);
+    }
   };
 
   if (!isOpen) return null;
@@ -55,7 +96,7 @@ export const NewAppointmentModal = ({ isOpen, onClose }: NewAppointmentModalProp
               <CalendarPlus className="w-5 h-5 text-primary" />
             </div>
             <h2 className="text-xl font-bold tracking-tight">
-              {t('dashboard.newAppointment.title')}
+              {isEditMode ? t('dashboard.newAppointment.editTitle') : t('dashboard.newAppointment.title')}
             </h2>
           </div>
           <button 
@@ -75,38 +116,49 @@ export const NewAppointmentModal = ({ isOpen, onClose }: NewAppointmentModalProp
 
           <form id="new-appointment-form" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <Input
-              {...register('title', { required: true })}
+              {...register('title', { required: 'Obrigatório' })}
               label={t('dashboard.newAppointment.serviceName')}
               placeholder="Ex: Consulta Odontológica"
+              error={errors.title?.message as string}
               required
             />
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input
-                {...register('clientName', { required: true })}
+                {...register('clientName', { required: 'Obrigatório' })}
                 label={t('dashboard.newAppointment.clientName')}
                 placeholder="Ex: João da Silva"
+                error={errors.clientName?.message as string}
                 required
               />
               <Input
-                {...register('clientPhone', { required: true })}
+                {...register('clientPhone', { 
+                  required: true, 
+                  pattern: {
+                    value: /^\d{10,15}$/,
+                    message: "Formato inválido. Use Apenas Números (DDD + Número, ex: 11999999999)"
+                  }
+                })}
                 label={t('dashboard.newAppointment.clientPhone')}
-                placeholder="+55 11 99999-9999"
+                placeholder="11999999999"
+                error={errors.clientPhone?.message as string}
                 required
               />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input
-                {...register('startAt', { required: true })}
+                {...register('startAt', { required: 'Obrigatório' })}
                 label={t('dashboard.newAppointment.startAt')}
                 type="datetime-local"
+                error={errors.startAt?.message as string}
                 required
               />
               <Input
-                {...register('endAt', { required: true })}
+                {...register('endAt', { required: 'Obrigatório' })}
                 label={t('dashboard.newAppointment.endAt')}
                 type="datetime-local"
+                error={errors.endAt?.message as string}
                 required
               />
             </div>
@@ -118,20 +170,20 @@ export const NewAppointmentModal = ({ isOpen, onClose }: NewAppointmentModalProp
             type="button" 
             variant="ghost" 
             onClick={onClose}
-            disabled={mutation.isPending}
+            disabled={isPending}
           >
             {t('dashboard.newAppointment.cancel')}
           </Button>
           <Button 
             type="submit" 
             form="new-appointment-form"
-            disabled={mutation.isPending}
+            disabled={isPending}
             className="min-w-[140px]"
           >
-            {mutation.isPending ? (
+            {isPending ? (
               <Loader2 className="w-4 h-4 animate-spin mr-2" />
             ) : null}
-            {mutation.isPending 
+            {isPending 
               ? t('dashboard.newAppointment.creating') 
               : t('dashboard.newAppointment.submit')}
           </Button>

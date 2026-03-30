@@ -24,6 +24,15 @@ export const calendarService = {
     return response.data;
   },
 
+  updateAppointment: async (id: string, data: CreateAppointmentDto): Promise<Appointment> => {
+    const response = await apiClient.put(`/calendar/appointments/${id}`, data);
+    return response.data;
+  },
+
+  deleteAppointment: async (id: string): Promise<void> => {
+    await apiClient.delete(`/calendar/appointments/${id}`);
+  },
+
   sync: async (): Promise<{ message: string }> => {
     const response = await apiClient.post('/calendar/sync');
     return response.data;

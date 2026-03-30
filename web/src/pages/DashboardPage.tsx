@@ -6,12 +6,13 @@ import {
   CheckCircle2, 
   MessageCircle, 
   Clock, 
-  MoreVertical,
   CalendarDays,
   User,
   Phone,
   Loader2,
-  RefreshCw
+  RefreshCw,
+  Edit2,
+  Trash2
 } from 'lucide-react';
 import { PageLayout } from '../shared/ui/PageLayout';
 import { Card } from '../shared/ui/Card';
@@ -26,6 +27,8 @@ export const DashboardPage = () => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const { data: appointments, isLoading, isError } = useQuery({
     queryKey: ['appointments'],
@@ -44,6 +47,30 @@ export const DashboardPage = () => {
       queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
     },
   });
+
+  const deleteMutation = useMutation({
+    mutationFn: calendarService.deleteAppointment,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+    },
+  });
+
+  const handleEdit = (apt: Appointment) => {
+    setSelectedAppointment(apt);
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = (id: string) => {
+    setDeleteId(id);
+  };
+
+  const confirmDelete = () => {
+    if (deleteId) {
+      deleteMutation.mutate(deleteId);
+      setDeleteId(null);
+    }
+  };
 
   const statsList = [
     { 
@@ -106,7 +133,7 @@ export const DashboardPage = () => {
               <CalendarDays className="w-5 h-5 text-primary" />
               <h2 className="text-xl font-bold tracking-tight">{t('dashboard.recentAppointments')}</h2>
             </div>
-            <Button size="sm" className="hidden sm:flex group justify-center gap-2" onClick={() => setIsModalOpen(true)}>
+            <Button size="sm" className="hidden sm:flex group justify-center gap-2" onClick={() => { setSelectedAppointment(null); setIsModalOpen(true); }}>
               <Plus className="w-4 h-4" />
               {t('dashboard.newAppointment.button')}
             </Button>
@@ -173,9 +200,23 @@ export const DashboardPage = () => {
                         </div>
                       </td>
                       <td className="px-8 py-6 text-right">
-                        <button className="p-2 rounded-lg hover:bg-surface-high transition-colors text-muted-foreground">
-                          <MoreVertical className="w-4 h-4" />
-                        </button>
+                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); handleEdit(apt); }}
+                            className="p-2 rounded-lg hover:bg-surface-high transition-colors text-muted-foreground hover:text-primary"
+                            title={t('common.edit')}
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button 
+                            onClick={(e) => { e.stopPropagation(); handleDelete(apt.id); }}
+                            className="p-2 rounded-lg hover:bg-surface-high transition-colors text-muted-foreground hover:text-red-500"
+                            title={t('common.delete')}
+                            disabled={deleteMutation.isPending}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -237,8 +278,48 @@ export const DashboardPage = () => {
       
       <NewAppointmentModal 
         isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedAppointment(null);
+        }} 
+        initialData={selectedAppointment}
       />
+
+      {deleteId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+            onClick={() => setDeleteId(null)}
+          />
+          <div className="relative w-full max-w-sm bg-surface-high border border-outline-variant rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6">
+              <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center border border-red-500/20 mb-4">
+                <Trash2 className="w-6 h-6 text-red-500" />
+              </div>
+              <h2 className="text-xl font-bold tracking-tight mb-2">Atenção</h2>
+              <p className="text-sm text-foreground/80 leading-relaxed">
+                {t('dashboard.deleteConfirmation')}
+              </p>
+            </div>
+            <div className="p-4 border-t border-outline-variant/30 flex items-center justify-end gap-3 bg-surface-low/50">
+              <Button 
+                variant="ghost" 
+                onClick={() => setDeleteId(null)}
+                disabled={deleteMutation.isPending}
+              >
+                {t('common.cancel')}
+              </Button>
+              <Button 
+                onClick={confirmDelete}
+                disabled={deleteMutation.isPending}
+                className="bg-red-500 hover:bg-red-600 text-white shadow-none min-w-[100px]"
+              >
+                {deleteMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : t('common.delete')}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </PageLayout>
   );
 };

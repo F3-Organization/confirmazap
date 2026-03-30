@@ -18,10 +18,13 @@ export const pt = {
     requestAccess: 'Solicitar Acesso',
     privacyPolicy: 'Política de Privacidade',
     termsOfService: 'Termos de Serviço',
+    edit: 'Editar',
+    delete: 'Excluir',
     viewAll: 'Ver tudo',
     confirmed: 'Confirmado',
     pending: 'Pendente',
     cancelled: 'Cancelado',
+    cancel: 'Cancelar',
     connect: 'Conectar',
     contactSales: 'Falar com Vendas',
     currentPlan: 'Plano Atual',
@@ -59,6 +62,7 @@ export const pt = {
   dashboard: {
     title: 'Visão Geral',
     subtitle: 'Gerencie suas confirmações automáticas de agendamentos e acompanhe o desempenho da comunicação.',
+    deleteConfirmation: 'Tem certeza que deseja excluir permanentemente este agendamento?',
     stats: {
       confirmations: 'Total de Confirmações Env.',
       conversionRate: 'Taxa de Conversão',
@@ -77,8 +81,9 @@ export const pt = {
     noAppointments: 'Nenhum agendamento encontrado. Sincronize seu calendário para começar.',
     newAppointment: {
       button: 'Novo Agendamento',
-      title: 'Criar Novo Agendamento',
-      serviceName: 'Nome do Serviço / Título',
+      title: 'Agendar Horário',
+      editTitle: 'Editar Agendamento',
+      serviceName: 'Nome do Serviço',
       clientName: 'Nome do Cliente',
       clientPhone: 'Telefone do Cliente (WhatsApp)',
       startAt: 'Data e Hora de Início',
