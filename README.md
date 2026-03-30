@@ -18,6 +18,29 @@
 
 ---
 
+## 🎨 Interface (Design by Stitch)
+
+O design da interface do **AgendaOk** foi concebido utilizando o **Stitch**, focando em uma experiência de usuário premium, moderna e intuitiva.
+
+<p align="center">
+  <img src="https://lh3.googleusercontent.com/aida/ADBb0uisnPMLIb4KW-l9Y1OYWIxaofMoUyhcEBl7mN5TwkS75gz3PTc4bbkkYO617m1VmZBTJwxS8fYymCzfqP4xYZY8laEgVfP8aEoGaEizkJc21QA1W0pDh7txHfEN983b1DcoTxgPTurnUKSvWkg0OW6IqjhKdDSPfuFYsI1vJBXvEaB1yv6m0G-apCEc57P7mvAxHzTLjr9OqyWYVBahKQ2bkAXmgwYqcflqL0DB0gJjbAjH8o-pJ3ySmA" alt="Dashboard do ConfirmaZap" width="100%">
+  <br>
+  <em>Dashboard principal com métricas de agendamentos e status em tempo real.</em>
+</p>
+
+<p align="center">
+  <img src="https://lh3.googleusercontent.com/aida/ADBb0ugJW2J2CDia7xF0RGg3VpVqdLpRgjSNju9JLRfiPRxrPdqjhaZTYd8gA-EmIJjkcZYIaNg6z2ox642jOWLhVTLb_MWOlCtfTwdWu3jICpH6f_sW343zQDcQcWdcqJL5DsBR_DJ80_OXraBORNlewPd0GTUaLNTx1mqFZaZp9WFQG8qH2LxkYhpEsA1Z8azqsjDfTbzSBGkjFqZHg3onx7UC0V-BXPtT-B6JrY7ZC8yZhorXKiGzrL8fyuQ" alt="Conexão WhatsApp" width="100%">
+  <br>
+  <em>Integração simplificada com WhatsApp via Evolution API.</em>
+</p>
+
+<div style="display: flex; gap: 10px; justify-content: center;">
+  <img src="https://lh3.googleusercontent.com/aida/ADBb0uhc3s8yuQW1h-tC3AmxVcU8r8BpYj4GoUR5aKJ0RPkg2I2_WqWQKRLqbGcoWNYcA0mrqV-WgrDnZBK03KMpYJv6wIENVfEFXxmy6zdcy73p6fxFZqZONKjdvL5JE_Pt_0WuQTVbvQTURVoJ32OdskMXlSdu8ux_78A19fc1M5MINGRQXWwAH0_6LZc5c-_YFkY31m8_JeHz4f0hn6Ur3czJwlYybsiWyPgD8E7VUo2Dqeaz4R6WjOCP5wo" alt="Login" width="48%">
+  <img src="https://lh3.googleusercontent.com/aida/ADBb0ugiFh8JkpxU96vP17IIZibs9nh3DMmTncRyoFU6brA2ukiUxs3Qjbf4ASLoBzPWAegeV0qs-hHZwyHX8tv_f6hxbfC1n-zce9o3xAD0CXt-2wv4Wrn_nQZg3UhABAdoOmPyC8C3PVHadiAY7nlcsrnIMmIry_RFuFd3T9kGMeObvmJBYn8SFRK5Ro4vxNjAm1pY4adtyhUwfMEllcnlAnP3JGqnqb9Po9xZjimzfAA8AIhoimUYGX90RrU" alt="Configurações" width="48%">
+</div>
+
+---
+
 ## 🛠️ Tech Stack
 
 -   **Runtime**: Node.js 20+ (TypeScript)
