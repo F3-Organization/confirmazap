@@ -23,7 +23,12 @@ export class GetAppointmentsUseCase {
                 ...schedule,
                 clientName,
                 clientPhone,
-                attendees: schedule.attendees || []
+                attendees: schedule.attendees?.map((a: any) => ({
+                    email: a.email,
+                    responseStatus: a.responseStatus,
+                    displayName: a.displayName,
+                })) || [],
+                isOwner: (schedule as any).isOwner !== false,
             };
         });
     }

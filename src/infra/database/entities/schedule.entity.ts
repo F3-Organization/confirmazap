@@ -22,10 +22,13 @@ export class Schedule {
     @Column({ type: "text", nullable: true })
     description?: string;
 
-    @Column({ type: "jsonb", nullable: true })
+    @Column({ name: "attendees", type: "jsonb", nullable: true })
     attendees?: any[];
 
-    @Column({ name: "start_at" })
+    @Column({ name: "is_owner", default: true })
+    isOwner!: boolean;
+
+    @Column({ name: "start_at", type: "timestamp" })
     startAt!: Date;
 
     @Column({ name: "end_at" })

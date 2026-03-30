@@ -108,6 +108,18 @@ export class GoogleCalendarAdapter implements IGoogleCalendarService {
         return data.items || [];
     }
 
+    async getEvent(accessToken: string, eventId: string): Promise<any> {
+        const response = await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events/${eventId}`, {
+            headers: { Authorization: `Bearer ${accessToken}` }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Google Get Event Error: ${await response.text()}`);
+        }
+
+        return await response.json();
+    }
+
     async updateEvent(accessToken: string, eventId: string, updates: Partial<any>): Promise<void> {
         const response = await fetch(`https://www.googleapis.com/calendar/v3/calendars/primary/events/${eventId}`, {
             method: "PATCH",

@@ -207,21 +207,25 @@ export const DashboardPage = () => {
                       </td>
                       <td className="px-8 py-6 text-right">
                         <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <button 
-                            onClick={(e) => { e.stopPropagation(); handleEdit(apt); }}
-                            className="p-2 rounded-lg hover:bg-surface-high transition-colors text-muted-foreground hover:text-primary"
-                            title={t('common.edit')}
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </button>
-                          <button 
-                            onClick={(e) => { e.stopPropagation(); handleDelete(apt.id); }}
-                            className="p-2 rounded-lg hover:bg-surface-high transition-colors text-muted-foreground hover:text-red-500"
-                            title={t('common.delete')}
-                            disabled={deleteMutation.isPending}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          {apt.isOwner !== false && (
+                            <>
+                              <button 
+                                onClick={(e) => { e.stopPropagation(); handleEdit(apt); }}
+                                className="p-2 rounded-lg hover:bg-surface-high transition-colors text-muted-foreground hover:text-primary"
+                                title={t('common.edit')}
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </button>
+                              <button 
+                                onClick={(e) => { e.stopPropagation(); handleDelete(apt.id); }}
+                                className="p-2 rounded-lg hover:bg-surface-high transition-colors text-muted-foreground hover:text-red-500"
+                                title={t('common.delete')}
+                                disabled={deleteMutation.isPending}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </>
+                          )}
                         </div>
                       </td>
                     </tr>

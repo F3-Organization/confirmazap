@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X, Calendar as CalendarIcon, Phone, User, Users, CheckCircle, XCircle, HelpCircle, Clock } from 'lucide-react';
-import type { Appointment } from '../calendar.service';
+import { calendarService, type Appointment } from '../calendar.service';
 import { Button } from '../../../shared/ui/Button';
 
 interface AppointmentDetailsModalProps {
@@ -11,6 +12,15 @@ interface AppointmentDetailsModalProps {
 
 export const AppointmentDetailsModal = ({ isOpen, onClose, appointment }: AppointmentDetailsModalProps) => {
   const { t } = useTranslation();
+  const queryClient = useQueryClient();
+
+  const acceptMutation = useMutation({
+    mutationFn: (id: string) => calendarService.acceptInvite(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['appointments'] });
+      onClose();
+    }
+  });
 
   if (!isOpen || !appointment) return null;
 
@@ -151,10 +161,19 @@ export const AppointmentDetailsModal = ({ isOpen, onClose, appointment }: Appoin
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-outline-variant/30 bg-surface-high flex justify-end">
-          <Button variant="ghost" onClick={onClose}>
+        <div className="p-4 border-t border-outline-variant/30 bg-surface-high flex items-center justify-end gap-3">
+          <Button variant="ghost" onClick={onClose} disabled={acceptMutation.isPending}>
             {t('dashboard.appointmentDetails.close')}
           </Button>
+          {appointment.isOwner === false && appointment.status !== 'CONFIRMED' && (
+            <Button
+              onClick={() => acceptMutation.mutate(appointment.id)}
+              disabled={acceptMutation.isPending}
+              className="bg-primary text-primary-foreground font-bold"
+            >
+              {acceptMutation.isPending ? '⏳ Processando...' : '✅ Confirmar Presença'}
+            </Button>
+          )}
         </div>
       </div>
     </div>

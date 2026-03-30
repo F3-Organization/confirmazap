@@ -6,6 +6,7 @@ import { GetAppointmentsUseCase } from "../../usecase/calendar/get-appointments.
 import { CreateAppointmentUseCase } from "../../usecase/calendar/create-appointment.usecase";
 import { UpdateAppointmentUseCase } from "../../usecase/calendar/update-appointment.usecase";
 import { DeleteAppointmentUseCase } from "../../usecase/calendar/delete-appointment.usecase";
+import { AcceptInviteUseCase } from "../../usecase/calendar/accept-invite.usecase";
 import { AuthUserPayload } from "../types/auth.types";
 
 export class CalendarController {
@@ -17,6 +18,7 @@ export class CalendarController {
         private readonly createAppointment: CreateAppointmentUseCase,
         private readonly updateAppointment: UpdateAppointmentUseCase,
         private readonly deleteAppointment: DeleteAppointmentUseCase,
+        private readonly acceptInvite: AcceptInviteUseCase,
         private readonly subMiddleware?: any
     ) {
         this.fastify.logInfo("[CalendarController] Initializing and registering routes...");
@@ -226,6 +228,22 @@ export class CalendarController {
         }, {
             tags: ["Calendar"],
             summary: "Deleta um agendamento",
+        });
+
+        this.fastify.addProtectedRoute("PATCH", "/calendar/appointments/:id/accept", async (request: FastifyRequest, reply: FastifyReply) => {
+            const user = request.user as AuthUserPayload;
+            const { id } = request.params as { id: string };
+
+            try {
+                await this.acceptInvite.execute(user.id, id);
+                reply.send({ message: "Invite accepted successfully" });
+            } catch (error: any) {
+                console.error("[CalendarController] Accept Invite Error:", error);
+                reply.code(400).send({ error: "Erro ao aceitar convite", message: error.message });
+            }
+        }, {
+            tags: ["Calendar"],
+            summary: "Aceita um convite de agendamento em que o usuário não é dono",
         });
     }
 }

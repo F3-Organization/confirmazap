@@ -13,6 +13,7 @@ export interface Appointment {
     displayName?: string;
     responseStatus?: string;
   }>;
+  isOwner?: boolean;
 }
 
 export interface CreateAppointmentDto {
@@ -36,6 +37,11 @@ export const calendarService = {
 
   deleteAppointment: async (id: string): Promise<void> => {
     await apiClient.delete(`/calendar/appointments/${id}`);
+  },
+
+  acceptInvite: async (id: string): Promise<{ message: string }> => {
+    const response = await apiClient.patch(`/calendar/appointments/${id}/accept`);
+    return response.data;
   },
 
   sync: async (): Promise<{ message: string }> => {

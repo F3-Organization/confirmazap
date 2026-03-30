@@ -59,6 +59,7 @@ export class SyncCalendarUseCase {
                 existing.startAt = startAt;
                 existing.endAt = endAt;
                 existing.attendees = event.attendees || [];
+                existing.isOwner = event.organizer ? event.organizer.self !== false : true;
                 await this.scheduleRepository.save(existing);
                 continue;
             }
@@ -70,6 +71,7 @@ export class SyncCalendarUseCase {
             schedule.startAt = startAt;
             schedule.endAt = endAt;
             schedule.attendees = event.attendees || [];
+            schedule.isOwner = event.organizer ? event.organizer.self !== false : true;
             schedule.status = ScheduleStatus.PENDING;
             schedule.userId = userId;
 

@@ -35,6 +35,7 @@ import { GetAppointmentsUseCase } from "../../usecase/calendar/get-appointments.
 import { CreateAppointmentUseCase } from "../../usecase/calendar/create-appointment.usecase";
 import { UpdateAppointmentUseCase } from "../../usecase/calendar/update-appointment.usecase";
 import { DeleteAppointmentUseCase } from "../../usecase/calendar/delete-appointment.usecase";
+import { AcceptInviteUseCase } from "../../usecase/calendar/accept-invite.usecase";
 import { RegisterUserUseCase } from "../../usecase/auth/register-user.usecase";
 import { LoginUseCase } from "../../usecase/auth/login.usecase";
 import { AuthenticateGoogleUseCase } from "../../usecase/auth/authenticate-google.usecase";
@@ -183,6 +184,11 @@ const getUseCase = {
         getRepo.schedule(),
         getRepo.userConfig()
     ),
+    acceptInvite: () => new AcceptInviteUseCase(
+        googleCalendarAdapter,
+        getRepo.schedule(),
+        getRepo.userConfig()
+    ),
     registerUser: () => new RegisterUserUseCase(
         getRepo.user()
     ),
@@ -235,6 +241,7 @@ export const factory = {
             getUseCase.createAppointment(),
             getUseCase.updateAppointment(),
             getUseCase.deleteAppointment(),
+            getUseCase.acceptInvite(),
             getMiddleware.subscription()
         ),
         webhook: () => new EvolutionWebhookController(
