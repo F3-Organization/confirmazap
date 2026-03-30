@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { Zap, Check, ArrowRight, Calendar, MessageSquare, BarChart3, Globe, Shield, Sparkles, Layers, ShieldCheck, ZapOff } from 'lucide-react';
+import { Zap, Check, ArrowRight, Calendar, MessageSquare, BarChart3, ShieldCheck, ZapOff, Layers, Sparkles } from 'lucide-react';
 import { Button } from '../shared/ui/Button';
 import { Card } from '../shared/ui/Card';
 import { useAuthStore } from '../features/auth/auth.store';
@@ -109,7 +109,7 @@ export const LandingPage = () => {
             {t('landing.multiTenantTitle')}
           </div>
           
-          <h1 className="text-6xl md:text-9xl font-extrabold tracking-tighter leading-[0.8] mb-10 text-transparent bg-clip-text bg-gradient-to-br from-foreground to-foreground/30 max-w-5xl mx-auto">
+          <h1 className="text-6xl md:text-9xl font-extrabold tracking-tight leading-[1.3] pb-6 text-transparent bg-clip-text bg-gradient-to-br from-foreground to-foreground/30 max-w-7xl mx-auto">
             {t('landing.heroTitle')}
           </h1>
           
