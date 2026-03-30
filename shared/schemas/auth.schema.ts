@@ -16,7 +16,7 @@ export const LoginResponseSchema = z.object({
 export const AuthMeResponseSchema = AuthUserSchema;
 
 export const LoginInputSchema = z.object({
-    email: z.string().email(),
+    email: z.email(),
     password: z.string().min(6)
 });
 
