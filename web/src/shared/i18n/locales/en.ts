@@ -42,6 +42,8 @@ export const en = {
     backToLogin: 'Back to login',
     verificationFailed: 'Verification failed. Please check the code.',
     newPassword: 'New Password',
+    retry: 'Retry',
+    disconnect: 'Disconnect',
   },
 
   login: {
@@ -102,6 +104,11 @@ export const en = {
     clickToRefresh: 'Click to Refresh',
     cantScan: "Can't scan?",
     instead: 'instead.',
+    generatingQR: 'Generating QR...',
+    qrCodeAlt: 'WhatsApp QR Code',
+    failedLoadQR: 'Failed to load QR',
+    connected: 'Connected',
+    connectButton: 'Connect WhatsApp',
   },
   subscription: {
     title: 'Plan & Billing',
@@ -153,6 +160,17 @@ export const en = {
     },
     pricing: {
       perMonth: '/mo',
+    },
+    usage: {
+      title: 'Plan Usage',
+      messageLimit: 'Message Limit',
+      sent: 'sent of 50',
+      limitReached: 'Limit reached!',
+      limitReachedTitle: 'Message Limit Reached',
+      limitReachedDesc: 'Your monthly quota of 50 messages has been reached. Upgrade to PRO to continue confirming appointments.',
+      limitWarningTitle: 'You have only {{count}} messages left',
+      limitWarningDesc: "Your monthly limit of 50 messages is almost over. Don't leave your appointments unconfirmed!",
+      upgradeButton: 'Upgrade to PRO now',
     },
     enterpriseCta: {
       title: 'Need a custom enterprise solution?',

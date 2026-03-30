@@ -2,18 +2,31 @@ import { IEvolutionService } from "../ports/ievolution-service";
 import { IScheduleRepository } from "../repositories/ischedule-repository";
 import { IUserConfigRepository } from "../repositories/iuser-config-repository";
 import { IClientRepository } from "../repositories/iclient-repository";
+import { ISubscriptionRepository } from "../repositories/isubscription-repository";
+import { CheckUsageLimitUseCase } from "../subscription/check-usage-limit.usecase";
 
 export class NotifyUpcomingAppointmentsUseCase {
     constructor(
         private readonly scheduleRepository: IScheduleRepository,
         private readonly userConfigRepository: IUserConfigRepository,
         private readonly clientRepository: IClientRepository,
-        private readonly evolutionService: IEvolutionService
+        private readonly subscriptionRepository: ISubscriptionRepository,
+        private readonly evolutionService: IEvolutionService,
+        private readonly checkUsageLimit: CheckUsageLimitUseCase
     ) {}
 
     async execute(userId: string): Promise<void> {
         const config = await this.userConfigRepository.findByUserId(userId);
         if (!config || !config.whatsappInstanceName) {
+            return;
+        }
+
+        const usage = await this.checkUsageLimit.execute(userId);
+        const isPro = usage.plan === "PRO";
+        let currentMonthCount = usage.count;
+
+        if (!usage.canSend && !isPro) {
+            console.log(`[NotifyUseCase] User ${userId} has reached the 50-message limit for FREE plan. Skipping.`);
             return;
         }
 
@@ -29,6 +42,11 @@ export class NotifyUpcomingAppointmentsUseCase {
         const appointments = await this.scheduleRepository.findNextToNotify(userId, now, next24h);
 
         for (const appointment of appointments) {
+            if (!isPro && currentMonthCount >= 50) {
+                console.log(`[NotifyUseCase] User ${userId} hit the 50-message limit during processing. Skipping remaining.`);
+                break;
+            }
+
             let phoneNumber = this.extractPhoneNumber(`${appointment.title} ${appointment.description || ""}`);
             
             if (!phoneNumber && appointment.clientId) {
@@ -50,7 +68,8 @@ export class NotifyUpcomingAppointmentsUseCase {
                 
                 try {
                     await this.evolutionService.sendText(config.whatsappInstanceName, phoneNumber, message);
-                    await this.scheduleRepository.updateNotified(appointment.id, userId, true);
+                    await this.scheduleRepository.updateNotified(appointment.id, userId, true, new Date());
+                    if (!isPro) currentMonthCount++;
                 } catch (error) {
                     console.error(`[NotifyUseCase] Failed to send notification for appointment ${appointment.id}:`, error);
                 }

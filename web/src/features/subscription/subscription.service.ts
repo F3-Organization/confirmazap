@@ -3,6 +3,7 @@ import { apiClient } from '../../shared/api/api-client';
 export interface SubscriptionStatus {
   status: 'ACTIVE' | 'INACTIVE' | 'EXPIRED' | 'CANCELLED' | 'PAST_DUE' | 'TRIAL';
   plan: string;
+  messageCount: number;
   currentPeriodEnd?: string;
   checkoutUrl?: string;
 }

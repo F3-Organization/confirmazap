@@ -42,6 +42,8 @@ export const pt = {
     backToLogin: 'Voltar ao login',
     verificationFailed: 'Falha na verificação. Por favor, verifique o código.',
     newPassword: 'Nova Senha',
+    retry: 'Tentar Novamente',
+    disconnect: 'Desconectar',
   },
 
   login: {
@@ -102,6 +104,11 @@ export const pt = {
     clickToRefresh: 'Clique para Atualizar',
     cantScan: 'Não consegue escanear?',
     instead: 'em vez disso.',
+    generatingQR: 'Gerando QR...',
+    qrCodeAlt: 'Código QR do WhatsApp',
+    failedLoadQR: 'Falha ao carregar QR',
+    connected: 'Conectado',
+    connectButton: 'Conectar WhatsApp',
   },
   subscription: {
     title: 'Plano e Faturamento',
@@ -153,6 +160,17 @@ export const pt = {
     },
     pricing: {
       perMonth: '/mês',
+    },
+    usage: {
+      title: 'Uso do Plano',
+      messageLimit: 'Limite de Mensagens',
+      sent: 'enviadas de 50',
+      limitReached: 'Limite atingido!',
+      limitReachedTitle: 'Limite de Mensagens Atingido',
+      limitReachedDesc: 'Sua cota mensal de 50 mensagens foi atingida. Faça o upgrade para PRO para continuar confirmando agendamentos.',
+      limitWarningTitle: 'Você tem apenas {{count}} mensagens restantes',
+      limitWarningDesc: 'Seu limite de 50 mensagens mensais está quase no fim. Não deixe seus agendamentos sem confirmação!',
+      upgradeButton: 'Migrar para PRO agora',
     },
     enterpriseCta: {
       title: 'Precisa de uma solução enterprise personalizada?',

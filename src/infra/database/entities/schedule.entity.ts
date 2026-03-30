@@ -38,6 +38,9 @@ export class Schedule {
     @Column({ name: "is_notified", default: false })
     isNotified!: boolean;
 
+    @Column({ name: "notified_at", type: "timestamp", nullable: true })
+    notifiedAt?: Date;
+
     @Column({ name: "user_id" })
     userId!: string;
 

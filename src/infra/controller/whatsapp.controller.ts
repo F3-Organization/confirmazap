@@ -8,18 +8,13 @@ export class WhatsappController {
     constructor(
         private readonly fastify: FastifyAdapter,
         private readonly connectUseCase: ConnectWhatsappUseCase,
-        private readonly disconnectUseCase: DisconnectWhatsappUseCase,
-        private readonly subMiddleware?: any,
-        private readonly adminMiddleware?: any
+        private readonly disconnectUseCase: DisconnectWhatsappUseCase
     ) {
         this.fastify.logInfo("[WhatsappController] Initializing...");
         this.registerRoutes();
     }
 
     private registerRoutes() {
-        const connectMiddlewares = [];
-        if (this.subMiddleware) connectMiddlewares.push(this.subMiddleware);
-
         this.fastify.addProtectedRoute("POST", "/whatsapp/connect", async (request: FastifyRequest, reply: FastifyReply) => {
             const user = request.user as AuthUserPayload;
             const userId = user.id;
@@ -28,7 +23,7 @@ export class WhatsappController {
                 const qr = await this.connectUseCase.execute(userId);
                 return reply.send(qr);
             } catch (error: any) {
-                this.fastify.logInfo("[WaitappController] Connection Error", { error: error.message });
+                this.fastify.logInfo("[WhatsappController] Connection Error", { error: error.message });
                 return reply.code(error.status || 500).send({ 
                     error: "Connection Error", 
                     message: "Could not generate QR Code. Please try again later." 
@@ -55,8 +50,7 @@ export class WhatsappController {
                     }
                 }
             }
-
-        }, connectMiddlewares);
+        }, []);
 
         this.fastify.addProtectedRoute("DELETE", "/whatsapp/disconnect", async (request: FastifyRequest, reply: FastifyReply) => {
             const user = request.user as AuthUserPayload;
@@ -92,7 +86,6 @@ export class WhatsappController {
                     }
                 }
             }
-
-        }, this.subMiddleware ? [this.subMiddleware] : []);
+        }, []);
     }
 }

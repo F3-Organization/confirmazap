@@ -37,7 +37,19 @@ export class ScheduleRepository implements IScheduleRepository {
         await this.repository.update({ id, userId }, { status });
     }
 
-    async updateNotified(id: string, userId: string, isNotified: boolean): Promise<void> {
-        await this.repository.update({ id, userId }, { isNotified });
+    async updateNotified(id: string, userId: string, isNotified: boolean, notifiedAt?: Date): Promise<void> {
+        const updateData: any = { isNotified };
+        if (notifiedAt) updateData.notifiedAt = notifiedAt;
+        await this.repository.update({ id, userId }, updateData);
+    }
+
+    async countMonthlyNotifications(userId: string, startDate: Date, endDate: Date): Promise<number> {
+        return await this.repository.count({
+            where: {
+                userId,
+                isNotified: true,
+                notifiedAt: Between(startDate, endDate)
+            }
+        });
     }
 }

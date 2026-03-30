@@ -4,12 +4,15 @@ import { ConfirmAppointmentUseCase } from "../calendar/confirm-appointment.useca
 import { CancelAppointmentUseCase } from "../calendar/cancel-appointment.usecase";
 import { EvolutionWebhookPayload } from "../../../shared/schemas/evolution.schema";
 
+import { CheckUsageLimitUseCase } from "../subscription/check-usage-limit.usecase";
+
 export class HandleEvolutionWebhookUseCase {
     constructor(
         private readonly userConfigRepository: IUserConfigRepository,
         private readonly confirmAppointment: ConfirmAppointmentUseCase,
         private readonly cancelAppointment: CancelAppointmentUseCase,
-        private readonly evolutionService: IEvolutionService
+        private readonly evolutionService: IEvolutionService,
+        private readonly checkUsageLimit: CheckUsageLimitUseCase
     ) {}
 
     async execute(payload: EvolutionWebhookPayload): Promise<void> {
@@ -21,6 +24,12 @@ export class HandleEvolutionWebhookUseCase {
         const instanceName = payload.instance;
         const config = await this.userConfigRepository.findByInstanceName(instanceName);
         if (!config) return;
+
+        const usage = await this.checkUsageLimit.execute(config.userId);
+        if (!usage.canSend) {
+            console.log(`[HandleWebhook] User ${config.userId} has reached the 50-message limit. Skipping auto-reply.`);
+            return;
+        }
 
         const remoteJid = data.key.remoteJid;
         if (!remoteJid) return;

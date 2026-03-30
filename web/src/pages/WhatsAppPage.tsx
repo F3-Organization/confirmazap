@@ -93,7 +93,7 @@ export const WhatsAppPage = () => {
               {connectMutation.isPending ? (
                 <div className="flex flex-col items-center gap-4 text-slate-900">
                   <Loader2 className="w-12 h-12 animate-spin text-primary" />
-                  <span className="text-xs font-bold uppercase tracking-widest">Generating QR...</span>
+                  <span className="text-xs font-bold uppercase tracking-widest text-[#0F172A]">{t('whatsapp.generatingQR')}</span>
                 </div>
               ) : qrData?.qrcode?.base64 ? (
                 <div className="w-full h-full relative">
@@ -114,14 +114,14 @@ export const WhatsAppPage = () => {
               ) : connectMutation.isError ? (
                 <div className="flex flex-col items-center gap-4 text-red-500">
                   <XCircle className="w-12 h-12" />
-                  <span className="text-xs font-bold uppercase tracking-widest">Failed to load QR</span>
-                  <Button variant="ghost" size="sm" onClick={() => connectMutation.mutate()}>Retry</Button>
+                  <span className="text-xs font-bold uppercase tracking-widest">{t('whatsapp.failedLoadQR')}</span>
+                  <Button variant="ghost" size="sm" onClick={() => connectMutation.mutate()}>{t('common.retry')}</Button>
                 </div>
               ) : (
                  <div className="flex flex-col items-center gap-4 text-green-500">
                   <CheckCircle2 className="w-12 h-12" />
-                  <span className="text-xs font-bold uppercase tracking-widest">Connected</span>
-                  <Button variant="ghost" size="sm" onClick={() => disconnectMutation.mutate()} className="text-red-400 hover:text-red-500">Disconnect</Button>
+                  <span className="text-xs font-bold uppercase tracking-widest">{t('whatsapp.connected')}</span>
+                  <Button variant="ghost" size="sm" onClick={() => disconnectMutation.mutate()} className="text-red-400 hover:text-red-500">{t('common.disconnect')}</Button>
                 </div>
               )}
             </div>
@@ -134,7 +134,7 @@ export const WhatsAppPage = () => {
                       className="w-full h-12 gap-2 text-xs font-bold tracking-widest uppercase"
                       onClick={() => connectMutation.mutate()}
                     >
-                      Connect WhatsApp
+                      {t('whatsapp.connectButton')}
                     </Button>
                  </div>
               ) : (

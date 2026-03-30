@@ -118,6 +118,69 @@ export const SubscriptionPage = () => {
       title={t('subscription.title')} 
       subtitle={t('subscription.subtitle')}
     >
+      {/* Usage Progress Section for FREE Plan */}
+      {subStatus?.plan === 'FREE' && (
+        <Card variant="glass" className="mb-12 p-8 border border-primary/20 overflow-hidden relative group">
+          <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent -z-10" />
+          
+          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
+            <div className="flex-1 w-full uppercase">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-all ${
+                    subStatus.messageCount >= 50 ? 'bg-red-500/10 border-red-500/20' : 'bg-primary/10 border-primary/20'
+                  }`}>
+                    <Zap className={`w-5 h-5 ${subStatus.messageCount >= 50 ? 'text-red-400' : 'text-primary'}`} />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-black tracking-widest leading-none mb-1">{t('subscription.usage.title')}</h3>
+                    <p className="text-[10px] text-muted-foreground font-bold tracking-wide italic lowercase opacity-70">
+                      * {t('subscription.usage.messageLimit')}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className={`text-xs font-black tracking-tighter ${subStatus.messageCount >= 50 ? 'text-red-400' : 'text-foreground'}`}>
+                    {subStatus.messageCount}
+                  </span>
+                  <span className="text-[10px] font-bold tracking-widest opacity-40 ml-1">
+                    / 50 {t('subscription.usage.sent')}
+                  </span>
+                </div>
+              </div>
+              
+              <div className="h-4 w-full bg-black/40 rounded-full overflow-hidden border border-outline-variant/30 relative p-[3px]">
+                <div 
+                  className={`h-full rounded-full transition-all duration-1000 ease-out relative group-hover:brightness-110 ${
+                    subStatus.messageCount >= 50 
+                      ? 'bg-gradient-to-r from-red-600 to-red-400 shadow-[0_0_20px_rgba(239,68,68,0.4)]' 
+                      : 'bg-gradient-to-r from-primary-dim to-primary'
+                  }`}
+                  style={{ width: `${Math.min((subStatus.messageCount / 50) * 100, 100)}%` }}
+                >
+                  <div className="absolute inset-0 bg-white/20 animate-pulse-slow rounded-full" />
+                </div>
+              </div>
+            </div>
+            
+            <div className="shrink-0 w-full md:w-auto">
+               <Button 
+                variant={subStatus.messageCount >= 50 ? 'primary' : 'secondary'} 
+                className={`w-full md:w-auto h-14 px-10 text-[10px] font-black tracking-[0.2em] uppercase shadow-2xl transition-all ${
+                  subStatus.messageCount >= 50 ? 'shadow-red-500/20 active:scale-95' : 'shadow-primary/10'
+                }`}
+                onClick={() => checkoutMutation.mutate()}
+                disabled={checkoutMutation.isPending}
+               >
+                 {checkoutMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Zap className="w-3 h-3 mr-3 fill-current" />}
+                 {t('subscription.usage.upgradeButton')}
+                 <ArrowRight className="w-3 h-3 ml-3 opacity-50 group-hover:translate-x-1 transition-transform" />
+               </Button>
+            </div>
+          </div>
+        </Card>
+      )}
+
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-16">
         {plans.map((plan, i) => (
           <Card 

@@ -26,7 +26,16 @@ O sistema deve tentar encontrar o telefone do cliente final em duas etapas (Fall
     - O Webhook de `billing.paid` deve conciliar o ID da cobrança (`billingId`) para marcar o registro histórico como `PAID` e registrar a data exata do pagamento (`paidAt`).
 - **Faturas em PDF:** O sistema permite o download de comprovantes de pagamento em formato PDF apenas para transações com status `PAID`. As faturas são geradas dinamicamente com os dados do usuário e da cobrança.
 
-## 5. Status e Conciliação (Google Calendar Sync)
+## 5. Limites de Uso e Planos
+O sistema aplica restrições de uso com base no plano de assinatura do profissional:
+- **Plano FREE:**
+    - Limite de **50 notificações mensais** via WhatsApp.
+    - O sistema rastreia o envio através do campo `notified_at` nos agendamentos.
+    - Ao atingir o limite, os disparos automáticos são suspensos até o início do próximo mês.
+- **Plano PRO:**
+    - **Notificações ilimitadas** via WhatsApp enquanto a assinatura estiver com status `ACTIVE`.
+
+## 6. Status e Conciliação (Google Calendar Sync)
 Quando o cliente responde no WhatsApp:
 - Se resposta = SIM -> Mudar cor do evento na API do Google para 'Verde' (ID 10) e adicionar o prefixo `[CONFIRMADO]`.
 - Se resposta = NÃO -> Mudar cor para 'Vermelho' (ID 11), adicionar prefixo `[CANCELADO]` e disparar o alerta para o profissional.

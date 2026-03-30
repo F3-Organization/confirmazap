@@ -35,12 +35,14 @@ import { RegisterUserUseCase } from "../../usecase/auth/register-user.usecase";
 import { LoginUseCase } from "../../usecase/auth/login.usecase";
 import { AuthenticateGoogleUseCase } from "../../usecase/auth/authenticate-google.usecase";
 import { GetSubscriptionStatusUseCase } from "../../usecase/subscription/get-subscription-status.usecase";
+import { CheckUsageLimitUseCase } from "../../usecase/subscription/check-usage-limit.usecase";
 
 import { SyncCalendarQueue } from "../queue/sync-calendar.queue";
 import { SyncCalendarWorker } from "../queue/sync-calendar.worker";
 import { NotifyQueue } from "../queue/notify.queue";
 import { NotifyWorker } from "../queue/notify.worker";
 import { subscriptionMiddleware } from "../middleware/subscription.middleware";
+import { usageLimitMiddleware } from "../middleware/usage-limit.middleware";
 import { NodemailerAdapter } from "../adapters/nodemailer.adapter";
 import { RedisService } from "../database/redis.service";
 import { SendEmailVerificationUseCase } from "../../usecase/auth/send-email-verification.usecase";
@@ -86,11 +88,19 @@ const getUseCase = {
 
     exchangeGoogleCode: () => new ExchangeGoogleCodeUseCase(googleCalendarAdapter, getRepo.userConfig()),
     syncCalendar: () => new SyncCalendarUseCase(googleCalendarAdapter, getRepo.schedule(), getRepo.userConfig()),
+    
+    checkUsageLimit: () => new CheckUsageLimitUseCase(
+        getRepo.subscription(),
+        getRepo.schedule()
+    ),
+
     notifyUpcomingAppointments: () => new NotifyUpcomingAppointmentsUseCase(
         getRepo.schedule(),
         getRepo.userConfig(),
         getRepo.client(),
-        evolutionAdapter
+        getRepo.subscription(),
+        evolutionAdapter,
+        getUseCase.checkUsageLimit()
     ),
     confirmAppointment: () => new ConfirmAppointmentUseCase(
         getRepo.schedule(),
@@ -106,7 +116,8 @@ const getUseCase = {
         getRepo.userConfig(),
         getUseCase.confirmAppointment(),
         getUseCase.cancelAppointment(),
-        evolutionAdapter
+        evolutionAdapter,
+        getUseCase.checkUsageLimit()
     ),
     createSubscriptionCheckout: () => new CreateSubscriptionCheckoutUseCase(
         getRepo.user(),
@@ -161,12 +172,14 @@ const getUseCase = {
         getUseCase.exchangeGoogleCode()
     ),
     getSubscriptionStatus: () => new GetSubscriptionStatusUseCase(
-        getRepo.subscription()
+        getRepo.subscription(),
+        getRepo.schedule()
     )
 };
 
 const getMiddleware = {
-    subscription: () => subscriptionMiddleware(getRepo.subscription())
+    subscription: () => subscriptionMiddleware(getRepo.subscription()),
+    usageLimit: () => usageLimitMiddleware(getUseCase.checkUsageLimit())
 };
 
 export const factory = {
@@ -213,9 +226,7 @@ export const factory = {
         whatsapp: () => new WhatsappController(
             adapterInstance,
             getUseCase.connectWhatsapp(),
-            getUseCase.disconnectWhatsapp(),
-            getMiddleware.subscription(),
-            adminMiddleware
+            getUseCase.disconnectWhatsapp()
         ),
         dashboard: () => new DashboardController(
             adapterInstance,
