@@ -25,6 +25,10 @@ import { HandleAbacatePayWebhookUseCase } from "../../usecase/subscription/handl
 import { ConnectWhatsappUseCase } from "../../usecase/notification/connect-whatsapp.usecase";
 import { DisconnectWhatsappUseCase } from "../../usecase/notification/disconnect-whatsapp.usecase";
 import { WhatsappController } from "../controller/whatsapp.controller";
+import { DashboardController } from "../controller/dashboard.controller";
+import { GetDashboardStatsUseCase } from "../../usecase/dashboard/get-dashboard-stats.usecase";
+
+
 import { SyncCalendarQueue } from "../queue/sync-calendar.queue";
 import { SyncCalendarWorker } from "../queue/sync-calendar.worker";
 import { NotifyQueue } from "../queue/notify.queue";
@@ -113,8 +117,12 @@ const getUseCase = {
     verifyEmailSetPassword: () => new VerifyEmailSetPasswordUseCase(
         getRepo.user(),
         redisService
+    ),
+    getDashboardStats: () => new GetDashboardStatsUseCase(
+        getRepo.schedule()
     )
 };
+
 
 
 const getMiddleware = {
@@ -164,8 +172,14 @@ export const factory = {
             getUseCase.disconnectWhatsapp(),
             getMiddleware.subscription(),
             adminMiddleware
+        ),
+        dashboard: () => new DashboardController(
+            adapterInstance,
+            getUseCase.getDashboardStats()
         )
     },
+
+
     queues: {
         sync: () => syncCalendarQueue || (syncCalendarQueue = new SyncCalendarQueue()),
         notify: () => notifyQueue || (notifyQueue = new NotifyQueue())

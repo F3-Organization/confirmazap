@@ -16,6 +16,8 @@ import { PageLayout } from '../shared/ui/PageLayout';
 import { Card } from '../shared/ui/Card';
 import { Button } from '../shared/ui/Button';
 import { calendarService, type Appointment } from '../features/calendar/calendar.service';
+import { dashboardService } from '../features/dashboard/dashboard.service';
+
 
 export const DashboardPage = () => {
   const { t } = useTranslation();
@@ -26,18 +28,44 @@ export const DashboardPage = () => {
     queryFn: calendarService.getAppointments,
   });
 
+  const { data: dashboardStats } = useQuery({
+    queryKey: ['dashboard-stats'],
+    queryFn: dashboardService.getStats,
+  });
+
   const syncMutation = useMutation({
     mutationFn: calendarService.sync,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['appointments'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
     },
   });
 
-  const stats = [
-    { label: t('dashboard.stats.confirmations'), value: appointments?.length.toString() || '0', icon: CheckCircle2, change: '+12.5%', color: 'text-green-400' },
-    { label: t('dashboard.stats.deliveryRate'), value: '98.2%', icon: ArrowUpRight, change: '+0.5%', color: 'text-primary' },
-    { label: t('dashboard.stats.replies'), value: '412', icon: MessageCircle, change: '+8.2%', color: 'text-secondary' },
+  const statsList = [
+    { 
+      label: t('dashboard.stats.confirmations'), 
+      value: dashboardStats?.totalConfirmations.toString() || '0', 
+      icon: CheckCircle2, 
+      change: dashboardStats?.confirmationsChange || '+0%', 
+      color: 'text-green-400' 
+    },
+    { 
+      label: t('dashboard.stats.deliveryRate'), 
+      value: dashboardStats?.deliveryRate || '0%', 
+      icon: ArrowUpRight, 
+      change: undefined, 
+      color: 'text-primary' 
+    },
+
+    { 
+      label: t('dashboard.stats.replies'), 
+      value: dashboardStats?.managedReplies.toString() || '0', 
+      icon: MessageCircle, 
+      change: dashboardStats?.repliesChange || '+0%', 
+      color: 'text-secondary' 
+    },
   ];
+
 
   return (
     <PageLayout 
@@ -45,16 +73,20 @@ export const DashboardPage = () => {
       subtitle={t('dashboard.subtitle')}
     >
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-        {stats.map((stat, i) => (
+        {statsList.map((stat, i) => (
+
           <Card key={i} variant="glass" className="p-8 group hover:scale-[1.02] transition-all cursor-default">
             <div className="flex justify-between items-start mb-6">
               <div className="w-12 h-12 rounded-xl bg-surface-low border border-outline-variant/50 flex items-center justify-center group-hover:border-primary/30 transition-colors">
                 <stat.icon className="w-6 h-6 text-muted-foreground group-hover:text-primary transition-colors" />
               </div>
-              <span className={`text-xs font-bold px-2 py-1 rounded-full bg-surface-low border border-outline-variant/30 ${stat.color}`}>
-                {stat.change}
-              </span>
+              {stat.change && (
+                <span className={`text-xs font-bold px-2 py-1 rounded-full bg-surface-low border border-outline-variant/30 ${stat.color}`}>
+                  {stat.change}
+                </span>
+              )}
             </div>
+
             <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-2">{stat.label}</h3>
             <p className="text-4xl font-extrabold tracking-tighter">{stat.value}</p>
           </Card>
