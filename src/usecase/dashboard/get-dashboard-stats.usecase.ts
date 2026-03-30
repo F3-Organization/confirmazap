@@ -38,13 +38,6 @@ export class GetDashboardStatsUseCase {
             s.status === ScheduleStatus.CANCELLED
         ).length;
 
-        // 3. Delivery Rate
-        // Since we don't have a specific table for delivery status (success/fail),
-        // we'll calculate based on schedules that were marked for notification.
-        // For visual fidelity without mocks: 100% if any sent, else 0%
-        // In a real system we would have (deliveredCount/totalSentCount).
-        const deliveryRate = totalConfirmations > 0 ? "100%" : "0%";
-
         const calculateChange = (current: number, previous: number) => {
             if (previous === 0) return current > 0 ? "+100%" : "0%";
             const diff = ((current - previous) / previous) * 100;
@@ -52,12 +45,31 @@ export class GetDashboardStatsUseCase {
             return `${sign}${diff.toFixed(1)}%`;
         };
 
+        const getRate = (confirmed: number, notified: number) => {
+            if (notified === 0) return 0;
+            return (confirmed / notified) * 100;
+        };
+
+        const cpRate = getRate(cpConfirmations, cpConfirmations); // Since totalConfirmations is based on isNotified
+        // Wait, cpConfirmations in my code is "totalConfirmations = allSchedules.filter(s => s.isNotified).length"
+
+        // Let's refine the variables for clarity:
+        const currentNotified = cpSchedules.filter(s => s.isNotified).length;
+        const currentConfirmed = cpSchedules.filter(s => s.status === ScheduleStatus.CONFIRMED).length;
+        
+        const previousNotified = ppSchedules.filter(s => s.isNotified).length;
+        const previousConfirmed = ppSchedules.filter(s => s.status === ScheduleStatus.CONFIRMED).length;
+
+        const currentRateValue = getRate(currentConfirmed, currentNotified);
+        const previousRateValue = getRate(previousConfirmed, previousNotified);
+
         return {
-            totalConfirmations,
-            deliveryRate,
+            totalConfirmations: allSchedules.filter(s => s.isNotified).length,
             managedReplies,
+            conversionRate: `${currentRateValue.toFixed(1)}%`,
             confirmationsChange: calculateChange(cpConfirmations, ppConfirmations),
-            repliesChange: calculateChange(cpReplies, ppReplies)
+            repliesChange: calculateChange(cpReplies, ppReplies),
+            conversionRateChange: calculateChange(currentRateValue, previousRateValue)
         };
 
     }

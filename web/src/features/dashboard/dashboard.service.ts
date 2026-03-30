@@ -2,12 +2,13 @@ import { apiClient } from '../../shared/api/api-client';
 
 export interface DashboardStats {
   totalConfirmations: number;
-  deliveryRate: string;
   managedReplies: number;
+  conversionRate: string;
   confirmationsChange: string;
-  deliveryRateChange: string;
   repliesChange: string;
+  conversionRateChange: string;
 }
+
 
 export const dashboardService = {
   getStats: async (): Promise<DashboardStats> => {

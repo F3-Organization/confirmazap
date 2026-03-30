@@ -59,9 +59,11 @@ export const en = {
     subtitle: 'Manage your automated appointment confirmations and track communication performance.',
     stats: {
       confirmations: 'Total Confirmations Sent',
-      deliveryRate: 'Delivery Rate',
+      conversionRate: 'Conversion Rate',
       replies: 'Replies Handled',
+
     },
+
     recentAppointments: 'Recent Appointments',
     table: {
       patient: 'Patient/Client',

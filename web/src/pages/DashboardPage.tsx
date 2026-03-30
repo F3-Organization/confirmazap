@@ -50,13 +50,12 @@ export const DashboardPage = () => {
       color: 'text-green-400' 
     },
     { 
-      label: t('dashboard.stats.deliveryRate'), 
-      value: dashboardStats?.deliveryRate || '0%', 
+      label: t('dashboard.stats.conversionRate'), 
+      value: dashboardStats?.conversionRate || '0%', 
       icon: ArrowUpRight, 
-      change: undefined, 
+      change: dashboardStats?.conversionRateChange || '+0%', 
       color: 'text-primary' 
     },
-
     { 
       label: t('dashboard.stats.replies'), 
       value: dashboardStats?.managedReplies.toString() || '0', 
@@ -64,6 +63,8 @@ export const DashboardPage = () => {
       change: dashboardStats?.repliesChange || '+0%', 
       color: 'text-secondary' 
     },
+
+
   ];
 
 

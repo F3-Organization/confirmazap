@@ -59,9 +59,11 @@ export const pt = {
     subtitle: 'Gerencie suas confirmações automáticas de agendamentos e acompanhe o desempenho da comunicação.',
     stats: {
       confirmations: 'Total de Confirmações Env.',
-      deliveryRate: 'Taxa de Entrega',
+      conversionRate: 'Taxa de Conversão',
       replies: 'Respostas Gerenciadas',
+
     },
+
     recentAppointments: 'Agendamentos Recentes',
     table: {
       patient: 'Paciente/Cliente',
