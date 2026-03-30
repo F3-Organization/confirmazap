@@ -27,6 +27,14 @@ import { DisconnectWhatsappUseCase } from "../../usecase/notification/disconnect
 import { WhatsappController } from "../controller/whatsapp.controller";
 import { DashboardController } from "../controller/dashboard.controller";
 import { GetDashboardStatsUseCase } from "../../usecase/dashboard/get-dashboard-stats.usecase";
+import { GetAppointmentsUseCase } from "../../usecase/calendar/get-appointments.usecase";
+import { RegisterUserUseCase } from "../../usecase/auth/register-user.usecase";
+import { LoginUseCase } from "../../usecase/auth/login.usecase";
+import { AuthenticateGoogleUseCase } from "../../usecase/auth/authenticate-google.usecase";
+import { GetSubscriptionStatusUseCase } from "../../usecase/subscription/get-subscription-status.usecase";
+
+
+
 
 
 import { SyncCalendarQueue } from "../queue/sync-calendar.queue";
@@ -120,8 +128,28 @@ const getUseCase = {
     ),
     getDashboardStats: () => new GetDashboardStatsUseCase(
         getRepo.schedule()
+    ),
+    getAppointments: () => new GetAppointmentsUseCase(
+        getRepo.schedule()
+    ),
+    registerUser: () => new RegisterUserUseCase(
+        getRepo.user()
+    ),
+    login: () => new LoginUseCase(
+        getRepo.user()
+    ),
+    authenticateGoogle: () => new AuthenticateGoogleUseCase(
+        googleCalendarAdapter,
+        getRepo.user(),
+        getUseCase.exchangeGoogleCode()
+    ),
+    getSubscriptionStatus: () => new GetSubscriptionStatusUseCase(
+        getRepo.subscription()
     )
 };
+
+
+
 
 
 
@@ -142,9 +170,9 @@ export const factory = {
         auth: () => new AuthController(
             adapterInstance,
             getUseCase.generateGoogleAuthUrl(),
-            getUseCase.exchangeGoogleCode(),
-            getRepo.user(),
-            googleCalendarAdapter,
+            getUseCase.authenticateGoogle(),
+            getUseCase.registerUser(),
+            getUseCase.login(),
             getUseCase.sendEmailVerification(),
             getUseCase.verifyEmailSetPassword()
         ),
@@ -153,7 +181,7 @@ export const factory = {
             adapterInstance,
             factory.queues.sync(),
             factory.queues.notify(),
-            getRepo.schedule(),
+            getUseCase.getAppointments(),
             getMiddleware.subscription()
         ),
         webhook: () => new EvolutionWebhookController(
@@ -164,7 +192,7 @@ export const factory = {
             adapterInstance,
             getUseCase.createSubscriptionCheckout(),
             getUseCase.handleAbacatePayWebhook(),
-            getRepo.subscription()
+            getUseCase.getSubscriptionStatus()
         ),
         whatsapp: () => new WhatsappController(
             adapterInstance,

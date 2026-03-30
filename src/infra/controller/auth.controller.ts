@@ -1,32 +1,32 @@
+import { FastifyReply, FastifyRequest } from "fastify";
 import { FastifyAdapter } from "../adapters/fastfy.adapter";
 import { GenerateGoogleAuthUrlUseCase } from "../../usecase/auth/generate-google-auth-url.usecase";
-import { ExchangeGoogleCodeUseCase } from "../../usecase/auth/exchange-google-code.usecase";
-import { UserRepository } from "../database/repositories/user.repository";
-import { User } from "../database/entities/user.entity";
-import { IGoogleCalendarService } from "../../usecase/ports/igoogle-calendar-service";
-import { z } from "zod";
-import * as bcrypt from "bcrypt";
-import { AuthMeResponseSchema, LoginResponseSchema, LoginInputSchema, RegisterInputSchema, VerifyRegistrationInputSchema } from "../../../shared/schemas/auth.schema";
+import { AuthenticateGoogleUseCase } from "../../usecase/auth/authenticate-google.usecase";
+import { RegisterUserUseCase } from "../../usecase/auth/register-user.usecase";
+import { LoginUseCase } from "../../usecase/auth/login.usecase";
 import { SendEmailVerificationUseCase } from "../../usecase/auth/send-email-verification.usecase";
 import { VerifyEmailSetPasswordUseCase } from "../../usecase/auth/verify-email-set-password.usecase";
-import { FastifyReply, FastifyRequest } from "fastify";
-import { GoogleCalendarAdapter } from "../adapters/google-calendar.adapter";
-
+import { AuthUserPayload } from "../types/auth.types";
+import { z } from "zod";
+import { 
+    LoginInputSchema, 
+    RegisterInputSchema, 
+    VerifyRegistrationInputSchema 
+} from "../../../shared/schemas/auth.schema";
 
 export class AuthController {
     constructor(
         private readonly fastify: FastifyAdapter,
         private readonly generateAuthUrl: GenerateGoogleAuthUrlUseCase,
-        private readonly exchangeCode: ExchangeGoogleCodeUseCase,
-        private readonly userRepo: UserRepository,
-        private readonly googleService: GoogleCalendarAdapter,
+        private readonly authenticateGoogle: AuthenticateGoogleUseCase,
+        private readonly registerUser: RegisterUserUseCase,
+        private readonly login: LoginUseCase,
         private readonly sendEmailVerification: SendEmailVerificationUseCase,
         private readonly verifyEmailSetPassword: VerifyEmailSetPasswordUseCase
     ) {
         this.fastify.logInfo("[AuthController] Initializing...");
         this.registerRoutes();
     }
-
 
     private registerRoutes() {
         this.fastify.addRoute("GET", "/auth/google", async (request: FastifyRequest, reply: FastifyReply) => {
@@ -38,8 +38,8 @@ export class AuthController {
             description: "Redirects the user to the Google OAuth2 consent page.",
             response: {
                 302: {
-                    type: 'object',
-                    description: 'Redirect to Google'
+                    type: "object",
+                    description: "Redirect to Google"
                 }
             }
         });
@@ -61,20 +61,7 @@ export class AuthController {
             const { code } = parseResult.data;
 
             try {
-                const tokens = await this.googleService.getTokens(code);
-
-                const profile = await this.googleService.getUserProfile(tokens.access_token);
-
-                let user = await this.userRepo.findByGoogleId(profile.id);
-                if (!user) {
-                    user = new User();
-                    user.googleId = profile.id;
-                    user.email = profile.email;
-                    user.name = profile.name;
-                    user = await this.userRepo.save(user);
-                }
-
-                await this.exchangeCode.execute(user.id, tokens);
+                const { user } = await this.authenticateGoogle.execute(code);
 
                 const token = this.fastify.sign({
                     id: user.id,
@@ -94,7 +81,7 @@ export class AuthController {
                     }
                 });
             } catch (error: any) {
-                console.error("[AuthController] Authentication failed:", error);
+                this.fastify.logInfo("[AuthController] Authentication failed:", { error: error.message });
                 reply.code(500).send({
                     error: "Authentication failure",
                     message: error.message
@@ -103,25 +90,19 @@ export class AuthController {
         }, {
             tags: ["Auth"],
             summary: "Google authentication callback",
-            description: "Receives the code from Google, creates/finds the user, saves tokens, and returns a JWT for future sessions.",
+            description: "Receives the code from Google, creates/finds the user, saves tokens, and returns a JWT.",
             querystring: {
-                type: 'object',
-                required: ['code'],
+                type: "object",
+                required: ["code"],
                 properties: {
-                    code: { type: 'string' }
+                    code: { type: "string" }
                 }
             }
         });
 
-        // 3. Rota para pegar dados do usuário logado
         this.fastify.addProtectedRoute("GET", "/auth/me", async (request: FastifyRequest, reply: FastifyReply) => {
-            const userId = (request.user as any).id;
-            const user = await this.userRepo.findById(userId);
-
-            if (!user) {
-                return reply.code(404).send({ error: "User not found" });
-            }
-
+            const user = request.user as AuthUserPayload;
+            
             reply.send({
                 id: user.id,
                 name: user.name,
@@ -133,8 +114,6 @@ export class AuthController {
             summary: "Obtém dados do usuário autenticado"
         });
 
-        // 4. Rota de Registro Convencional
-
         this.fastify.addRoute("POST", "/auth/register", async (request: FastifyRequest, reply: FastifyReply) => {
             const parseResult = RegisterInputSchema.safeParse(request.body);
             if (!parseResult.success) {
@@ -143,53 +122,41 @@ export class AuthController {
 
             const { name, email, password } = parseResult.data;
 
-            const existingUser = await this.userRepo.findByEmail(email);
+            try {
+                const user = await this.registerUser.execute({ name, email, password });
 
-            if (existingUser) {
-                // Se o usuário existir mas não tiver senha, ele veio do Google.
-                // Iniciamos o fluxo de verificação de e-mail para ele definir uma senha.
-                if (!existingUser.password) {
+                const token = this.fastify.sign({
+                    id: user.id,
+                    email: user.email,
+                    name: user.name,
+                    role: user.role
+                });
+
+                reply.send({
+                    message: "Registration successful",
+                    token,
+                    user: { id: user.id, name: user.name, email: user.email, role: user.role }
+                });
+            } catch (error: any) {
+                if (error.message === "User already exists") {
+                    // Try to send verification email for users without password (Google-only users)
                     try {
                         await this.sendEmailVerification.execute(email);
                         return reply.send({
-                            status: 'PENDING_VERIFICATION',
+                            status: "PENDING_VERIFICATION",
                             message: "Email verification code sent. Please verify your email to set a password."
                         });
-                    } catch (error: any) {
-                        return reply.code(500).send({ error: "Failed to send verification email", message: error.message });
+                    } catch (mailError: any) {
+                        return reply.code(500).send({ error: "Failed to send verification email", message: mailError.message });
                     }
                 }
-
-                return reply.code(400).send({ error: "User already exists" });
+                return reply.code(400).send({ error: "Registration failed", message: error.message });
             }
-
-            const hashedPassword = await bcrypt.hash(password, 10);
-
-            let user = new User();
-            user.name = name;
-            user.email = email;
-            user.password = hashedPassword;
-
-            user = await this.userRepo.save(user);
-
-            const token = this.fastify.sign({
-                id: user.id,
-                email: user.email,
-                name: user.name,
-                role: user.role
-            });
-
-            reply.send({
-                message: "Registration successful",
-                token,
-                user: { id: user.id, name: user.name, email: user.email, role: user.role }
-            });
         }, {
             tags: ["Auth"],
             summary: "Registers a new user or starts verification for existing Google users"
         });
 
-        // 4.1. Rota de Verificação de Registro (para quem já existe via Google)
         this.fastify.addRoute("POST", "/auth/register/verify", async (request: FastifyRequest, reply: FastifyReply) => {
             const parseResult = VerifyRegistrationInputSchema.safeParse(request.body);
             if (!parseResult.success) {
@@ -221,7 +188,6 @@ export class AuthController {
             summary: "Verifies email and sets password for existing Google users"
         });
 
-
         this.fastify.addRoute("POST", "/auth/login", async (request: FastifyRequest, reply: FastifyReply) => {
             const parseResult = LoginInputSchema.safeParse(request.body);
             if (!parseResult.success) {
@@ -230,32 +196,27 @@ export class AuthController {
 
             const { email, password } = parseResult.data;
 
-            const user = await this.userRepo.findByEmail(email);
-            if (!user || !user.password) {
+            try {
+                const user = await this.login.execute(email, password);
+
+                const token = this.fastify.sign({
+                    id: user.id,
+                    email: user.email,
+                    name: user.name,
+                    role: user.role
+                });
+
+                reply.send({
+                    message: "Login successful",
+                    token,
+                    user: { id: user.id, name: user.name, email: user.email, role: user.role }
+                });
+            } catch (error: any) {
                 return reply.code(401).send({ error: "Invalid credentials" });
             }
-
-            const isValid = await bcrypt.compare(password, user.password);
-            if (!isValid) {
-                return reply.code(401).send({ error: "Invalid credentials" });
-            }
-
-            const token = this.fastify.sign({
-                id: user.id,
-                email: user.email,
-                name: user.name,
-                role: user.role
-            });
-
-            reply.send({
-                message: "Login successful",
-                token,
-                user: { id: user.id, name: user.name, email: user.email, role: user.role }
-            });
         }, {
             tags: ["Auth"],
             summary: "Logins a user with email and password"
         });
     }
 }
-

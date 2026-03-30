@@ -1,8 +1,9 @@
+import { FastifyReply, FastifyRequest } from "fastify";
 import { FastifyAdapter } from "../adapters/fastfy.adapter";
 import { CreateSubscriptionCheckoutUseCase } from "../../usecase/subscription/create-checkout.usecase";
 import { HandleAbacatePayWebhookUseCase } from "../../usecase/subscription/handle-abacate-webhook.usecase";
-import { SubscriptionRepository } from "../database/repositories/subscription.repository";
-import { SubscriptionStatus } from "../database/entities/subscription.entity";
+import { GetSubscriptionStatusUseCase } from "../../usecase/subscription/get-subscription-status.usecase";
+import { AuthUserPayload } from "../types/auth.types";
 import { env } from "../config/configs";
 import { createHmac } from "crypto";
 import { z } from "zod";
@@ -12,20 +13,23 @@ export class SubscriptionController {
         private readonly fastify: FastifyAdapter,
         private readonly createCheckout: CreateSubscriptionCheckoutUseCase,
         private readonly handleWebhook: HandleAbacatePayWebhookUseCase,
-        private readonly subscriptionRepo: SubscriptionRepository
+        private readonly getStatus: GetSubscriptionStatusUseCase
     ) {
+        this.fastify.logInfo("[SubscriptionController] Initializing...");
         this.registerRoutes();
     }
 
     private registerRoutes() {
         // 1. Criar Checkout de Assinatura
-        this.fastify.addProtectedRoute("POST", "/subscription/checkout", async (request, reply) => {
-            const userId = (request.user as any).id;
+        this.fastify.addProtectedRoute("POST", "/subscription/checkout", async (request: FastifyRequest, reply: FastifyReply) => {
+            const user = request.user as AuthUserPayload;
+            const userId = user.id;
+
             try {
                 const result = await this.createCheckout.execute(userId);
                 reply.send(result);
             } catch (error: any) {
-                console.error("[SubscriptionController] Checkout failed:", error);
+                this.fastify.logInfo("[SubscriptionController] Checkout failed", { error: error.message });
                 reply.code(500).send({ error: "Checkout creation failed", message: error.message });
             }
         }, {
@@ -34,47 +38,44 @@ export class SubscriptionController {
             description: "Registers the user in Abacate Pay and returns a payment URL for PIX or Credit Card.",
             response: {
                 200: {
-                    type: 'object',
+                    type: "object",
                     properties: {
-                        url: { type: 'string' }
+                        url: { type: "string" }
                     }
                 }
             }
         });
 
         // 2. Ver Status da Assinatura
-        this.fastify.addProtectedRoute("GET", "/subscription/status", async (request, reply) => {
-            const userId = (request.user as any).id;
-            const subscription = await this.subscriptionRepo.findByUserId(userId);
+        this.fastify.addProtectedRoute("GET", "/subscription/status", async (request: FastifyRequest, reply: FastifyReply) => {
+            const user = request.user as AuthUserPayload;
+            const userId = user.id;
 
-            if (!subscription) {
-                return reply.send({ status: SubscriptionStatus.INACTIVE, plan: "FREE" });
+            try {
+                const status = await this.getStatus.execute(userId);
+                reply.send(status);
+            } catch (error: any) {
+                this.fastify.logInfo("[SubscriptionController] Failed to get status", { error: error.message });
+                reply.code(500).send({ error: "Status retrieval failed" });
             }
-
-            reply.send({
-                status: subscription.status,
-                plan: subscription.plan,
-                currentPeriodEnd: subscription.currentPeriodEnd,
-                checkoutUrl: subscription.checkoutUrl
-            });
         }, {
             tags: ["Subscription"],
             summary: "Gets the current subscription status of the user",
             response: {
                 200: {
-                    type: 'object',
+                    type: "object",
                     properties: {
-                        status: { type: 'string' },
-                        plan: { type: 'string' },
-                        currentPeriodEnd: { type: 'string', format: 'date-time' },
-                        checkoutUrl: { type: 'string' }
+                        status: { type: "string" },
+                        plan: { type: "string" },
+                        currentPeriodEnd: { type: "string", format: "date-time" },
+                        checkoutUrl: { type: "string" }
                     }
                 }
             }
         });
 
         // 3. Webhook do Abacate Pay (Público)
-        this.fastify.addRoute("POST", "/webhook/abacatepay", async (request, reply) => {
+        this.fastify.addRoute("POST", "/webhook/abacatepay", async (request: FastifyRequest, reply: FastifyReply) => {
             const signature = request.headers["x-abacatepay-signature"] as string;
             
             const webhookSchema = z.object({
@@ -101,7 +102,7 @@ export class SubscriptionController {
                 const digest = hmac.update(rawBody).digest("hex");
 
                 if (signature !== digest) {
-                    console.error("[SubscriptionController] Invalid HMAC signature");
+                    this.fastify.logInfo("[SubscriptionController] Invalid HMAC signature");
                     return reply.code(401).send({ error: "Invalid signature" });
                 }
             }
@@ -110,7 +111,7 @@ export class SubscriptionController {
                 await this.handleWebhook.execute(payload);
                 reply.send({ status: "processed" });
             } catch (error: any) {
-                console.error("[SubscriptionController] Webhook processing failed:", error);
+                this.fastify.logInfo("[SubscriptionController] Webhook processing failed", { error: error.message });
                 reply.code(400).send({ error: "Webhook processing error" });
             }
         }, {
@@ -118,7 +119,10 @@ export class SubscriptionController {
             summary: "Abacate Pay event receiver",
             description: "Public endpoint for automatic payment notifications and billing updates.",
             response: {
-                200: { type: 'object', properties: { status: { type: 'string' } } }
+                200: { 
+                    type: "object", 
+                    properties: { status: { type: "string" } } 
+                }
             }
         });
     }

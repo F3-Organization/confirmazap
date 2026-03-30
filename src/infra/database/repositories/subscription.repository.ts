@@ -1,8 +1,9 @@
 import { Repository } from "typeorm";
 import { AppDataSource } from "../../config/data-source";
 import { Subscription, SubscriptionStatus } from "../entities/subscription.entity";
+import { ISubscriptionRepository } from "../../../usecase/repositories/isubscription-repository";
 
-export class SubscriptionRepository {
+export class SubscriptionRepository implements ISubscriptionRepository {
     private readonly repository: Repository<Subscription>;
 
     constructor() {
@@ -31,10 +32,10 @@ export class SubscriptionRepository {
     }
 
     async updateStatus(id: string, userId: string, status: SubscriptionStatus, periodEnd?: Date): Promise<void> {
-        const updateData: any = { status };
+        const updateData: Partial<Subscription> = { status };
         if (periodEnd) {
             updateData.currentPeriodEnd = periodEnd;
         }
-        await this.repository.update({ id, userId }, updateData);
+        await this.repository.update({ id, userId }, updateData as any);
     }
 }
