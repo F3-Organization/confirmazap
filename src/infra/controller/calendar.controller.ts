@@ -49,7 +49,7 @@ export class CalendarController {
                 }
             }
 
-        }, this.subMiddleware);
+        });
 
         this.fastify.addProtectedRoute("POST", "/calendar/notify", async (request: FastifyRequest, reply: FastifyReply) => {
             const user = request.user as AuthUserPayload;
