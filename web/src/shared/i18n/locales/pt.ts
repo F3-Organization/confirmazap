@@ -75,6 +75,20 @@ export const pt = {
     loadingSchedule: 'Carregando sua agenda...',
     failedToLoad: 'Falha ao carregar agendamentos.',
     noAppointments: 'Nenhum agendamento encontrado. Sincronize seu calendário para começar.',
+    newAppointment: {
+      button: 'Novo Agendamento',
+      title: 'Criar Novo Agendamento',
+      serviceName: 'Nome do Serviço / Título',
+      clientName: 'Nome do Cliente',
+      clientPhone: 'Telefone do Cliente (WhatsApp)',
+      startAt: 'Data e Hora de Início',
+      endAt: 'Data e Hora de Fim',
+      cancel: 'Cancelar',
+      submit: 'Salvar Agendamento',
+      success: 'Agendamento criado com sucesso no Google Agenda!',
+      error: 'Erro ao criar agendamento.',
+      creating: 'Salvando...'
+    },
     syncCalendar: {
       title: 'Sincronizar Calendário',
       description: 'Conecte seu Google Calendar para enviar automaticamente lembretes de WhatsApp para cada nova reserva criada.',

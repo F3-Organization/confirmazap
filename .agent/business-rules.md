@@ -7,8 +7,9 @@ A AgendaOk é uma plataforma **SaaS Multi-Tenant**. Cada Profissional (Usuário)
 - **Segurança:** Use Cases devem sempre receber o `userId` autenticado e garantir que as operações de leitura/escrita sejam filtradas por esse ID para evitar vazamento de dados entre profissionais.
 
 ## 2. Identificação de Clientes e Telefones (Client Matching)
-O sistema deve tentar encontrar o telefone do cliente final em duas etapas (Fallback Strategy):
-- **Estratégia A (Base de Dados):** O sistema busca na tabela `clients` se existe um cliente cadastrado pelo usuário (`userId`) cujo `name` ou `email` bata com o título/convidado do evento no Google Calendar.
+O sistema deve tentar encontrar o telefone do cliente final nas seguintes tentativas (Fallback Strategy):
+- **Estratégia A (Regex no Título/Descrição):** O sistema varre o título e descrição do evento buscando um número de telefone com ou sem DDD. Quando um agendamento é criado pelo próprio frontend do AgendaOk, ele é sincronizado **instantaneamente (síncrono)** com a API do Google Calendar e o telefone do cliente é embutido diretamente na descrição do evento (`Telefone: XXXXX`).
+- **Estratégia B (Base de Dados):** O sistema busca na tabela `clients` se existe um cliente cadastrado pelo usuário (`userId`) cujo `name` ou `email` bata com o título/convidado do evento no Google Calendar.
 
 ## 3. Janela de Notificação (Cron Jobs)
 - O sistema varre os eventos futuros a cada 15 minutos.

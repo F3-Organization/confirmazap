@@ -32,6 +32,7 @@ import { WhatsappController } from "../controller/whatsapp.controller";
 import { DashboardController } from "../controller/dashboard.controller";
 import { GetDashboardStatsUseCase } from "../../usecase/dashboard/get-dashboard-stats.usecase";
 import { GetAppointmentsUseCase } from "../../usecase/calendar/get-appointments.usecase";
+import { CreateAppointmentUseCase } from "../../usecase/calendar/create-appointment.usecase";
 import { RegisterUserUseCase } from "../../usecase/auth/register-user.usecase";
 import { LoginUseCase } from "../../usecase/auth/login.usecase";
 import { AuthenticateGoogleUseCase } from "../../usecase/auth/authenticate-google.usecase";
@@ -165,6 +166,11 @@ const getUseCase = {
     getAppointments: () => new GetAppointmentsUseCase(
         getRepo.schedule()
     ),
+    createAppointment: () => new CreateAppointmentUseCase(
+        googleCalendarAdapter,
+        getRepo.schedule(),
+        getRepo.userConfig()
+    ),
     registerUser: () => new RegisterUserUseCase(
         getRepo.user()
     ),
@@ -214,6 +220,7 @@ export const factory = {
             factory.queues.sync(),
             factory.queues.notify(),
             getUseCase.getAppointments(),
+            getUseCase.createAppointment(),
             getMiddleware.subscription()
         ),
         webhook: () => new EvolutionWebhookController(

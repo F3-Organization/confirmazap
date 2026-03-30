@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
@@ -17,11 +18,14 @@ import { Card } from '../shared/ui/Card';
 import { Button } from '../shared/ui/Button';
 import { calendarService, type Appointment } from '../features/calendar/calendar.service';
 import { dashboardService } from '../features/dashboard/dashboard.service';
+import { NewAppointmentModal } from '../features/calendar/components/NewAppointmentModal';
+import { Plus } from 'lucide-react';
 
 
 export const DashboardPage = () => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { data: appointments, isLoading, isError } = useQuery({
     queryKey: ['appointments'],
@@ -102,9 +106,9 @@ export const DashboardPage = () => {
               <CalendarDays className="w-5 h-5 text-primary" />
               <h2 className="text-xl font-bold tracking-tight">{t('dashboard.recentAppointments')}</h2>
             </div>
-            <Button variant="ghost" size="sm" className="hidden sm:flex group">
-              {t('common.viewAll')}
-              <ArrowUpRight className="w-3 h-3 ml-1 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            <Button size="sm" className="hidden sm:flex group justify-center gap-2" onClick={() => setIsModalOpen(true)}>
+              <Plus className="w-4 h-4" />
+              {t('dashboard.newAppointment.button')}
             </Button>
           </div>
 
@@ -230,6 +234,11 @@ export const DashboardPage = () => {
           </Card>
         </div>
       </div>
+      
+      <NewAppointmentModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+      />
     </PageLayout>
   );
 };

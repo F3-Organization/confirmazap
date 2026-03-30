@@ -75,6 +75,20 @@ export const en = {
     loadingSchedule: 'Loading your schedule...',
     failedToLoad: 'Failed to load appointments.',
     noAppointments: 'No appointments found. Sync your calendar to start.',
+    newAppointment: {
+      button: 'New Appointment',
+      title: 'Create New Appointment',
+      serviceName: 'Service Name / Title',
+      clientName: 'Client Name',
+      clientPhone: 'Client Phone (WhatsApp)',
+      startAt: 'Start Date & Time',
+      endAt: 'End Date & Time',
+      cancel: 'Cancel',
+      submit: 'Save Appointment',
+      success: 'Appointment successfully created in Google Calendar!',
+      error: 'Error creating appointment.',
+      creating: 'Saving...'
+    },
     syncCalendar: {
       title: 'Sync Calendar',
       description: 'Connect your Google Calendar to automatically send WhatsApp reminders for every new booking created.',

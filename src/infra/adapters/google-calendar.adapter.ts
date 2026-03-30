@@ -122,4 +122,21 @@ export class GoogleCalendarAdapter implements IGoogleCalendarService {
             throw new Error(`Google Update Event Error: ${await response.text()}`);
         }
     }
+
+    async createEvent(accessToken: string, eventDetails: any): Promise<any> {
+        const response = await fetch("https://www.googleapis.com/calendar/v3/calendars/primary/events", {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(eventDetails)
+        });
+
+        if (!response.ok) {
+            throw new Error(`Google Create Event Error: ${await response.text()}`);
+        }
+
+        return await response.json();
+    }
 }

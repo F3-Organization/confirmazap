@@ -10,7 +10,20 @@ export interface Appointment {
   clientPhone: string;
 }
 
+export interface CreateAppointmentDto {
+  title: string;
+  clientName: string;
+  clientPhone: string;
+  startAt: string;
+  endAt: string;
+}
+
 export const calendarService = {
+  createAppointment: async (data: CreateAppointmentDto): Promise<Appointment> => {
+    const response = await apiClient.post('/calendar/appointments', data);
+    return response.data;
+  },
+
   sync: async (): Promise<{ message: string }> => {
     const response = await apiClient.post('/calendar/sync');
     return response.data;
