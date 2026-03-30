@@ -2,13 +2,15 @@ import { FastifyReply, FastifyRequest } from "fastify";
 import { FastifyAdapter } from "../adapters/fastfy.adapter";
 import { ConnectWhatsappUseCase } from "../../usecase/notification/connect-whatsapp.usecase";
 import { DisconnectWhatsappUseCase } from "../../usecase/notification/disconnect-whatsapp.usecase";
+import { GetWhatsappStatusUseCase } from "../../usecase/notification/get-whatsapp-status.usecase";
 import { AuthUserPayload } from "../types/auth.types";
 
 export class WhatsappController {
     constructor(
         private readonly fastify: FastifyAdapter,
         private readonly connectUseCase: ConnectWhatsappUseCase,
-        private readonly disconnectUseCase: DisconnectWhatsappUseCase
+        private readonly disconnectUseCase: DisconnectWhatsappUseCase,
+        private readonly getStatusUseCase: GetWhatsappStatusUseCase
     ) {
         this.fastify.logInfo("[WhatsappController] Initializing...");
         this.registerRoutes();
@@ -47,6 +49,24 @@ export class WhatsappController {
                     properties: {
                         error: { type: "string" },
                         message: { type: "string" }
+                    }
+                }
+            }
+        }, []);
+
+        this.fastify.addProtectedRoute("GET", "/whatsapp/status", async (request: FastifyRequest, reply: FastifyReply) => {
+            const user = request.user as AuthUserPayload;
+            return await this.getStatusUseCase.execute(user.id);
+        }, {
+            tags: ["WhatsApp"],
+            summary: "Gets current WhatsApp connection status",
+            description: "Queries the Evolution API to check if the user's instance is connected and returns the state.",
+            response: {
+                200: {
+                    type: "object",
+                    properties: {
+                        status: { type: "string" },
+                        instanceName: { type: "string", nullable: true }
                     }
                 }
             }

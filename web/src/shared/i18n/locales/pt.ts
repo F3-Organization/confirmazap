@@ -109,6 +109,9 @@ export const pt = {
     failedLoadQR: 'Falha ao carregar QR',
     connected: 'Conectado',
     connectButton: 'Conectar WhatsApp',
+    successTitle: 'WhatsApp Conectado!',
+    successDescription: 'Sua conta foi pareada com sucesso. Agora você pode automatizar suas confirmações de agendamento.',
+    startAutomating: 'Ir para o Dashboard'
   },
   subscription: {
     title: 'Plano e Faturamento',

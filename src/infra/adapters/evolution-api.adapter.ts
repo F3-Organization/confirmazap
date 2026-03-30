@@ -60,6 +60,15 @@ export class EvolutionApiAdapter implements IEvolutionService {
         });
     }
 
+    async fetchInstance(instanceName: string): Promise<{ instance: { status: string } }> {
+        const response = await this.request<any>(`/instance/connectionState/${instanceName}`, "GET");
+        return {
+            instance: {
+                status: response.instance.state || response.instance.status
+            }
+        };
+    }
+
     async connectInstance(instanceName: string): Promise<EvolutionConnectResponse> {
         let retries = 3;
         

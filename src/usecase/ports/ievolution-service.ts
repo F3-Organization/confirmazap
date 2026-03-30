@@ -22,6 +22,7 @@ export interface EvolutionConnectResponse {
 export interface IEvolutionService {
     createInstance(instanceName: string): Promise<EvolutionInstanceResponse>;
     connectInstance(instanceName: string): Promise<EvolutionConnectResponse>;
+    fetchInstance(instanceName: string): Promise<{ instance: { status: string } }>;
     sendText(instanceName: string, number: string, text: string): Promise<void>;
     setWebhook(instanceName: string, url: string): Promise<void>;
     logoutInstance(instanceName: string): Promise<void>;

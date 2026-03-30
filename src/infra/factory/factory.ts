@@ -27,6 +27,7 @@ import { GetSubscriptionPaymentHistoryUseCase } from "../../usecase/subscription
 import { GenerateInvoicePdfUseCase } from "../../usecase/subscription/generate-invoice-pdf.usecase";
 import { ConnectWhatsappUseCase } from "../../usecase/notification/connect-whatsapp.usecase";
 import { DisconnectWhatsappUseCase } from "../../usecase/notification/disconnect-whatsapp.usecase";
+import { GetWhatsappStatusUseCase } from "../../usecase/notification/get-whatsapp-status.usecase";
 import { WhatsappController } from "../controller/whatsapp.controller";
 import { DashboardController } from "../controller/dashboard.controller";
 import { GetDashboardStatsUseCase } from "../../usecase/dashboard/get-dashboard-stats.usecase";
@@ -146,6 +147,10 @@ const getUseCase = {
         getRepo.userConfig(),
         evolutionAdapter
     ),
+    getWhatsappStatus: () => new GetWhatsappStatusUseCase(
+        getRepo.userConfig(),
+        evolutionAdapter
+    ),
     sendEmailVerification: () => new SendEmailVerificationUseCase(
         mailAdapter,
         redisService
@@ -226,7 +231,8 @@ export const factory = {
         whatsapp: () => new WhatsappController(
             adapterInstance,
             getUseCase.connectWhatsapp(),
-            getUseCase.disconnectWhatsapp()
+            getUseCase.disconnectWhatsapp(),
+            getUseCase.getWhatsappStatus()
         ),
         dashboard: () => new DashboardController(
             adapterInstance,

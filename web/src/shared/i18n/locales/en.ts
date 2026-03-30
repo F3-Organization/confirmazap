@@ -109,6 +109,9 @@ export const en = {
     failedLoadQR: 'Failed to load QR',
     connected: 'Connected',
     connectButton: 'Connect WhatsApp',
+    successTitle: 'WhatsApp Connected!',
+    successDescription: 'Your account has been successfully paired. You can now automate your appointment confirmations.',
+    startAutomating: 'Go to Dashboard'
   },
   subscription: {
     title: 'Plan & Billing',
