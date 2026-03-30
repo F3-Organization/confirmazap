@@ -18,5 +18,7 @@ export const AppDataSource = new DataSource({
     logging: env.debug(),
     entities: [User, Client, Schedule, UserConfig, Subscription],
     subscribers: [],
-    migrations: ["dist/migrations/*.js"],
+    migrations: [env.isProduction() ? "dist/migrations/*.js" : "src/migrations/*.ts"],
 })
+
+
