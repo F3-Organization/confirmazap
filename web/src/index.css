@@ -77,4 +77,26 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
+  /* Fix Autofill Background with Dark Theme */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover, 
+  input:-webkit-autofill:focus, 
+  input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px #091328 inset !important; /* matches --surface-low */
+    -webkit-text-fill-color: #dee5ff !important; /* matches --foreground */
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  /* Fix Calendar Icon Visibility in Dark Mode */
+  ::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+  }
+
+  ::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+  }
 }

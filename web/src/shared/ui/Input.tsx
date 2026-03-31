@@ -28,6 +28,17 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             error && 'border-red-500/50 focus:border-red-500/40 focus:ring-red-500/5',
             className
           )}
+          onClick={(e) => {
+            const target = e.currentTarget;
+            if (['date', 'datetime-local', 'time', 'month', 'week'].includes(target.type)) {
+              try {
+                target.showPicker();
+              } catch (err) {
+                // Fallback for browsers that don't support showPicker() yet
+              }
+            }
+            props.onClick?.(e);
+          }}
           {...props}
         />
         {error && (

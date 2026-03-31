@@ -11,9 +11,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "migration:generate": "typeorm migration:generate -d dist/infra/config/data-source.js",
-    "migration:run": "typeorm migration:run -d dist/infra/config/data-source.js",
-    "migration:revert": "typeorm migration:revert -d dist/infra/config/data-source.js"
+    "schema:sync": "typeorm schema:sync -d dist/infra/config/data-source.js",
+    "schema:diff": "typeorm schema:log -d dist/infra/config/data-source.js"
   },
   "keywords": [],
   "author": "",

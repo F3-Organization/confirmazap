@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { X, CalendarPlus, Loader2 } from 'lucide-react';
 import { Input } from '../../../shared/ui/Input';
 import { Button } from '../../../shared/ui/Button';
+import { DatePicker } from '../../../shared/ui/DatePicker';
 import { calendarService, type CreateAppointmentDto, type Appointment } from '../calendar.service';
 
 interface NewAppointmentModalProps {
@@ -19,7 +20,8 @@ export const NewAppointmentModal = ({ isOpen, onClose, initialData }: NewAppoint
   const [error, setError] = useState<string | null>(null);
   const isEditMode = !!initialData;
 
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<CreateAppointmentDto>();
+  const { register, handleSubmit, reset, control, watch, setValue, formState: { errors } } = useForm<CreateAppointmentDto>();
+  const watchedStartAt = watch('startAt');
 
   // Set default values when modal opens or initialData changes
   useEffect(() => {
@@ -28,13 +30,31 @@ export const NewAppointmentModal = ({ isOpen, onClose, initialData }: NewAppoint
         title: initialData.title,
         clientName: initialData.clientName,
         clientPhone: initialData.clientPhone,
-        startAt: new Date(initialData.startAt).toISOString().slice(0, 16),
-        endAt: new Date(initialData.endAt).toISOString().slice(0, 16),
+        startAt: new Date(initialData.startAt).toISOString(),
+        endAt: new Date(initialData.endAt).toISOString(),
       });
-    } else if (!isOpen) {
-      reset({ title: '', clientName: '', clientPhone: '', startAt: '', endAt: '' });
+    } else if (isOpen) {
+      const now = new Date();
+      now.setMinutes(Math.ceil(now.getMinutes() / 15) * 15); // Round to next 15 mins
+      const start = now.toISOString();
+      const end = new Date(now.getTime() + 60 * 60 * 1000).toISOString(); // +1 hour
+      reset({ title: '', clientName: '', clientPhone: '', startAt: start, endAt: end });
     }
   }, [initialData, isOpen, reset]);
+
+  // Auto-bump endAt when startAt changes
+  useEffect(() => {
+    if (watchedStartAt) {
+      const startDate = new Date(watchedStartAt);
+      const currentEndAt = control._formValues.endAt;
+      const endDate = currentEndAt ? new Date(currentEndAt) : null;
+
+      if (!endDate || endDate <= startDate) {
+        const newEndAt = new Date(startDate.getTime() + 60 * 60 * 1000).toISOString();
+        setValue('endAt', newEndAt);
+      }
+    }
+  }, [watchedStartAt, setValue, control]);
 
   const mutationCreate = useMutation({
     mutationFn: calendarService.createAppointment,
@@ -89,8 +109,8 @@ export const NewAppointmentModal = ({ isOpen, onClose, initialData }: NewAppoint
       />
       
       {/* Modal */}
-      <div className="relative w-full max-w-lg bg-surface-high border border-outline-variant rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-        <div className="p-6 border-b border-outline-variant/30 flex items-center justify-between">
+      <div className="relative w-full max-w-lg bg-surface-high border border-outline-variant rounded-2xl shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+        <div className="p-6 border-b border-outline-variant/30 flex items-center justify-between rounded-t-2xl bg-surface-high">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
               <CalendarPlus className="w-5 h-5 text-primary" />
@@ -146,26 +166,57 @@ export const NewAppointmentModal = ({ isOpen, onClose, initialData }: NewAppoint
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Input
-                {...register('startAt', { required: 'Obrigatório' })}
-                label={t('dashboard.newAppointment.startAt')}
-                type="datetime-local"
-                error={errors.startAt?.message as string}
-                required
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+              <Controller
+                name="startAt"
+                control={control}
+                rules={{ 
+                  required: 'Obrigatório',
+                  validate: (value) => {
+                    const now = new Date();
+                    // Give 1 min grace period for selection time
+                    now.setMinutes(now.getMinutes() - 1);
+                    return new Date(value) >= now || 'Não é possível agendar no passado';
+                  }
+                }}
+                render={({ field }) => (
+                  <DatePicker
+                    value={field.value}
+                    onChange={field.onChange}
+                    label={t('dashboard.newAppointment.startAt')}
+                    error={errors.startAt?.message as string}
+                    minDate={new Date()}
+                    required
+                  />
+                )}
               />
-              <Input
-                {...register('endAt', { required: 'Obrigatório' })}
-                label={t('dashboard.newAppointment.endAt')}
-                type="datetime-local"
-                error={errors.endAt?.message as string}
-                required
+              <Controller
+                name="endAt"
+                control={control}
+                rules={{ 
+                  required: 'Obrigatório',
+                  validate: (value) => {
+                    if (!watchedStartAt) return true;
+                    return new Date(value) > new Date(watchedStartAt) || 'O término deve ser após o início';
+                  }
+                }}
+                render={({ field }) => (
+                  <DatePicker
+                    value={field.value}
+                    onChange={field.onChange}
+                    label={t('dashboard.newAppointment.endAt')}
+                    error={errors.endAt?.message as string}
+                    minDate={watchedStartAt ? new Date(watchedStartAt) : new Date()}
+                    align="right"
+                    required
+                  />
+                )}
               />
             </div>
           </form>
         </div>
 
-        <div className="p-6 border-t border-outline-variant/30 flex items-center justify-end gap-3 bg-surface-low/50">
+        <div className="p-6 border-t border-outline-variant/30 flex items-center justify-end gap-3 bg-surface-low/50 rounded-b-2xl">
           <Button 
             type="button" 
             variant="ghost" 
