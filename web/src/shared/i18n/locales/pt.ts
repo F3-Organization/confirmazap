@@ -111,8 +111,11 @@ export const pt = {
     },
     syncCalendar: {
       title: 'Sincronizar Calendário',
+      connectedTitle: 'Calendário Sincronizado',
       description: 'Conecte seu Google Calendar para enviar automaticamente lembretes de WhatsApp para cada nova reserva criada.',
+      connectedDescription: 'Sua conta do Google está vinculada. Clique abaixo para forçar uma atualização manual dos seus compromissos.',
       button: 'Conectar Google Calendar',
+      connectedButton: 'Sincronizar Agora'
     },
     newConnection: {
       title: 'Nova Conexão?',

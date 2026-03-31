@@ -276,11 +276,11 @@ export const DashboardPage = () => {
                 <CalendarDays className="w-6 h-6 text-primary-foreground" />
               </div>
               <h3 className="text-xl font-bold tracking-tight mb-3">
-                {dashboardStats?.calendarConnected ? 'Calendário Sincronizado' : t('dashboard.syncCalendar.title')}
+                {dashboardStats?.calendarConnected ? t('dashboard.syncCalendar.connectedTitle') : t('dashboard.syncCalendar.title')}
               </h3>
               <p className="text-sm text-foreground/80 leading-relaxed mb-8">
                 {dashboardStats?.calendarConnected 
-                  ? 'Sua conta do Google está vinculada. Clique abaixo para forçar uma atualização manual dos seus compromissos.'
+                  ? t('dashboard.syncCalendar.connectedDescription')
                   : t('dashboard.syncCalendar.description')}
               </p>
               <Button 
@@ -299,7 +299,7 @@ export const DashboardPage = () => {
                 ) : (
                   dashboardStats?.calendarConnected ? <RefreshCw className="w-4 h-4 mr-2" /> : <ExternalLink className="w-4 h-4 mr-2" />
                 )}
-                {dashboardStats?.calendarConnected ? 'Sincronizar Agora' : t('dashboard.syncCalendar.button')}
+                {dashboardStats?.calendarConnected ? t('dashboard.syncCalendar.connectedButton') : t('dashboard.syncCalendar.button')}
               </Button>
             </div>
           </Card>

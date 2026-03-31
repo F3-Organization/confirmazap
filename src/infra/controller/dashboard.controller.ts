@@ -24,14 +24,15 @@ export class DashboardController {
             response: {
                 200: {
                     type: "object",
-                    required: ["totalConfirmations", "managedReplies", "conversionRate", "confirmationsChange", "repliesChange", "conversionRateChange"],
+                    required: ["totalConfirmations", "managedReplies", "conversionRate", "confirmationsChange", "repliesChange", "conversionRateChange", "calendarConnected"],
                     properties: {
                         totalConfirmations: { type: "number" },
                         managedReplies: { type: "number" },
                         conversionRate: { type: "string" },
                         confirmationsChange: { type: "string" },
                         repliesChange: { type: "string" },
-                        conversionRateChange: { type: "string" }
+                        conversionRateChange: { type: "string" },
+                        calendarConnected: { type: "boolean" }
                     }
                 }
 
