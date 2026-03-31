@@ -1,12 +1,13 @@
 import { env } from "../../infra/config/configs";
 import { IEvolutionService } from "../ports/ievolution-service";
 import { IUserConfigRepository } from "../repositories/iuser-config-repository";
+import { AppError } from "../../shared/errors/app-error";
 
-export interface UpdateUserConfigDTO {
-    whatsappNumber?: string | undefined;
-    syncEnabled?: boolean | undefined;
-    silentWindowStart?: string | undefined;
-    silentWindowEnd?: string | undefined;
+export interface UpdateUserConfigInput {
+    whatsappNumber?: string;
+    syncEnabled?: boolean;
+    silentWindowStart?: string;
+    silentWindowEnd?: string;
 }
 
 export class UpdateUserConfigUseCase {
@@ -15,7 +16,15 @@ export class UpdateUserConfigUseCase {
         private readonly evolutionService: IEvolutionService
     ) {}
 
-    async execute(userId: string, data: UpdateUserConfigDTO): Promise<void> {
+    async execute(userId: string, data: UpdateUserConfigInput): Promise<void> {
+        if (!userId) {
+            throw new AppError("User ID is required", 400);
+        }
+
+        if (data.whatsappNumber) {
+            data.whatsappNumber = this.normalizeNumber(data.whatsappNumber);
+        }
+
         let config = await this.userConfigRepo.findByUserId(userId);
         
         if (!config) {
@@ -24,30 +33,37 @@ export class UpdateUserConfigUseCase {
                 ...data
             } as any);
         } else {
-            await this.userConfigRepo.update(userId, data as any);
+            await this.userConfigRepo.update(userId, data);
         }
 
-        // If the number was updated/added, send a test message to capture LID
-        if (data.whatsappNumber) {
+        if (data.whatsappNumber && config) {
             try {
-                const message = `🔔 *ConfirmaZap: Ativação de Notificações*\n\n` +
-                    `Olá! Recebi seu número para envio de lembretes.\n` +
-                    `Por favor, *responda esta mensagem com um OK* para que eu possa reconhecer seu WhatsApp e ativar o sistema.\n\n` +
-                    `Obrigado!`;
+                const introMessage = `🔔 *Ativação ConfirmaZap*\n\n` +
+                    `Olá! Para concluir seu vínculo com o sistema e receber alertas de agendamentos e cancelamentos por aqui, precisamos validar sua conta.\n\n` +
+                    `👉 *Copie e envie a próxima mensagem abaixo neste chat:*`;
 
-                const messageId = await this.evolutionService.sendText(
+                const codeMessage = `Ref: ${config.id}`;
+                const targetNumber = `55${data.whatsappNumber}`;
+
+                await this.evolutionService.sendText(
                     env.evolution.systemBotInstance, 
-                    data.whatsappNumber, 
-                    message
+                    targetNumber, 
+                    introMessage
                 );
 
-                if (messageId) {
-                    await this.userConfigRepo.update(userId, { lastMessageId: messageId });
-                    console.log(`[UpdateConfig] Greeting sent to ${data.whatsappNumber}. Mapping ID: ${messageId}`);
-                }
-            } catch (error) {
-                console.error(`[UpdateConfig] Failed to send greeting to ${data.whatsappNumber}:`, error);
+                await this.evolutionService.sendText(
+                    env.evolution.systemBotInstance, 
+                    targetNumber, 
+                    codeMessage
+                );
+            } catch (error: unknown) {
+                // We don't throw here to avoid failing the update if the message fails
+                // but we should ideally use a logger instead of console.error
             }
         }
+    }
+
+    private normalizeNumber(number: string): string {
+        return number.replace(/\D/g, "").replace(/^55/, "");
     }
 }

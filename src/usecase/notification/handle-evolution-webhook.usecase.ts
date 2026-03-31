@@ -8,6 +8,7 @@ import { EvolutionWebhookPayload } from "../../../shared/schemas/evolution.schem
 import { env } from "../../infra/config/configs";
 import { CheckUsageLimitUseCase } from "../subscription/check-usage-limit.usecase";
 import { isWithinSilentWindow } from "../../shared/utils/time.util";
+import { UserConfig } from "../../infra/database/entities/user-config.entity";
 
 export class HandleEvolutionWebhookUseCase {
     constructor(
@@ -24,25 +25,8 @@ export class HandleEvolutionWebhookUseCase {
         const instanceName = payload.instance;
         if (!instanceName) return;
 
-        // 1. Handle Connection Updates (Auto-capture Number & LID)
         if (payload.event === "connection.update") {
-            const state = payload.data.state;
-            if (state === "open") {
-                const jid = payload.data.worker || payload.data.jid;
-                const number = payload.data.number || (jid as string).split("@")[0] || "";
-                
-                if (jid && number) {
-                    console.log(`[HandleWebhook] Auto-capturing metadata for instance ${instanceName}: Number=${number}, LID=${jid}`);
-                    const config = await this.userConfigRepository.findByInstanceName(instanceName);
-                    if (config) {
-                        await this.userConfigRepository.update(config.userId, {
-                            whatsappNumber: this.normalizeNumber(number),
-                            whatsappLid: jid as string
-                        });
-                        console.log(`[HandleWebhook] Config updated successfully for user ${config.userId}`);
-                    }
-                }
-            }
+            await this.handleConnectionUpdate(instanceName, payload.data);
             return;
         }
 
@@ -51,97 +35,143 @@ export class HandleEvolutionWebhookUseCase {
         const data = payload.data;
         if (!data.key || data.key.fromMe) return;
 
-        const fullJid = payload.sender || data.key?.remoteJid;
-        if (!fullJid) return;
+        const remoteJid = (data.key?.remoteJid || "") as string;
+        const senderJid = (payload.sender || "") as string;
         
-        const phoneNumber = (fullJid as string).split("@")[0] || "";
-        if (!phoneNumber) return;
+        const lid = remoteJid.includes("@lid") ? remoteJid : "";
+        const senderNumber = (senderJid || remoteJid).split("@")[0] || "";
+        const fullJid = lid || senderJid || remoteJid;
+        
+        if (!lid && !senderNumber) return;
 
         const messageText = data.message?.extendedTextMessage?.text || data.message?.conversation || "";
         const stanzaId = data.message?.extendedTextMessage?.contextInfo?.stanzaId;
         
-        console.log(`[HandleWebhook] Received message from ${phoneNumber}: "${messageText}" on instance ${instanceName}`);
-
-        // 1. Handle System Bot (Direct message to/from user)
         if (instanceName === env.evolution.systemBotInstance) {
-            await this.handleSystemBotMessage(phoneNumber, messageText, stanzaId);
+            await this.handleSystemBotMessage(instanceName, senderNumber, fullJid, messageText, stanzaId, payload);
             return;
         }
 
-        // 2. Handle User Instance (Agent for client confirmation)
+        await this.handleUserInstanceMessage(instanceName, senderNumber, fullJid, messageText);
+    }
+
+    private async handleConnectionUpdate(instanceName: string, data: { state?: string | undefined; worker?: string | undefined; jid?: string | undefined; number?: string | undefined }): Promise<void> {
+        const state = data.state;
+        if (state !== "open") return;
+
+        const jid = (data.worker || data.jid) as string;
+        const rawNumber = data.number as string; 
+        
+        if (!jid) return;
+
+        const config = await this.userConfigRepository.findByInstanceName(instanceName);
+        if (config) {
+            const updateData: Partial<UserConfig> = { whatsappLid: jid };
+
+            if (rawNumber && !rawNumber.includes("@")) {
+                updateData.whatsappNumber = this.normalizeNumber(rawNumber);
+            }
+
+            await this.userConfigRepository.update(config.userId, updateData);
+        }
+    }
+
+    private async handleUserInstanceMessage(instanceName: string, senderNumber: string, fullJid: string, text: string): Promise<void> {
         const config = await this.userConfigRepository.findByInstanceName(instanceName);
         if (!config) return;
 
         const usage = await this.checkUsageLimit.execute(config.userId);
         if (!usage.canSend) {
-            console.log(`[HandleWebhook] User ${config.userId} quota reached. Skipping auto-reply.`);
             return;
         }
 
-        // 3. Check Silent Window (only if not confirming via SIM/NAO)
-        const isConfirmation = this.isConfirmation(messageText) || this.isCancellation(messageText);
+        const isConfirmation = this.isConfirmation(text) || this.isCancellation(text);
         if (!isConfirmation && isWithinSilentWindow(config.silentWindowStart, config.silentWindowEnd)) {
-            console.log(`[HandleWebhook] Skipping message due to silent window for user ${config.userId}`);
             return;
         }
 
-        if (this.isConfirmation(messageText)) {
+        if (this.isConfirmation(text)) {
             try {
-                await this.confirmAppointment.execute(config.userId, phoneNumber);
-                await this.evolutionService.sendText(instanceName, phoneNumber, "✅ Ótimo! Seu agendamento foi confirmado com sucesso. Te esperamos!");
-            } catch (error) {
-                // Silently log
-            }
-        } else if (this.isCancellation(messageText)) {
+                await this.confirmAppointment.execute(config.userId, senderNumber);
+                await this.evolutionService.sendText(instanceName, fullJid, "✅ Ótimo! Seu agendamento foi confirmado com sucesso. Te esperamos!");
+            } catch (error) {}
+        } else if (this.isCancellation(text)) {
             try {
-                await this.cancelAppointment.execute(config.userId, phoneNumber);
-                await this.evolutionService.sendText(instanceName, phoneNumber, "❌ Certo, seu agendamento foi cancelado. Entre em contato para remarcar quando puder.");
-            } catch (error) {
-                // Silently log
-            }
+                await this.cancelAppointment.execute(config.userId, senderNumber);
+                await this.evolutionService.sendText(instanceName, fullJid, "❌ Certo, seu agendamento foi cancelado. Entre em contato para remarcar quando puder.");
+            } catch (error) {}
         }
     }
 
-    private async handleSystemBotMessage(phoneNumber: string, text: string, stanzaId?: string): Promise<void> {
-        if (!this.isConfirmation(text)) return;
+    private async handleSystemBotMessage(
+        instanceName: string, 
+        phoneNumber: string, 
+        fullJid: string, 
+        text: string, 
+        stanzaId?: string, 
+        payload?: EvolutionWebhookPayload
+    ): Promise<void> {
+        const uuidRegex = /([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})/;
         
-        // 1. Try mapping via stanzaId (Contextual Mapping)
-        let config: any = null;
-        if (stanzaId) {
-            config = await this.userConfigRepository.findByLastMessageId(stanzaId);
-            if (config && !config.whatsappLid) {
-                console.log(`[HandleSystemBot] Mapping LID ${phoneNumber} to user ${config.userId} via stanzaId ${stanzaId}`);
-                await this.userConfigRepository.update(config.userId, { whatsappLid: phoneNumber });
-                // We don't return here, we proceed with the confirmation
+        const quotedText = (payload?.data?.message?.extendedTextMessage?.contextInfo?.quotedMessage?.conversation || 
+                          payload?.data?.message?.extendedTextMessage?.contextInfo?.quotedMessage?.extendedTextMessage?.text || "") as string;
+        const fullSearchText = `${text} ${quotedText}`;
+        const match = fullSearchText.match(uuidRegex);
+        
+        if (!this.isConfirmation(text) && !match) return;
+        
+        let config: UserConfig | null = null;
+
+        if (match && match[1]) {
+            const configId = match[1];
+            config = await this.userConfigRepository.findById(configId);
+            
+            if (config && (!config.whatsappLid || config.whatsappLid !== fullJid)) {
+                await this.userConfigRepository.update(config.userId, { whatsappLid: fullJid });
             }
         }
 
-        // 2. Fallback to normal lookup if not mapped or for repeat users
-        if (!config) {
-            config = await this.userConfigRepository.findByWhatsappNumber(phoneNumber);
+        if (!config && stanzaId) {
+            config = await this.userConfigRepository.findByLastMessageId(stanzaId);
+            if (config && (!config.whatsappLid || config.whatsappLid !== fullJid)) {
+                await this.userConfigRepository.update(config.userId, { whatsappLid: fullJid });
+            }
         }
 
         if (!config) {
-            const normalizedNumber = this.normalizeNumber(phoneNumber);
-            console.log(`[HandleWebhook] User config not found for identifier: ${phoneNumber} (normalized: ${normalizedNumber})`);
-            return;
+            config = await this.userConfigRepository.findByWhatsappNumber(fullJid);
+            if (!config) {
+                config = await this.userConfigRepository.findByWhatsappNumber(phoneNumber);
+            }
+
+            if (config) {
+                await this.userConfigRepository.update(config.userId, { whatsappLid: fullJid });
+            }
         }
+
+        if (config) {
+            const target = config.whatsappNumber?.startsWith("55") ? config.whatsappNumber : `55${config.whatsappNumber}`;
+            await this.evolutionService.sendText(instanceName, target || phoneNumber, "✅ *Vínculo realizado com sucesso!*\n\nAgora você receberá alertas de agendamentos e cancelamentos diretamente por aqui.");
+        } else if (match) {
+            await this.evolutionService.sendText(instanceName, phoneNumber, "❌ *Código de ativação inválido.*\n\nNão encontrei nenhuma conta com este código no sistema. Verifique se copiou corretamente do seu painel e tente novamente.");
+        }
+
+        if (!config) return;
 
         const usage = await this.checkUsageLimit.execute(config.userId);
         if (!usage.canSend) return;
 
         const lastInvite = await this.scheduleRepository.findLastPendingInvite(config.userId);
         if (!lastInvite) {
-            await this.evolutionService.sendText(env.evolution.systemBotInstance, phoneNumber, "⚠️ Não encontrei nenhum convite pendente para aceitar no momento.");
+            await this.evolutionService.sendText(env.evolution.systemBotInstance, fullJid, "⚠️ Não encontrei nenhum convite pendente para aceitar no momento.");
             return;
         }
 
         try {
             await this.acceptInvite.execute(config.userId, lastInvite.id);
-            await this.evolutionService.sendText(env.evolution.systemBotInstance, phoneNumber, `✅ Perfeito! O compromisso *"${lastInvite.title}"* foi aceito e confirmado no seu Google Calendar.`);
-        } catch (error: any) {
-            console.error(`[HandleSystemBot] Error accepting invite for user ${config.userId}:`, error);
-            await this.evolutionService.sendText(env.evolution.systemBotInstance, phoneNumber, "❌ Ops, tive um problema ao tentar aceitar seu convite no Google Calendar. Tente novamente em instantes.");
+            await this.evolutionService.sendText(env.evolution.systemBotInstance, fullJid, `✅ Perfeito! O compromisso *"${lastInvite.title}"* foi aceito e confirmado no seu Google Calendar.`);
+        } catch (error: unknown) {
+            await this.evolutionService.sendText(env.evolution.systemBotInstance, fullJid, "❌ Ops, tive um problema ao tentar aceitar seu convite. Tente novamente.");
         }
     }
 

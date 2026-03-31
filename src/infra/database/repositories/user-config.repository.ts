@@ -10,8 +10,12 @@ export class UserConfigRepository implements IUserConfigRepository {
         this.repository = AppDataSource.getRepository(UserConfig);
     }
 
-    async save(config: UserConfig): Promise<UserConfig> {
+    async save(config: Partial<UserConfig>): Promise<UserConfig> {
         return await this.repository.save(config);
+    }
+
+    async findById(id: string): Promise<UserConfig | null> {
+        return await this.repository.findOneBy({ id });
     }
 
     async findByUserId(userId: string): Promise<UserConfig | null> {
@@ -26,16 +30,34 @@ export class UserConfigRepository implements IUserConfigRepository {
         return await this.repository.findOneBy({ lastMessageId: messageId });
     }
 
-    async findByWhatsappNumber(number: string): Promise<UserConfig | null> {
-        const cleaned = number.replace(/\D/g, "");
-        // Search for the number exactly or with/without the 55 prefix
-        const numberWithout55 = cleaned.startsWith("55") ? cleaned.substring(2) : cleaned;
+    async findByWhatsappNumber(identifier: string): Promise<UserConfig | null> {
+        if (identifier.includes("@")) {
+            const lidMatch = await this.repository.findOneBy({ whatsappLid: identifier });
+            if (lidMatch) return lidMatch;
+        }
+
+        const cleaned = identifier.replace(/\D/g, "");
+        if (!cleaned) return null;
+
+        const without55 = cleaned.startsWith("55") ? cleaned.substring(2) : cleaned;
+        const variations = [cleaned, without55, `55${without55}`];
         
+        if (without55.length >= 10 && without55.length <= 11) {
+            const ddd = without55.substring(0, 2);
+            const body = without55.substring(2);
+            
+            if (body.startsWith("9") && body.length === 9) {
+                const without9 = ddd + body.substring(1);
+                variations.push(without9, `55${without9}`);
+            } else if (body.length === 8) {
+                const with9 = ddd + "9" + body;
+                variations.push(with9, `55${with9}`);
+            }
+        }
+
         return await this.repository.createQueryBuilder("config")
-            .where("config.whatsapp_number = :number", { number: cleaned })
-            .orWhere("config.whatsapp_number = :without55", { without55: numberWithout55 })
-            .orWhere("config.whatsapp_number = :with55", { with55: `55${numberWithout55}` })
-            .orWhere("config.whatsapp_lid = :lid", { lid: number }) // number here is the raw input
+            .where("config.whatsapp_number IN (:...variations)", { variations })
+            .orWhere("config.whatsapp_lid LIKE :identifier", { identifier: `%${identifier.split("@")[0]}%` })
             .getOne();
     }
 

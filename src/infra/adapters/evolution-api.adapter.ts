@@ -14,7 +14,7 @@ export class EvolutionApiAdapter implements IEvolutionService {
         this.apiKey = env.evolution.apiKey;
     }
 
-    private async request<T = any>(path: string, method: string, body?: any): Promise<T> {
+    private async request<T = unknown>(path: string, method: string, body?: unknown): Promise<T> {
         const url = `${this.baseUrl}${path}`;
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 15000);
@@ -41,8 +41,8 @@ export class EvolutionApiAdapter implements IEvolutionService {
             }
 
             return await response.json() as T;
-        } catch (error: any) {
-            if (error.name === "AbortError") {
+        } catch (error: unknown) {
+            if (error instanceof Error && error.name === "AbortError") {
                 throw new Error(`Evolution API Timeout (15s) calling ${path}`);
             }
             throw error;
@@ -108,9 +108,10 @@ export class EvolutionApiAdapter implements IEvolutionService {
     }
 
     private sanitizeNumber(number: string): string {
+        if (number.includes("@")) return number;
+
         let cleaned = number.replace(/\D/g, "");
         
-        // If it's a Brazilian number missing the country code (DDD + Number)
         if (cleaned.length >= 10 && cleaned.length <= 11 && !cleaned.startsWith("55")) {
             cleaned = `55${cleaned}`;
         }
@@ -141,10 +142,9 @@ export class EvolutionApiAdapter implements IEvolutionService {
 
     async health(): Promise<boolean> {
         try {
-            // A basic check to see if the server responds
             await this.request("/instance/fetchInstances", "GET");
             return true;
-        } catch (error) {
+        } catch {
             return false;
         }
     }

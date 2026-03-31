@@ -1,7 +1,8 @@
 import { UserConfig } from "../../infra/database/entities/user-config.entity";
 
 export interface IUserConfigRepository {
-    save(config: UserConfig): Promise<UserConfig>;
+    save(config: Partial<UserConfig>): Promise<UserConfig>;
+    findById(id: string): Promise<UserConfig | null>;
     findByUserId(userId: string): Promise<UserConfig | null>;
     findByInstanceName(instanceName: string): Promise<UserConfig | null>;
     findByWhatsappNumber(number: string): Promise<UserConfig | null>;
