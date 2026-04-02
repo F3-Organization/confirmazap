@@ -9,7 +9,7 @@ export class GenerateInvoicePdfUseCase {
         private readonly paymentRepository: ISubscriptionPaymentRepository,
         private readonly userRepository: IUserRepository,
         private readonly userConfigRepository: UserConfigRepository
-    ) {}
+    ) { }
 
     private valorPorExtenso(valor: number): string {
         const unidades = ["", "um", "dois", "três", "quatro", "cinco", "seis", "sete", "oito", "nove"];
@@ -19,7 +19,7 @@ export class GenerateInvoicePdfUseCase {
 
         if (valor === 49.90) return "Quarenta e nove reais e noventa centavos";
         if (valor === 0) return "Zero reais";
-        
+
         // Simples conversão para os valores padrão do sistema (até R$ 999,99)
         const reais = Math.floor(valor);
         const centavos = Math.round((valor - reais) * 100);
@@ -79,7 +79,7 @@ export class GenerateInvoicePdfUseCase {
             doc.on('error', (err: any) => reject(err));
 
             // --- PDF Content ---
-            
+
             // Header - Emitente
             doc.fillColor("#111827")
                 .fontSize(22)
@@ -110,7 +110,7 @@ export class GenerateInvoicePdfUseCase {
                 .fontSize(9)
                 .fillColor("#6b7280")
                 .text(userEmail, 50, 160);
-            
+
             if (userTaxId) {
                 doc.text(`CPF/CNPJ: ${userTaxId}`, 50, 172);
             }
@@ -156,7 +156,7 @@ export class GenerateInvoicePdfUseCase {
             doc.fontSize(8)
                 .fillColor("#9ca3af")
                 .text("Este documento é um recibo de quitação de pagamento e não substitui a Nota Fiscal de Serviços.", 50, 700, { align: "center", width: 500 })
-                .text("ConfirmaZap - Todos os direitos reservados", 50, 715, { align: "center", width: 500 });
+                .text(`${env.company.name} - Todos os direitos reservados`, 50, 715, { align: "center", width: 500 });
 
             doc.end();
         });
