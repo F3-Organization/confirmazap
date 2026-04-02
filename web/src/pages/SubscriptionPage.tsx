@@ -24,6 +24,8 @@ export const SubscriptionPage = () => {
   const { t } = useTranslation();
   const [showSuccessBanner, setShowSuccessBanner] = useState(false);
   const prevStatusRef = useRef<string | undefined>(undefined);
+  
+  const SUPPORT_WHATSAPP = import.meta.env.VITE_SUPPORT_WHATSAPP || '5595981035934';
 
   const { data: subStatus, isLoading: isStatusLoading } = useQuery({
     queryKey: ['subscription-status'],
@@ -63,7 +65,8 @@ export const SubscriptionPage = () => {
     if (planId === 'PRO') {
       checkoutMutation.mutate();
     } else if (planId === 'ENTERPRISE') {
-      window.open('https://wa.me/5595981035934?text=Olá, gostaria de saber mais sobre o plano Enterprise do ConfirmaZap', '_blank');
+      const message = encodeURIComponent('Olá, gostaria de saber mais sobre o plano Enterprise do ConfirmaZap');
+      window.open(`https://wa.me/${SUPPORT_WHATSAPP}?text=${message}`, '_blank');
     }
   };
 

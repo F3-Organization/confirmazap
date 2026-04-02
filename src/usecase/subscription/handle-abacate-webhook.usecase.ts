@@ -38,6 +38,9 @@ export class HandleAbacatePayWebhookUseCase {
                     "PRO"
                 );
 
+                // Desativar outras assinaturas ativas do usuário
+                await this.subscriptionRepository.deactivateOthers(subscription.userId, subscription.id);
+
                 console.log(`[Subscription] User ${subscription.userId} activated via Abacate Pay.`);
             }
         }

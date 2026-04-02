@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn, OneToMany } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from "typeorm";
 import { User } from "./user.entity";
 import { SubscriptionPayment } from "./subscription-payment.entity";
 
@@ -16,10 +16,10 @@ export class Subscription {
     @PrimaryGeneratedColumn("uuid")
     id!: string;
 
-    @Column({ name: "user_id", unique: true })
+    @Column({ name: "user_id" })
     userId!: string;
 
-    @OneToOne(() => User)
+    @ManyToOne(() => User)
     @JoinColumn({ name: "user_id" })
     user!: User;
 

@@ -61,17 +61,19 @@ export class CreateSubscriptionCheckoutUseCase {
             completionUrl: `${baseUrl}/subscription`
         });
 
-        // Salvar/Atualizar subscription
-        const updatedSubscription = await this.subscriptionRepository.createOrUpdate(userId, {
+        // Criar NOVO registro de assinatura PRO como PENDING
+        const newSubscription = await this.subscriptionRepository.save({
+            userId,
             abacateBillingId: billing.id,
             abacateCustomerId: customerId,
             checkoutUrl: billing.url,
+            plan: "PRO",
             status: SubscriptionStatus.PENDING
         });
 
         // Criar registro de pagamento histórico (PENDENTE)
         await this.paymentRepository.create({
-            subscriptionId: updatedSubscription.id,
+            subscriptionId: newSubscription.id,
             billingId: billing.id,
             amount: env.abacatePay.planPrice,
             status: SubscriptionPaymentStatus.PENDING,
