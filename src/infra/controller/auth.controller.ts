@@ -12,6 +12,7 @@ import { UpdateUserConfigUseCase } from "../../usecase/user/update-user-config.u
 import { Validate2FAUseCase } from "../../usecase/user/validate-2fa.usecase";
 import { LoginVerify2FAUseCase } from "../../usecase/auth/login-verify-2fa.usecase";
 import { AuthUserPayload } from "../types/auth.types";
+import { User } from "../database/entities/user.entity";
 import { z } from "zod";
 import { 
     LoginInputSchema, 
@@ -72,37 +73,7 @@ export class AuthController {
 
             try {
                 const { user } = await this.authenticateGoogle.execute(code);
-
-                if (user.twoFactorEnabled) {
-                    const tempToken = this.fastify.sign({
-                        id: user.id,
-                        is2FAPending: true
-                    }, { expiresIn: "5m" });
-
-                    return reply.send({
-                        status: "2FA_REQUIRED",
-                        message: "Two-Factor Authentication required",
-                        tempToken
-                    });
-                }
-
-                const token = this.fastify.sign({
-                    id: user.id,
-                    email: user.email,
-                    name: user.name,
-                    role: user.role
-                });
-
-                reply.send({
-                    message: "Authentication successful!",
-                    token,
-                    user: {
-                        id: user.id,
-                        name: user.name,
-                        email: user.email,
-                        role: user.role
-                    }
-                });
+                return this.sendAuthResponse(reply, user, "Authentication successful!");
             } catch (error: any) {
                 this.fastify.logInfo("[AuthController] Authentication failed:", { error: error.message });
                 reply.code(500).send({
@@ -187,25 +158,7 @@ export class AuthController {
 
             try {
                 const user = await this.registerUser.execute({ name, email, password, whatsappNumber });
-
-                const token = this.fastify.sign({
-                    id: user.id,
-                    email: user.email,
-                    name: user.name,
-                    role: user.role
-                });
-
-                reply.send({
-                    message: "Registration successful",
-                    token,
-                    user: { 
-                        id: user.id, 
-                        name: user.name, 
-                        email: user.email, 
-                        role: user.role,
-                        hasPassword: !!user.password
-                    }
-                });
+                return this.sendAuthResponse(reply, user, "Registration successful");
             } catch (error: any) {
                 if (error.message === "User already exists") {
                     // Try to send verification email for users without password (Google-only users)
@@ -274,25 +227,7 @@ export class AuthController {
 
             try {
                 const user = await this.verifyEmailSetPassword.execute(email, code, password);
-
-                const token = this.fastify.sign({
-                    id: user.id,
-                    email: user.email,
-                    name: user.name,
-                    role: user.role
-                });
-
-                reply.send({
-                    message: "Email verified and password set successfully",
-                    token,
-                    user: { 
-                        id: user.id, 
-                        name: user.name, 
-                        email: user.email, 
-                        role: user.role,
-                        hasPassword: !!user.password
-                    }
-                });
+                return this.sendAuthResponse(reply, user, "Email verified and password set successfully");
             } catch (error: any) {
                 return reply.code(400).send({ error: "Verification failed", message: error.message });
             }
@@ -347,38 +282,7 @@ export class AuthController {
 
             try {
                 const user = await this.login.execute(email, password);
-
-                if (user.twoFactorEnabled) {
-                    const tempToken = this.fastify.sign({
-                        id: user.id,
-                        is2FAPending: true
-                    }, { expiresIn: "5m" });
-
-                    return reply.send({
-                        status: "2FA_REQUIRED",
-                        message: "Two-Factor Authentication required",
-                        tempToken
-                    });
-                }
-
-                const token = this.fastify.sign({
-                    id: user.id,
-                    email: user.email,
-                    name: user.name,
-                    role: user.role
-                });
-
-                reply.send({
-                    message: "Login successful",
-                    token,
-                    user: { 
-                        id: user.id, 
-                        name: user.name, 
-                        email: user.email, 
-                        role: user.role,
-                        hasPassword: !!user.password
-                    }
-                });
+                return this.sendAuthResponse(reply, user, "Login successful");
             } catch (error: any) {
                 return reply.code(401).send({ error: "Invalid credentials" });
             }
@@ -514,6 +418,39 @@ export class AuthController {
                 }
             }
         });
+    }
 
+    private sendAuthResponse(reply: FastifyReply, user: User, message: string) {
+        if (user.twoFactorEnabled) {
+            const tempToken = this.fastify.sign({
+                id: user.id,
+                is2FAPending: true
+            }, { expiresIn: "5m" });
+
+            return reply.send({
+                status: "2FA_REQUIRED",
+                message: "Two-Factor Authentication required",
+                tempToken
+            });
+        }
+
+        const token = this.fastify.sign({
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role
+        });
+
+        return reply.send({
+            message,
+            token,
+            user: { 
+                id: user.id, 
+                name: user.name, 
+                email: user.email, 
+                role: user.role,
+                hasPassword: !!user.password
+            }
+        });
     }
 }

@@ -1,6 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, OneToMany } from "typeorm";
+import { Entity, Column, ManyToOne, JoinColumn, OneToMany, Index } from "typeorm";
 import { User } from "./user.entity";
 import { SubscriptionPayment } from "./subscription-payment.entity";
+import { BaseEntity } from "./base.entity";
 
 export enum SubscriptionStatus {
     ACTIVE = "ACTIVE",
@@ -12,10 +13,8 @@ export enum SubscriptionStatus {
 }
 
 @Entity("subscriptions")
-export class Subscription {
-    @PrimaryGeneratedColumn("uuid")
-    id!: string;
-
+@Index(["userId"])
+export class Subscription extends BaseEntity {
     @Column({ name: "user_id" })
     userId!: string;
 
@@ -29,13 +28,14 @@ export class Subscription {
     @Column({ name: "abacate_customer_id", nullable: true })
     abacateCustomerId?: string;
 
-    @Column({ default: "FREE" })
+    @Column({ default: "FREE", name: "plan" })
     plan!: string;
 
     @Column({
         type: "enum",
         enum: SubscriptionStatus,
-        default: SubscriptionStatus.ACTIVE
+        default: SubscriptionStatus.ACTIVE,
+        name: "status"
     })
     status!: SubscriptionStatus;
 
@@ -47,10 +47,4 @@ export class Subscription {
 
     @OneToMany(() => SubscriptionPayment, (payment) => payment.subscription)
     payments!: SubscriptionPayment[];
-
-    @CreateDateColumn({ name: "created_at" })
-    createdAt!: Date;
-
-    @UpdateDateColumn({ name: "updated_at" })
-    updatedAt!: Date;
 }

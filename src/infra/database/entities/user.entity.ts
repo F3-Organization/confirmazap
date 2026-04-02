@@ -1,17 +1,15 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from "typeorm";
+import { Entity, Column, Index } from "typeorm";
+import { BaseEntity } from "./base.entity";
 
 @Entity("users")
-export class User {
-    @PrimaryGeneratedColumn("uuid")
-    id!: string;
-
-    @Column({ unique: true })
+export class User extends BaseEntity {
+    @Column({ unique: true, name: "email" })
     email!: string;
 
-    @Column()
+    @Column({ name: "name" })
     name!: string;
 
-    @Column({ type: "varchar", nullable: true })
+    @Column({ type: "varchar", nullable: true, name: "password" })
     password?: string;
 
     @Column({ name: "google_id", type: "varchar", nullable: true, unique: true })
@@ -20,7 +18,8 @@ export class User {
     @Column({
         type: "enum",
         enum: ["ADMIN", "USER"],
-        default: "USER"
+        default: "USER",
+        name: "role"
     })
     role!: "ADMIN" | "USER";
 
@@ -29,10 +28,4 @@ export class User {
 
     @Column({ name: "two_factor_secret", type: "varchar", nullable: true })
     twoFactorSecret?: string | null;
-
-    @CreateDateColumn()
-    createdAt!: Date;
-
-    @UpdateDateColumn()
-    updatedAt!: Date;
 }

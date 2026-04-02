@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from "typeorm";
+import { Entity, Column, ManyToOne, JoinColumn, Index } from "typeorm";
 import { Subscription } from "./subscription.entity";
+import { BaseEntity } from "./base.entity";
 
 export enum SubscriptionPaymentStatus {
     PENDING = "PENDING",
@@ -10,10 +11,8 @@ export enum SubscriptionPaymentStatus {
 }
 
 @Entity("subscription_payments")
-export class SubscriptionPayment {
-    @PrimaryGeneratedColumn("uuid")
-    id!: string;
-
+@Index(["subscriptionId"])
+export class SubscriptionPayment extends BaseEntity {
     @Column({ name: "subscription_id" })
     subscriptionId!: string;
 
@@ -24,11 +23,12 @@ export class SubscriptionPayment {
     @Column({
         type: "enum",
         enum: SubscriptionPaymentStatus,
-        default: SubscriptionPaymentStatus.PENDING
+        default: SubscriptionPaymentStatus.PENDING,
+        name: "status"
     })
     status!: SubscriptionPaymentStatus;
 
-    @Column({ type: "integer" })
+    @Column({ type: "integer", name: "amount" })
     amount!: number;
 
     @Column({ name: "billing_id" })
@@ -39,10 +39,4 @@ export class SubscriptionPayment {
 
     @Column({ name: "paid_at", type: "timestamp", nullable: true })
     paidAt?: Date;
-
-    @CreateDateColumn({ name: "created_at" })
-    createdAt!: Date;
-
-    @UpdateDateColumn({ name: "updated_at" })
-    updatedAt!: Date;
 }

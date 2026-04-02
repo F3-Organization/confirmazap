@@ -23,6 +23,7 @@ import { ScheduleRepository } from "../database/repositories/schedule.repository
 import { UserConfigRepository } from "../database/repositories/user-config.repository";
 import { SubscriptionRepository } from "../database/repositories/subscription.repository";
 import { SubscriptionPaymentRepository } from "../database/repositories/subscription-payment.repository";
+import { IntegrationRepository } from "../database/repositories/integration.repository";
 import { GenerateGoogleAuthUrlUseCase } from "../../usecase/auth/generate-google-auth-url.usecase";
 import { ExchangeGoogleCodeUseCase } from "../../usecase/auth/exchange-google-code.usecase";
 import { SyncCalendarUseCase } from "../../usecase/calendar/sync-calendar.usecase";
@@ -82,6 +83,7 @@ let scheduleRepository: ScheduleRepository;
 let userConfigRepository: UserConfigRepository;
 let subscriptionRepository: SubscriptionRepository;
 let subscriptionPaymentRepository: SubscriptionPaymentRepository;
+let integrationRepository: IntegrationRepository;
 
 let syncCalendarQueue: SyncCalendarQueue;
 let notifyQueue: NotifyQueue;
@@ -92,7 +94,8 @@ const getRepo = {
     schedule: () => scheduleRepository || (scheduleRepository = new ScheduleRepository()),
     userConfig: () => userConfigRepository || (userConfigRepository = new UserConfigRepository()),
     subscription: () => subscriptionRepository || (subscriptionRepository = new SubscriptionRepository()),
-    subscriptionPayment: () => subscriptionPaymentRepository || (subscriptionPaymentRepository = new SubscriptionPaymentRepository())
+    subscriptionPayment: () => subscriptionPaymentRepository || (subscriptionPaymentRepository = new SubscriptionPaymentRepository()),
+    integration: () => integrationRepository || (integrationRepository = new IntegrationRepository())
 };
 
 const getUseCase = {
@@ -103,12 +106,13 @@ const getUseCase = {
     ),
     generateGoogleAuthUrl: () => new GenerateGoogleAuthUrlUseCase(googleCalendarAdapter),
 
-    exchangeGoogleCode: () => new ExchangeGoogleCodeUseCase(googleCalendarAdapter, getRepo.userConfig()),
+    exchangeGoogleCode: () => new ExchangeGoogleCodeUseCase(googleCalendarAdapter, getRepo.userConfig(), getRepo.integration()),
     syncCalendar: () => new SyncCalendarUseCase(
         googleCalendarAdapter, 
         getRepo.schedule(), 
         getRepo.userConfig(),
         getRepo.user(),
+        getRepo.integration(),
         evolutionAdapter,
         getUseCase.checkUsageLimit()
     ),
@@ -129,11 +133,13 @@ const getUseCase = {
     confirmAppointment: () => new ConfirmAppointmentUseCase(
         getRepo.schedule(),
         getRepo.userConfig(),
+        getRepo.integration(),
         googleCalendarAdapter
     ),
     cancelAppointment: () => new CancelAppointmentUseCase(
         getRepo.schedule(),
         getRepo.userConfig(),
+        getRepo.integration(),
         googleCalendarAdapter
     ),
     handleEvolutionWebhook: () => new HandleEvolutionWebhookUseCase(
@@ -196,29 +202,33 @@ const getUseCase = {
     toggle2FA: () => new Toggle2FAUseCase(getRepo.user()),
     verify2FA: () => new Verify2FAUseCase(getRepo.user()),
     validate2FA: () => new Validate2FAUseCase(getRepo.user()),
-    getDashboardStats: () => new GetDashboardStatsUseCase(getRepo.schedule(), getRepo.userConfig()),
+    getDashboardStats: () => new GetDashboardStatsUseCase(getRepo.schedule(), getRepo.userConfig(), getRepo.integration()),
     getAppointments: () => new GetAppointmentsUseCase(
         getRepo.schedule()
     ),
     createAppointment: () => new CreateAppointmentUseCase(
         googleCalendarAdapter,
         getRepo.schedule(),
-        getRepo.userConfig()
+        getRepo.userConfig(),
+        getRepo.integration()
     ),
     updateAppointment: () => new UpdateAppointmentUseCase(
         googleCalendarAdapter,
         getRepo.schedule(),
-        getRepo.userConfig()
+        getRepo.userConfig(),
+        getRepo.integration()
     ),
     deleteAppointment: () => new DeleteAppointmentUseCase(
         googleCalendarAdapter,
         getRepo.schedule(),
-        getRepo.userConfig()
+        getRepo.userConfig(),
+        getRepo.integration()
     ),
     acceptInvite: () => new AcceptInviteUseCase(
         googleCalendarAdapter,
         getRepo.schedule(),
-        getRepo.userConfig()
+        getRepo.userConfig(),
+        getRepo.integration()
     ),
     registerUser: () => new RegisterUserUseCase(
         getRepo.user(),
