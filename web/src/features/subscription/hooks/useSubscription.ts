@@ -8,8 +8,8 @@ export const useSubscription = () => {
   const { t } = useTranslation();
   const [showSuccessBanner, setShowSuccessBanner] = useState(false);
   const prevStatusRef = useRef<string | undefined>(undefined);
-  
-  const SUPPORT_WHATSAPP = import.meta.env.VITE_SUPPORT_WHATSAPP || '5595981035934';
+
+  const SUPPORT_WHATSAPP = import.meta.env.VITE_SUPPORT_WHATSAPP;
 
   const { data: subStatus, isLoading: isStatusLoading } = useQuery({
     queryKey: ['subscription-status'],
@@ -94,10 +94,10 @@ export const useSubscription = () => {
       ],
       current: subStatus?.plan === 'PRO' || subStatus?.status === 'PENDING',
       disabled: subStatus?.status === 'PENDING',
-      cta: subStatus?.plan === 'PRO' 
-        ? t('common.currentPlan') 
-        : subStatus?.status === 'PENDING' 
-          ? t('common.pending') 
+      cta: subStatus?.plan === 'PRO'
+        ? t('common.currentPlan')
+        : subStatus?.status === 'PENDING'
+          ? t('common.pending')
           : t('common.connect')
     },
     {
