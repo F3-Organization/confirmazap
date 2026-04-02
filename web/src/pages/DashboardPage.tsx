@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
@@ -13,7 +13,9 @@ import {
   RefreshCw,
   Edit2,
   Trash2,
-  ExternalLink
+  ExternalLink,
+  Search,
+  Filter
 } from 'lucide-react';
 import { PageLayout } from '../shared/ui/PageLayout';
 import { Card } from '../shared/ui/Card';
@@ -34,11 +36,27 @@ export const DashboardPage = () => {
   const [detailsAppointment, setDetailsAppointment] = useState<Appointment | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [showPhoneSuccess, setShowPhoneSuccess] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('ALL');
 
   const { data: appointments, isLoading, isError } = useQuery({
     queryKey: ['appointments'],
     queryFn: calendarService.getAppointments,
   });
+  
+  const filteredAppointments = useMemo(() => {
+    if (!appointments) return [];
+    
+    return appointments.filter(apt => {
+      const matchesSearch = 
+        (apt.clientName || apt.title || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (apt.clientPhone || '').includes(searchTerm);
+        
+      const matchesStatus = statusFilter === 'ALL' || apt.status === statusFilter;
+      
+      return matchesSearch && matchesStatus;
+    });
+  }, [appointments, searchTerm, statusFilter]);
 
   const { data: dashboardStats } = useQuery({
     queryKey: ['dashboard-stats'],
@@ -207,6 +225,38 @@ export const DashboardPage = () => {
             </Button>
           </div>
 
+          {/* Filter Bar */}
+          <div className="px-8 py-4 bg-surface-high/20 border-b border-outline-variant/10 flex flex-col sm:flex-row gap-4 items-center">
+            <div className="relative w-full sm:w-auto sm:flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <input 
+                type="text"
+                placeholder={t('dashboard.filters.search')}
+                className="w-full pl-10 pr-4 py-2 bg-surface-low border border-outline-variant/30 rounded-xl text-sm focus:outline-none focus:border-primary/50 transition-colors"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <div className="relative w-full sm:w-48">
+              <Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+              <select 
+                className="w-full pl-9 pr-4 py-2 bg-surface-low border border-outline-variant/30 rounded-xl text-sm focus:outline-none focus:border-primary/50 transition-colors appearance-none cursor-pointer"
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+              >
+                <option value="ALL">{t('dashboard.filters.status')}</option>
+                <option value="CONFIRMED">{t('dashboard.filters.confirmed')}</option>
+                <option value="PENDING">{t('dashboard.filters.pending')}</option>
+                <option value="CANCELLED">{t('dashboard.filters.cancelled')}</option>
+              </select>
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
+                <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+            </div>
+          </div>
+
           <div className="overflow-x-auto no-scrollbar">
             {isLoading ? (
               <div className="p-20 flex flex-col items-center justify-center text-muted-foreground gap-4">
@@ -231,7 +281,7 @@ export const DashboardPage = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-outline-variant/10">
-                  {appointments?.map((apt: Appointment) => (
+                  {filteredAppointments.map((apt: Appointment) => (
                     <tr 
                       key={apt.id} 
                       className="group hover:bg-surface-high/30 transition-all cursor-pointer"
@@ -310,10 +360,10 @@ export const DashboardPage = () => {
                       </td>
                     </tr>
                   ))}
-                  {(appointments?.length === 0 || !appointments) && !isLoading && (
+                  {(filteredAppointments.length === 0) && !isLoading && (
                     <tr>
                       <td colSpan={4} className="px-8 py-20 text-center text-muted-foreground text-sm italic">
-                        {t('dashboard.noAppointments')}
+                        {searchTerm || statusFilter !== 'ALL' ? 'Nenhum agendamento corresponde aos filtros.' : t('dashboard.noAppointments')}
                       </td>
                     </tr>
                   )}

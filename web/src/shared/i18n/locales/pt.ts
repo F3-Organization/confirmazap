@@ -79,6 +79,13 @@ export const pt = {
     loadingSchedule: 'Carregando sua agenda...',
     failedToLoad: 'Falha ao carregar agendamentos.',
     noAppointments: 'Nenhum agendamento encontrado. Sincronize seu calendário para começar.',
+    filters: {
+      search: 'Buscar por nome ou telefone...',
+      status: 'Todos os Status',
+      confirmed: 'Confirmados',
+      pending: 'Pendentes',
+      cancelled: 'Cancelados',
+    },
     appointmentDetails: {
       title: 'Detalhes do Agendamento',
       clientName: 'Nome do Cliente',

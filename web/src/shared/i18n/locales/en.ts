@@ -79,6 +79,13 @@ export const en = {
     loadingSchedule: 'Loading your schedule...',
     failedToLoad: 'Failed to load appointments.',
     noAppointments: 'No appointments found. Sync your calendar to start.',
+    filters: {
+      search: 'Search by name or phone...',
+      status: 'All Status',
+      confirmed: 'Confirmed',
+      pending: 'Pending',
+      cancelled: 'Cancelled',
+    },
     appointmentDetails: {
       title: 'Appointment Details',
       clientName: 'Client Name',
