@@ -279,6 +279,7 @@ export const en = {
     subtitle: 'Manage your profile data and system preferences',
     profile: {
       title: 'Professional Profile',
+      description: 'Update your contact information and tax details to ensure your account and invoices are always correct.',
       fullName: 'Full Name',
       email: 'Email',
       taxId: 'Tax ID / VAT',
@@ -293,6 +294,7 @@ export const en = {
     },
     automation: {
       title: 'Automation & Silence',
+      description: 'Control how and when ConfirmaZap interacts with your clients. Enable sync and define windows of rest to keep you productive without unwanted interruptions.',
       syncTitle: 'Active Synchronization',
       syncDesc: 'Enable or disable full automation with Google Calendar',
       silentWindow: 'Silent Window',
@@ -302,6 +304,7 @@ export const en = {
     },
     security: {
       title: 'Security & Privacy',
+      description: 'Protect your account with extra layers of defense. Manage your password and enable two-factor authentication to ensure only you have access to your scheduling data.',
       changePassword: 'Change Password',
       currentPassword: 'Current Password',
       newPassword: 'New Password',

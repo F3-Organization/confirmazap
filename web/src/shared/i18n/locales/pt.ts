@@ -289,6 +289,7 @@ export const pt = {
     subtitle: 'Gerencie seus dados de perfil e preferências do sistema',
     profile: {
       title: 'Perfil Profissional',
+      description: 'Atualize suas informações de contato e detalhes fiscais para garantir que sua conta e faturas estejam sempre corretas.',
       fullName: 'Nome Completo',
       email: 'E-mail',
       taxId: 'CPF / CNPJ',
@@ -303,6 +304,7 @@ export const pt = {
     },
     automation: {
       title: 'Automação & Silêncio',
+      description: 'Controle como e quando o ConfirmaZap interage com seus clientes. Ative a sincronização e defina janelas de descanso para mantê-lo produtivo sem interrupções indesejadas.',
       syncTitle: 'Sincronização Ativa',
       syncDesc: 'Habilite ou desabilite a automação total com o Google Calendar',
       silentWindow: 'Janela de Silêncio',
@@ -312,6 +314,7 @@ export const pt = {
     },
     security: {
       title: 'Segurança & Privacidade',
+      description: 'Proteja sua conta com camadas extras de defesa. Gerencie sua senha e ative a autenticação em duas etapas para garantir que apenas você tenha acesso aos seus dados de agendamento.',
       changePassword: 'Alterar Senha',
       currentPassword: 'Senha Atual',
       newPassword: 'Nova Senha',
