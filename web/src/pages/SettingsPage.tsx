@@ -198,7 +198,7 @@ export const SettingsPage = () => {
           <section className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <div className="space-y-2 px-1">
               <div className="flex items-center gap-3 text-primary">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20">
                   <User className="w-5 h-5" />
                 </div>
                 <h2 className="text-2xl font-black tracking-tight">{t('settings.profile.title', 'Perfil Profissional')}</h2>
@@ -208,8 +208,8 @@ export const SettingsPage = () => {
               </p>
             </div>
 
-            <Card variant="glass" className="p-10 space-y-10 border-white/5 shadow-3xl">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+            <Card variant="glass" className="p-8 space-y-8 border-white/5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-3">
                   <label className="text-[10px] font-black text-muted-foreground/50 uppercase tracking-[0.3em] ml-1">{t('settings.profile.fullName', 'Nome Completo')}</label>
                   <div className="relative group/input">
@@ -217,7 +217,7 @@ export const SettingsPage = () => {
                     <Input
                       name="name"
                       defaultValue={userConfig?.name}
-                      className="pl-12 h-14 bg-black/40 border-white/5 focus:bg-black/60 focus:border-primary/30 transition-all rounded-2xl font-medium"
+                      className="pl-12 h-12 bg-black/40 border-white/5 focus:bg-black/60 focus:border-primary/30 transition-all rounded-lg font-medium"
                       placeholder={t('settings.profile.placeholders.fullName', 'Seu nome completo')}
                     />
                   </div>
@@ -231,7 +231,7 @@ export const SettingsPage = () => {
                       name="email"
                       type="email"
                       defaultValue={userConfig?.email}
-                      className="pl-12 h-14 bg-black/40 border-white/5 focus:bg-black/60 focus:border-primary/30 transition-all rounded-2xl font-medium"
+                      className="pl-12 h-12 bg-black/40 border-white/5 focus:bg-black/60 focus:border-primary/30 transition-all rounded-lg font-medium"
                       placeholder={t('settings.profile.placeholders.email', 'exemplo@email.com')}
                     />
                   </div>
@@ -244,7 +244,7 @@ export const SettingsPage = () => {
                     <Input
                       name="taxId"
                       defaultValue={userConfig?.taxId}
-                      className="pl-12 h-14 bg-black/40 border-white/5 focus:bg-black/60 focus:border-primary/30 transition-all rounded-2xl font-medium"
+                      className="pl-12 h-12 bg-black/40 border-white/5 focus:bg-black/60 focus:border-primary/30 transition-all rounded-lg font-medium"
                       placeholder={t('settings.profile.placeholders.taxId', '000.000.000-00')}
                     />
                   </div>
@@ -257,7 +257,7 @@ export const SettingsPage = () => {
                     <Input
                       name="whatsappNumber"
                       defaultValue={userConfig?.whatsappNumber}
-                      className="pl-12 h-14 bg-black/40 border-white/5 focus:bg-black/60 focus:border-primary/30 transition-all rounded-2xl font-medium"
+                      className="pl-12 h-12 bg-black/40 border-white/5 focus:bg-black/60 focus:border-primary/30 transition-all rounded-lg font-medium"
                       placeholder={t('settings.profile.placeholders.whatsapp', '11999999999')}
                     />
                   </div>
@@ -273,7 +273,7 @@ export const SettingsPage = () => {
           <section className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150">
             <div className="space-y-2 px-1">
               <div className="flex items-center gap-3 text-primary">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
+                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20">
                   <Bell className="w-5 h-5" />
                 </div>
                 <h2 className="text-2xl font-black tracking-tight">{t('settings.automation.title', 'Automação & Silêncio')}</h2>
@@ -283,10 +283,10 @@ export const SettingsPage = () => {
               </p>
             </div>
 
-            <Card variant="glass" className="p-10 space-y-12 border-white/5 shadow-3xl">
-              <div className="flex items-center justify-between p-8 rounded-[2rem] bg-black/30 border border-white/5 shadow-inner group/sync">
+            <Card variant="glass" className="p-8 space-y-10 border-white/5">
+              <div className="flex items-center justify-between p-6 rounded-xl bg-black/30 border border-white/5 shadow-inner group/sync">
                 <div className="flex gap-6">
-                  <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary group-hover/sync:rotate-180 transition-transform duration-1000 shadow-xl">
+                  <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover/sync:rotate-180 transition-transform duration-1000 shadow-xl">
                     <RefreshCw className="w-7 h-7" />
                   </div>
                   <div>
@@ -317,7 +317,7 @@ export const SettingsPage = () => {
                     </p>
                   </div>
 
-                  <div className="flex-1 flex items-center gap-8 p-8 rounded-[2rem] bg-black/30 border border-white/5 shadow-inner">
+                  <div className="flex-1 flex items-center gap-6 p-6 rounded-xl bg-black/30 border border-white/5 shadow-inner">
                     <div className="flex-1 space-y-3">
                       <label className="text-[9px] font-black uppercase tracking-[0.3em] text-muted-foreground/40 flex items-center gap-2 ml-1">
                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
@@ -329,7 +329,7 @@ export const SettingsPage = () => {
                           name="silentWindowStart"
                           type="time"
                           defaultValue={userConfig?.silentWindowStart}
-                          className="pl-12 bg-black/30 border-white/5 focus:bg-black/60 focus:border-primary/30 transition-all font-black text-lg h-14 rounded-2xl"
+                          className="pl-12 bg-black/30 border-white/5 focus:bg-black/60 focus:border-primary/30 transition-all font-black text-lg h-12 rounded-lg"
                         />
                       </div>
                     </div>
@@ -349,7 +349,7 @@ export const SettingsPage = () => {
                           name="silentWindowEnd"
                           type="time"
                           defaultValue={userConfig?.silentWindowEnd}
-                          className="pl-12 bg-black/30 border-white/5 focus:bg-black/60 focus:border-primary/30 transition-all font-black text-lg h-14 rounded-2xl"
+                          className="pl-12 bg-black/30 border-white/5 focus:bg-black/60 focus:border-primary/30 transition-all font-black text-lg h-12 rounded-lg"
                         />
                       </div>
                     </div>
@@ -362,7 +362,7 @@ export const SettingsPage = () => {
               <Button 
                 type="submit" 
                 disabled={updateMutation.isPending} 
-                className="h-16 px-16 group gap-4 shadow-3xl shadow-primary/20 text-xs font-black tracking-[0.3em] uppercase transition-all hover:scale-[1.03] active:scale-95 bg-primary text-primary-dim rounded-2.5xl"
+                className="h-14 px-12 group gap-4 shadow-2xl shadow-primary/20 text-xs font-black tracking-[0.3em] uppercase transition-all hover:scale-[1.03] active:scale-95 bg-primary text-primary-dim rounded-xl"
               >
                 {updateMutation.isPending ? <Loader2 className="w-6 h-6 animate-spin" /> : <><Save className="w-6 h-6 fill-current" /> {t('settings.messages.savePreferences', 'Salvar Preferências')}</>}
               </Button>
@@ -376,7 +376,7 @@ export const SettingsPage = () => {
         <section className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300 pb-20">
           <div className="space-y-2 px-1">
             <div className="flex items-center gap-3 text-primary">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
+              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20">
                 <ShieldCheck className="w-5 h-5" />
               </div>
               <h2 className="text-2xl font-black tracking-tight">{t('settings.security.title', 'Segurança & Privacidade')}</h2>
@@ -389,10 +389,10 @@ export const SettingsPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-10 gap-10">
             {/* Password Section */}
             <div className="md:col-span-4">
-              <Card variant="glass" className="p-10 h-full border-white/5 flex flex-col justify-between hover:border-orange-500/20 transition-all duration-700 group/pwd">
-                <div className="space-y-10">
+              <Card variant="glass" className="p-8 h-full border-white/5 flex flex-col justify-between hover:border-orange-500/20 transition-all duration-700 group/pwd">
+                <div className="space-y-8">
                   <div className="flex items-center gap-5">
-                    <div className="w-14 h-14 rounded-3xl bg-orange-500/10 flex items-center justify-center text-orange-400 group-hover/pwd:scale-110 transition-transform shadow-2xl ring-1 ring-orange-500/20">
+                    <div className="w-14 h-14 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-400 group-hover/pwd:scale-110 transition-transform shadow-xl ring-1 ring-orange-500/20">
                       <KeyRound className="w-7 h-7" />
                     </div>
                     <h3 className="font-black text-lg tracking-tight">{userConfig?.hasPassword ? t('settings.security.changePassword', 'Alterar Senha') : t('settings.security.setPassword', 'Definir Senha')}</h3>
@@ -407,7 +407,7 @@ export const SettingsPage = () => {
                           <Input
                             name="currentPassword"
                             type="password"
-                            className="pl-12 h-14 bg-black/40 border-white/5 focus:bg-orange-500/5 focus:border-orange-500/30 transition-all rounded-2xl"
+                            className="pl-12 h-12 bg-black/40 border-white/5 focus:bg-orange-500/5 focus:border-orange-500/30 transition-all rounded-lg"
                             placeholder={t('settings.security.passwordPlaceholder', '••••••••')}
                             required={userConfig?.hasPassword}
                           />
@@ -422,7 +422,7 @@ export const SettingsPage = () => {
                         <Input
                           name="newPassword"
                           type="password"
-                          className="pl-12 h-14 bg-black/40 border-white/5 focus:bg-orange-500/5 focus:border-orange-500/30 transition-all rounded-2xl"
+                          className="pl-12 h-12 bg-black/40 border-white/5 focus:bg-orange-500/5 focus:border-orange-500/30 transition-all rounded-lg"
                           placeholder={t('settings.security.newPasswordHint', 'Mínimo 6 caracteres')}
                           required
                         />
@@ -436,7 +436,7 @@ export const SettingsPage = () => {
                         <Input
                           name="confirmPassword"
                           type="password"
-                          className="pl-12 h-14 bg-black/40 border-white/5 focus:bg-orange-500/5 focus:border-orange-500/30 transition-all rounded-2xl"
+                          className="pl-12 h-12 bg-black/40 border-white/5 focus:bg-orange-500/5 focus:border-orange-500/30 transition-all rounded-lg"
                           placeholder={t('settings.security.passwordPlaceholder', '••••••••')}
                           required
                         />
@@ -446,7 +446,7 @@ export const SettingsPage = () => {
                     <Button
                       type="submit"
                       variant="ghost"
-                      className="w-full mt-8 border border-white/10 hover:bg-orange-500/10 hover:text-orange-400 transition-all font-black uppercase text-[10px] tracking-[0.3em] h-14 shadow-inner rounded-2xl"
+                      className="w-full mt-6 border border-white/10 hover:bg-orange-500/10 hover:text-orange-400 transition-all font-black uppercase text-[10px] tracking-[0.3em] h-12 shadow-inner rounded-xl"
                     >
                       {changePasswordMutation.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : userConfig?.hasPassword ? t('settings.security.updatePassword', 'Atualizar Senha') : t('settings.security.setPassword', 'Definir Senha')}
                     </Button>
@@ -457,13 +457,13 @@ export const SettingsPage = () => {
 
             {/* 2FA Section */}
             <div className="md:col-span-6">
-              <Card variant="accent" className="p-10 h-full relative overflow-hidden group/2fa shadow-3xl border-primary/20 rounded-[2.5rem]">
+              <Card variant="accent" className="p-10 h-full relative overflow-hidden group/2fa shadow-3xl border-primary/20 rounded-2xl">
                 <div className="absolute top-0 right-0 w-80 h-80 bg-primary/20 rounded-full blur-[100px] -z-0 translate-x-1/3 -translate-y-1/3 opacity-30 group-hover/2fa:opacity-60 transition-opacity duration-1000" />
                 
                 <div className="relative z-10 flex flex-col h-full justify-between gap-12">
                   <div className="space-y-10">
                     <div className="flex items-center gap-6">
-                      <div className="w-16 h-16 rounded-[1.75rem] bg-primary-dim flex items-center justify-center text-primary-foreground shadow-2xl ring-1 ring-white/30 transform group-hover/2fa:rotate-6 transition-transform">
+                      <div className="w-16 h-16 rounded-xl bg-primary-dim flex items-center justify-center text-primary-foreground shadow-2xl ring-1 ring-white/30 transform group-hover/2fa:rotate-6 transition-transform">
                         <ShieldCheck className="w-8 h-8" />
                       </div>
                       <div>
@@ -483,7 +483,7 @@ export const SettingsPage = () => {
                   </div>
 
                   <div className="space-y-6">
-                    <div className="p-8 rounded-[2rem] bg-black/50 border border-white/5 flex items-center justify-between shadow-inner group/status">
+                    <div className="p-6 rounded-xl bg-black/50 border border-white/5 flex items-center justify-between shadow-inner group/status">
                       <div className="space-y-1">
                         <span className="text-[10px] font-black text-muted-foreground/40 uppercase tracking-[0.3em]">{t('settings.security.twoFactorStatus', 'Status da Segurança')}</span>
                         <p className="text-sm font-bold tracking-tight text-foreground/80">{userConfig?.twoFactorEnabled ? 'Proteção TOTP Ativa' : 'Segurança Vulnerável'}</p>
@@ -500,7 +500,7 @@ export const SettingsPage = () => {
                     {userConfig?.twoFactorEnabled && (
                       <Button 
                         variant="ghost" 
-                        className="w-full text-xs uppercase tracking-[0.4em] font-black h-16 border-primary/20 text-primary hover:bg-primary/20 hover:scale-[1.02] transition-all bg-primary/10 rounded-2.5xl ring-1 ring-primary/20"
+                        className="w-full text-xs uppercase tracking-[0.4em] font-black h-14 border-primary/20 text-primary hover:bg-primary/20 hover:scale-[1.02] transition-all bg-primary/10 rounded-xl ring-1 ring-primary/20"
                         onClick={() => toggle2FAMutation.mutate(true)}
                       >
                         {t('settings.security.setupScanner', 'Configurar Autenticador')}
@@ -515,8 +515,8 @@ export const SettingsPage = () => {
 
         {/* Setup 2FA Modal */}
         {isSetupModalOpen && setupData && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/95 backdrop-blur-3xl animate-in fade-in duration-700">
-            <Card variant="glass" className="w-full max-w-lg p-12 relative shadow-[0_0_150px_rgba(0,0,0,0.9)] border-primary/30 animate-in zoom-in-95 duration-500 rounded-[3.5rem] max-h-[85vh] overflow-y-auto">
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/40 backdrop-blur-xl animate-in fade-in duration-700">
+            <Card variant="glass" className="w-full max-w-lg p-10 relative shadow-[0_0_150px_rgba(0,0,0,0.9)] border-primary/30 animate-in zoom-in-95 duration-500 rounded-3xl max-h-[85vh] overflow-y-auto">
               <button 
                 onClick={() => setIsSetupModalOpen(false)}
                 className="absolute top-10 right-10 p-4 rounded-2xl hover:bg-white/10 text-muted-foreground/40 hover:text-foreground transition-all active:scale-90"
@@ -525,8 +525,8 @@ export const SettingsPage = () => {
               </button>
 
               <div className="text-center space-y-12">
-                <div className="w-28 h-28 rounded-[2.5rem] bg-primary/10 flex items-center justify-center text-primary mx-auto ring-1 ring-primary/30 shadow-3xl pulse-glow">
-                  <QrCode className="w-14 h-14" />
+                <div className="w-24 h-24 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mx-auto ring-1 ring-primary/30 shadow-3xl pulse-glow">
+                  <QrCode className="w-12 h-12" />
                 </div>
                 
                 <div className="space-y-4">
@@ -536,13 +536,13 @@ export const SettingsPage = () => {
                   </p>
                 </div>
 
-                <div className="bg-white p-10 rounded-[3.5rem] inline-block shadow-[0_30px_80px_rgba(255,255,255,0.1)] mx-auto relative group scale-105 border-primary/10 border-4">
-                  <div className="absolute inset-0 bg-primary/5 rounded-[3.5rem] opacity-0 group-hover:opacity-100 transition-opacity" />
+                <div className="bg-white p-8 rounded-2xl inline-block shadow-[0_30px_80px_rgba(255,255,255,0.1)] mx-auto relative group scale-105 border-primary/10 border-4">
+                  <div className="absolute inset-0 bg-primary/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
                   <QRCodeSVG value={setupData.otpauthUrl} size={220} level="H" />
                 </div>
 
-                <div className="space-y-10">
-                  <div className="p-6 rounded-[2rem] bg-black/60 border border-white/5 flex items-center justify-between gap-8 shadow-inner group/secret">
+                <div className="space-y-8">
+                  <div className="p-4 rounded-xl bg-black/60 border border-white/5 flex items-center justify-between gap-6 shadow-inner group/secret">
                     <div className="flex flex-col items-start gap-1.5 overflow-hidden">
                       <span className="text-[9px] font-black uppercase tracking-[0.25em] text-muted-foreground/30">KEY MANUAL</span>
                       <code className="text-sm font-mono text-primary font-black tracking-[0.25em] truncate w-full">
@@ -566,7 +566,7 @@ export const SettingsPage = () => {
                     </label>
                     <Input 
                       placeholder="000 000"
-                      className="text-center text-5xl tracking-[0.6em] font-black h-24 bg-black/60 border-white/10 rounded-[2rem] focus:border-primary/50 placeholder:opacity-20"
+                      className="text-center text-4xl tracking-[0.6em] font-black h-20 bg-black/60 border-white/10 rounded-xl focus:border-primary/50 placeholder:opacity-20"
                       maxLength={6}
                       value={verificationCode}
                       onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ''))}
@@ -574,7 +574,7 @@ export const SettingsPage = () => {
                   </div>
 
                   <Button 
-                    className="w-full h-18 text-sm font-black uppercase tracking-[0.4em] gap-5 shadow-3xl shadow-primary/40 bg-primary text-primary-dim rounded-[2rem] hover:scale-[1.02] active:scale-95 transition-all"
+                    className="w-full h-16 text-sm font-black uppercase tracking-[0.4em] gap-5 shadow-3xl shadow-primary/40 bg-primary text-primary-dim rounded-xl hover:scale-[1.02] active:scale-95 transition-all"
                     disabled={verificationCode.length !== 6 || verify2FAMutation.isPending}
                     onClick={() => verify2FAMutation.mutate(verificationCode)}
                   >
