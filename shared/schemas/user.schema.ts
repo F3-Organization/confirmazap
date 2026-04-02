@@ -8,9 +8,25 @@ export const userConfigSchema = z.object({
     silentWindowStart: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Formato inválido (HH:mm)").optional(),
     silentWindowEnd: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, "Formato inválido (HH:mm)").optional(),
     syncEnabled: z.boolean().optional(),
+    twoFactorEnabled: z.boolean().optional(),
 });
 
 export const updateUserConfigSchema = userConfigSchema.partial();
 
+export const changePasswordSchema = z.object({
+    currentPassword: z.string().min(1, "Senha atual é obrigatória"),
+    newPassword: z.string().min(6, "A nova senha deve ter no mínimo 6 caracteres"),
+    confirmPassword: z.string().min(6, "Confirmação de senha é obrigatória"),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+    message: "As senhas não coincidem",
+    path: ["confirmPassword"],
+});
+
+export const toggle2FASchema = z.object({
+    enabled: z.boolean(),
+});
+
 export type UserConfigDTO = z.infer<typeof userConfigSchema>;
 export type UpdateUserConfigDTO = z.infer<typeof updateUserConfigSchema>;
+export type ChangePasswordDTO = z.infer<typeof changePasswordSchema>;
+export type Toggle2FADTO = z.infer<typeof toggle2FASchema>;

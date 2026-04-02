@@ -1,14 +1,22 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { GetUserConfigUseCase } from "../../usecase/user/get-user-config.usecase";
 import { UpdateUserConfigUseCase } from "../../usecase/user/update-user-config.usecase";
-import { updateUserConfigSchema } from "../../../shared/schemas/user.schema";
+import { ChangePasswordUseCase } from "../../usecase/user/change-password.usecase";
+import { Toggle2FAUseCase } from "../../usecase/user/toggle-2fa.usecase";
+import { 
+    updateUserConfigSchema, 
+    changePasswordSchema, 
+    toggle2FASchema 
+} from "../../../shared/schemas/user.schema";
 import { FastifyAdapter } from "../adapters/fastfy.adapter";
 
 export class UserController {
     constructor(
         private readonly fastifyAdapter: FastifyAdapter,
         private readonly getUserConfigUseCase: GetUserConfigUseCase,
-        private readonly updateUserConfigUseCase: UpdateUserConfigUseCase
+        private readonly updateUserConfigUseCase: UpdateUserConfigUseCase,
+        private readonly changePasswordUseCase: ChangePasswordUseCase,
+        private readonly toggle2FAUseCase: Toggle2FAUseCase
     ) {
         this.registerRoutes();
     }
@@ -25,6 +33,18 @@ export class UserController {
             "/user/config",
             this.updateUserConfig.bind(this)
         );
+
+        this.fastifyAdapter.addProtectedRoute(
+            "POST",
+            "/user/change-password",
+            this.changePassword.bind(this)
+        );
+
+        this.fastifyAdapter.addProtectedRoute(
+            "POST",
+            "/user/toggle-2fa",
+            this.toggle2FA.bind(this)
+        );
     }
 
     async getUserConfig(request: FastifyRequest, reply: FastifyReply): Promise<void> {
@@ -40,5 +60,29 @@ export class UserController {
         await this.updateUserConfigUseCase.execute(userId, data);
         
         reply.status(200).send({ message: "Configurações atualizadas com sucesso" });
+    }
+
+    async changePassword(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+        const userId = (request.user as any).id;
+        const data = changePasswordSchema.parse(request.body);
+
+        try {
+            await this.changePasswordUseCase.execute(userId, data);
+            reply.status(200).send({ message: "Senha alterada com sucesso" });
+        } catch (error: any) {
+            reply.status(400).send({ error: error.message });
+        }
+    }
+
+    async toggle2FA(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+        const userId = (request.user as any).id;
+        const { enabled } = toggle2FASchema.parse(request.body);
+
+        try {
+            await this.toggle2FAUseCase.execute(userId, enabled);
+            reply.status(200).send({ message: enabled ? "2FA habilitado" : "2FA desabilitado" });
+        } catch (error: any) {
+            reply.status(400).send({ error: error.message });
+        }
     }
 }

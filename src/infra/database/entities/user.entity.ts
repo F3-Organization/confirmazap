@@ -24,6 +24,12 @@ export class User {
     })
     role!: "ADMIN" | "USER";
 
+    @Column({ name: "two_factor_enabled", default: false })
+    twoFactorEnabled!: boolean;
+
+    @Column({ name: "two_factor_secret", nullable: true })
+    twoFactorSecret?: string;
+
     @CreateDateColumn()
     createdAt!: Date;
 
