@@ -1,5 +1,7 @@
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation } from '@tanstack/react-query';
+import toast from 'react-hot-toast';
 import {
   Check,
   ArrowRight,
@@ -20,6 +22,8 @@ import { subscriptionService } from '../features/subscription/subscription.servi
 
 export const SubscriptionPage = () => {
   const { t } = useTranslation();
+  const [showSuccessBanner, setShowSuccessBanner] = useState(false);
+  const prevStatusRef = useRef<string | undefined>(undefined);
 
   const { data: subStatus, isLoading: isStatusLoading } = useQuery({
     queryKey: ['subscription-status'],
@@ -34,6 +38,19 @@ export const SubscriptionPage = () => {
     queryFn: subscriptionService.getPaymentHistory,
     refetchInterval: subStatus?.status === 'PENDING' ? 10000 : false,
   });
+
+  useEffect(() => {
+    if (prevStatusRef.current === 'PENDING' && subStatus?.status === 'ACTIVE') {
+      toast.success(t('subscription.billing.successTitle'), {
+        duration: 8000,
+        position: 'top-center',
+      });
+      setShowSuccessBanner(true);
+      // Ocultar banner após 30 segundos
+      setTimeout(() => setShowSuccessBanner(false), 30000);
+    }
+    prevStatusRef.current = subStatus?.status;
+  }, [subStatus?.status, t]);
 
   const checkoutMutation = useMutation({
     mutationFn: subscriptionService.createCheckout,
@@ -139,7 +156,23 @@ export const SubscriptionPage = () => {
       title={t('subscription.title')}
       subtitle={t('subscription.subtitle')}
     >
-      {subStatus?.status === 'PENDING' && (
+      {showSuccessBanner && (
+        <Card variant="glass" className="mb-8 p-6 border-emerald-500/30 bg-emerald-500/5 items-center flex gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
+          <div className="w-12 h-12 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">
+            <Check className="w-6 h-6 text-emerald-500" />
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-emerald-500 leading-tight">
+              {t('subscription.billing.successTitle')}
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              {t('subscription.billing.successDescription')}
+            </p>
+          </div>
+        </Card>
+      )}
+
+      {subStatus?.status === 'PENDING' && !showSuccessBanner && (
         <Card variant="glass" className="mb-8 p-6 border-yellow-500/30 bg-yellow-500/5 items-center flex gap-4">
           <div className="w-12 h-12 rounded-full bg-yellow-500/20 flex items-center justify-center shrink-0">
             <Loader2 className="w-6 h-6 text-yellow-500 animate-spin" />

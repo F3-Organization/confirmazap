@@ -226,6 +226,8 @@ export const pt = {
       noPaymentsDescription: 'Você ainda não possui faturas ou assinaturas registradas no sistema.',
       pendingTitle: 'Pagamento em Processamento',
       pendingDescription: 'Sua assinatura PRO será ativada assim que confirmarmos o recebimento do pagamento. Isso pode levar alguns minutos.',
+      successTitle: 'Plano PRO Ativado!',
+      successDescription: 'Seu pagamento foi confirmado. Agora você tem acesso ilimitado a todos os recursos.',
     },
     pricing: {
       perMonth: '/mês',

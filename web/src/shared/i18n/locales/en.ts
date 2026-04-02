@@ -216,6 +216,8 @@ export const en = {
       noPaymentsDescription: 'You do not have any invoices or subscriptions registered in the system yet.',
       pendingTitle: 'Payment Processing',
       pendingDescription: 'Your PRO subscription will be activated as soon as we confirm receipt of payment. This may take a few minutes.',
+      successTitle: 'PRO Plan Activated!',
+      successDescription: 'Your payment has been confirmed. You now have unlimited access to all features.',
     },
     pricing: {
       perMonth: '/mo',
