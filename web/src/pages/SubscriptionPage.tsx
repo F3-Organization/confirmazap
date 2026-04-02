@@ -1,7 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import toast from 'react-hot-toast';
 import {
   Check,
   ArrowRight,
@@ -18,130 +15,23 @@ import {
 import { PageLayout } from '../shared/ui/PageLayout';
 import { Card } from '../shared/ui/Card';
 import { Button } from '../shared/ui/Button';
-import { subscriptionService } from '../features/subscription/subscription.service';
+import { useSubscription } from '../features/subscription/hooks/useSubscription';
+import { formatCurrency, formatDate } from '../shared/utils/formatters';
 
 export const SubscriptionPage = () => {
   const { t } = useTranslation();
-  const [showSuccessBanner, setShowSuccessBanner] = useState(false);
-  const prevStatusRef = useRef<string | undefined>(undefined);
-  
-  const SUPPORT_WHATSAPP = import.meta.env.VITE_SUPPORT_WHATSAPP || '5595981035934';
-
-  const { data: subStatus, isLoading: isStatusLoading } = useQuery({
-    queryKey: ['subscription-status'],
-    queryFn: subscriptionService.getStatus,
-    refetchInterval: (query) => {
-      return query.state.data?.status === 'PENDING' ? 10000 : false;
-    }
-  });
-
-  const { data: paymentHistory, isLoading: isHistoryLoading } = useQuery({
-    queryKey: ['subscription-payments'],
-    queryFn: subscriptionService.getPaymentHistory,
-    refetchInterval: subStatus?.status === 'PENDING' ? 10000 : false,
-  });
-
-  useEffect(() => {
-    if (prevStatusRef.current === 'PENDING' && subStatus?.status === 'ACTIVE') {
-      toast.success(t('subscription.billing.successTitle'), {
-        duration: 8000,
-        position: 'top-center',
-      });
-      setShowSuccessBanner(true);
-      // Ocultar banner após 30 segundos
-      setTimeout(() => setShowSuccessBanner(false), 30000);
-    }
-    prevStatusRef.current = subStatus?.status;
-  }, [subStatus?.status, t]);
-
-  const checkoutMutation = useMutation({
-    mutationFn: subscriptionService.createCheckout,
-    onSuccess: (data) => {
-      window.location.href = data.url;
-    },
-  });
-
-  const handlePlanAction = (planId: string) => {
-    if (planId === 'PRO') {
-      checkoutMutation.mutate();
-    } else if (planId === 'ENTERPRISE') {
-      const message = encodeURIComponent('Olá, gostaria de saber mais sobre o plano Enterprise do ConfirmaZap');
-      window.open(`https://wa.me/${SUPPORT_WHATSAPP}?text=${message}`, '_blank');
-    }
-  };
-
-  const formatDate = (dateString: string | undefined | null) => {
-    if (!dateString) return '-';
-    // DD/MM/AAAA format as requested
-    const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR');
-  };
-
-  const formatAmount = (amount: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL',
-    }).format(amount / 100);
-  };
-
-  const handleDownloadPdf = async (paymentId: string) => {
-    try {
-      await subscriptionService.downloadInvoicePdf(paymentId);
-    } catch (error) {
-      console.error('Error downloading invoice:', error);
-      // You could add a toast here
-    }
-  };
-
-  const plans = [
-    {
-      id: 'FREE',
-      name: t('subscription.plans.standard.name'),
-      price: 'R$ 0',
-      description: t('subscription.plans.standard.description'),
-      features: [
-        `100 ${t('subscription.features.monthlyConfirmations')}`,
-        `1 ${t('subscription.features.whatsappDevices')}`,
-        t('subscription.features.support'),
-        t('subscription.features.reporting')
-      ],
-      current: subStatus?.plan === 'FREE' || !subStatus,
-      cta: subStatus?.plan === 'FREE' ? t('common.currentPlan') : t('common.connect')
-    },
-    {
-      id: 'PRO',
-      name: t('subscription.plans.pro.name'),
-      price: 'R$ 49',
-      description: t('subscription.plans.pro.description'),
-      features: [
-        t('subscription.features.unlimitedConfirmations'),
-        `3 ${t('subscription.features.whatsappDevicesPlural')}`,
-        t('subscription.features.prioritySupport'),
-        t('subscription.features.apiAccess'),
-        t('subscription.features.branding')
-      ],
-      current: subStatus?.plan === 'PRO' || subStatus?.status === 'PENDING',
-      disabled: subStatus?.status === 'PENDING',
-      cta: subStatus?.plan === 'PRO' 
-        ? t('common.currentPlan') 
-        : subStatus?.status === 'PENDING' 
-          ? t('common.pending') 
-          : t('common.connect')
-    },
-    {
-      id: 'ENTERPRISE',
-      name: t('subscription.plans.enterprise.name'),
-      price: t('subscription.plans.enterprise.customPrice'),
-      description: t('subscription.plans.enterprise.description'),
-      features: [
-        t('subscription.features.unlimitedConfirmations'),
-        t('subscription.features.dedicatedManager'),
-        t('subscription.features.onPremise')
-      ],
-      current: subStatus?.plan === 'ENTERPRISE',
-      cta: t('common.contactSales')
-    }
-  ];
+  const {
+    subStatus,
+    paymentHistory,
+    isStatusLoading,
+    isHistoryLoading,
+    showSuccessBanner,
+    plans,
+    checkoutMutation,
+    handlePlanAction,
+    handleDownloadPdf,
+    setShowSuccessBanner
+  } = useSubscription();
 
   if (isStatusLoading) {
     return (
@@ -172,6 +62,9 @@ export const SubscriptionPage = () => {
               {t('subscription.billing.successDescription')}
             </p>
           </div>
+          <Button variant="ghost" size="sm" className="ml-auto" onClick={() => setShowSuccessBanner(false)}>
+            {t('common.close')}
+          </Button>
         </Card>
       )}
 
@@ -190,6 +83,7 @@ export const SubscriptionPage = () => {
           </div>
         </Card>
       )}
+
       {/* Usage Progress Section for FREE Plan */}
       {subStatus?.plan === 'FREE' && (
         <Card variant="glass" className="mb-12 p-8 border border-primary/20 overflow-hidden relative group">
@@ -355,7 +249,7 @@ export const SubscriptionPage = () => {
                         {formatDate(payment.paidAt || payment.createdAt)}
                       </span>
                     </td>
-                    <td className="px-8 py-6 font-bold text-sm">{formatAmount(payment.amount)}</td>
+                    <td className="px-8 py-6 font-bold text-sm">{formatCurrency(payment.amount)}</td>
                     <td className="px-8 py-6">
                       <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase border ${payment.status === 'PAID'
                           ? 'bg-green-500/10 border-green-500/20 text-green-400'
