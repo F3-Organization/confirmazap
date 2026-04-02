@@ -46,6 +46,7 @@ import { CreateAppointmentUseCase } from "../../usecase/calendar/create-appointm
 import { UpdateAppointmentUseCase } from "../../usecase/calendar/update-appointment.usecase";
 import { DeleteAppointmentUseCase } from "../../usecase/calendar/delete-appointment.usecase";
 import { AcceptInviteUseCase } from "../../usecase/calendar/accept-invite.usecase";
+import { DeclineInviteUseCase } from "../../usecase/calendar/decline-invite.usecase";
 import { RegisterUserUseCase } from "../../usecase/auth/register-user.usecase";
 import { LoginUseCase } from "../../usecase/auth/login.usecase";
 import { AuthenticateGoogleUseCase } from "../../usecase/auth/authenticate-google.usecase";
@@ -230,6 +231,12 @@ const getUseCase = {
         getRepo.userConfig(),
         getRepo.integration()
     ),
+    declineInvite: () => new DeclineInviteUseCase(
+        googleCalendarAdapter,
+        getRepo.schedule(),
+        getRepo.userConfig(),
+        getRepo.integration()
+    ),
     registerUser: () => new RegisterUserUseCase(
         getRepo.user(),
         getRepo.userConfig()
@@ -294,6 +301,7 @@ export const factory = {
             getUseCase.updateAppointment(),
             getUseCase.deleteAppointment(),
             getUseCase.acceptInvite(),
+            getUseCase.declineInvite(),
             getMiddleware.subscription()
         ),
         webhook: () => new EvolutionWebhookController(

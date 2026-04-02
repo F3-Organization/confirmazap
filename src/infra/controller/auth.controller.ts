@@ -91,6 +91,26 @@ export class AuthController {
                 properties: {
                     code: { type: "string" }
                 }
+            },
+            response: {
+                200: {
+                    type: "object",
+                    properties: {
+                        message: { type: "string" },
+                        token: { type: "string" },
+                        user: {
+                            type: "object",
+                            properties: {
+                                id: { type: "string" },
+                                name: { type: "string" },
+                                email: { type: "string" },
+                                role: { type: "string" }
+                            }
+                        },
+                        status: { type: "string" },
+                        tempToken: { type: "string" }
+                    }
+                }
             }
         });
 
@@ -203,7 +223,8 @@ export class AuthController {
                                 role: { type: "string" }
                             }
                         },
-                        status: { type: "string" }
+                        status: { type: "string" },
+                        tempToken: { type: "string" }
                     }
                 },
                 400: {
@@ -258,7 +279,9 @@ export class AuthController {
                                 email: { type: "string" },
                                 role: { type: "string" }
                             }
-                        }
+                        },
+                        status: { type: "string" },
+                        tempToken: { type: "string" }
                     }
                 },
                 400: {
@@ -312,7 +335,9 @@ export class AuthController {
                                 email: { type: "string" },
                                 role: { type: "string" }
                             }
-                        }
+                        },
+                        status: { type: "string" },
+                        tempToken: { type: "string" }
                     }
                 },
                 401: {

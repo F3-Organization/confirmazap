@@ -35,7 +35,7 @@ export const GoogleCallbackPage = () => {
             );
             window.close();
           } else {
-            if (data.status === '2FA_REQUIRED') {
+            if (data.status === '2FA_REQUIRED' || !data.token) {
               navigate('/auth/2fa', { state: { tempToken: data.tempToken } });
               return;
             }

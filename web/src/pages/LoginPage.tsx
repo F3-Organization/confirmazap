@@ -41,8 +41,8 @@ export const LoginPage = () => {
     try {
       const response = await authService.login(data);
       
-      if (response.status === '2FA_REQUIRED') {
-        console.log('[LoginPage] 2FA required, redirecting...', response.tempToken);
+      if (response.status === '2FA_REQUIRED' || !response.token) {
+        console.log('[LoginPage] 2FA required or no token, redirecting...', response.tempToken);
         navigate('/auth/2fa', { state: { tempToken: response.tempToken } });
         return;
       }
@@ -67,8 +67,10 @@ export const LoginPage = () => {
         return;
       }
 
-      setAuth(response.user as AuthUser, response.token as string);
-      navigate('/dashboard');
+      if (response.token) {
+        setAuth(response.user as AuthUser, response.token as string);
+        navigate('/dashboard');
+      }
     } catch (err: any) {
       setError(err.response?.data?.error || t('common.registrationFailed'));
     } finally {
@@ -82,8 +84,8 @@ export const LoginPage = () => {
       if (event.data?.type === 'GOOGLE_AUTH_SUCCESS') {
         const { user, token, status, tempToken } = event.data.payload;
         
-        if (status === '2FA_REQUIRED') {
-          console.log('[LoginPage] Google 2FA required, redirecting...');
+        if (status === '2FA_REQUIRED' || !token) {
+          console.log('[LoginPage] Google 2FA required or no token, redirecting...');
           navigate('/auth/2fa', { state: { tempToken } });
           return;
         }
