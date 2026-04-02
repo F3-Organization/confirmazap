@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { subscriptionService } from '../subscription.service';
@@ -9,13 +9,14 @@ import { authService } from '../../auth/auth.service';
 export const useSubscription = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [showSuccessBanner, setShowSuccessBanner] = useState(false);
   const [showBillingModal, setShowBillingModal] = useState(false);
   const prevStatusRef = useRef<string | undefined>(undefined);
 
   const SUPPORT_WHATSAPP = import.meta.env.VITE_SUPPORT_WHATSAPP;
 
-  const { data: subStatus, isLoading: isStatusLoading } = useQuery({
+  const { data: subStatus, isLoading: isStatusLoading, isFetching: isStatusFetching } = useQuery({
     queryKey: ['subscription-status'],
     queryFn: subscriptionService.getStatus,
     refetchInterval: (query) => {
@@ -24,7 +25,8 @@ export const useSubscription = () => {
     }
   });
 
-  const isMissingBillingInfo = !subStatus?.taxId || !subStatus?.whatsappNumber;
+  // Só considera faltando se já carregou os dados e eles realmente não existem
+  const isMissingBillingInfo = !isStatusLoading && !isStatusFetching && (!subStatus?.taxId || !subStatus?.whatsappNumber);
 
   const { data: paymentHistory, isLoading: isHistoryLoading } = useQuery({
     queryKey: ['subscription-payments'],
@@ -67,10 +69,16 @@ export const useSubscription = () => {
 
   const updateBillingConfigMutation = useMutation({
     mutationFn: authService.updateConfig,
-    onSuccess: () => {
+    onSuccess: async () => {
       toast.success(t('subscription.billing.infoSaved'));
+      
+      // Invalida e força o refetch imediato do status para garantir que isMissingBillingInfo seja atualizado
+      await queryClient.invalidateQueries({ queryKey: ['subscription-status'] });
+      await queryClient.refetchQueries({ queryKey: ['subscription-status'] });
+      
       setShowBillingModal(false);
-      // Após salvar, dispara o checkout se for o plano PRO
+      
+      // Após salvar e atualizar o estado local, dispara o checkout se for o plano PRO
       checkoutMutation.mutate();
     },
     onError: (error: any) => {
@@ -84,6 +92,9 @@ export const useSubscription = () => {
 
   const handlePlanAction = (planId: string) => {
     if (planId === 'PRO') {
+      // Se ainda estiver carregando o status, não faz nada para evitar abrir o modal por engano
+      if (isStatusLoading || isStatusFetching) return;
+
       if (isMissingBillingInfo) {
         setShowBillingModal(true);
         return;
@@ -184,3 +195,4 @@ export const useSubscription = () => {
     updateBillingConfigMutation
   };
 };
+

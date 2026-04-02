@@ -76,7 +76,9 @@ export class SubscriptionController {
                         currentPeriodEnd: { type: "string", format: "date-time" },
                         checkoutUrl: { type: "string" },
                         amount: { type: "number" },
-                        planName: { type: "string" }
+                        planName: { type: "string" },
+                        taxId: { type: "string", nullable: true },
+                        whatsappNumber: { type: "string", nullable: true }
                     }
                 },
                 500: { type: "object", properties: { error: { type: "string" } } }
