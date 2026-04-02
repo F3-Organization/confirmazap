@@ -59,5 +59,8 @@ export const env = {
         cnpj: process.env.COMPANY_CNPJ || '00.000.000/0001-00',
         address: process.env.COMPANY_ADDRESS || 'Rua Exemplo, 123 - São Paulo/SP',
         supportWhatsapp: process.env.SUPPORT_WHATSAPP || '5595981035934',
+    },
+    security: {
+        encryptionKey: process.env.ENCRYPTION_KEY || 'f64b848c7c943896cf41a06781f9a65a'
     }
 }

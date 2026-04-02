@@ -306,6 +306,7 @@ export const en = {
       title: 'Security & Privacy',
       description: 'Protect your account with extra layers of defense. Manage your password and enable two-factor authentication to ensure only you have access to your scheduling data.',
       changePassword: 'Change Password',
+      setPassword: 'Set Password',
       currentPassword: 'Current Password',
       newPassword: 'New Password',
       confirmPassword: 'Confirm New Password',

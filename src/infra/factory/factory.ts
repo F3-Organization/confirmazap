@@ -12,6 +12,7 @@ import { SubscriptionController } from "../controller/subscription.controller";
 import { GetUserConfigUseCase } from "../../usecase/user/get-user-config.usecase";
 import { UpdateUserConfigUseCase } from "../../usecase/user/update-user-config.usecase";
 import { ChangePasswordUseCase } from "../../usecase/user/change-password.usecase";
+import { SetPasswordUseCase } from "../../usecase/user/set-password.usecase";
 import { Toggle2FAUseCase } from "../../usecase/user/toggle-2fa.usecase";
 import { Verify2FAUseCase } from "../../usecase/user/verify-2fa.usecase";
 import { Validate2FAUseCase } from "../../usecase/user/validate-2fa.usecase";
@@ -191,6 +192,7 @@ const getUseCase = {
     getUserConfig: () => new GetUserConfigUseCase(getRepo.user(), getRepo.userConfig()),
     updateUserConfig: () => new UpdateUserConfigUseCase(getRepo.user(), getRepo.userConfig(), evolutionAdapter),
     changePassword: () => new ChangePasswordUseCase(getRepo.user()),
+    setPassword: () => new SetPasswordUseCase(getRepo.user()),
     toggle2FA: () => new Toggle2FAUseCase(getRepo.user()),
     verify2FA: () => new Verify2FAUseCase(getRepo.user()),
     validate2FA: () => new Validate2FAUseCase(getRepo.user()),
@@ -311,6 +313,7 @@ export const factory = {
             getUseCase.getUserConfig(),
             getUseCase.updateUserConfig(),
             getUseCase.changePassword(),
+            getUseCase.setPassword(),
             getUseCase.toggle2FA(),
             getUseCase.verify2FA()
         )

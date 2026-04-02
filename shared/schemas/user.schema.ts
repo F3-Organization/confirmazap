@@ -15,7 +15,15 @@ export const userConfigSchema = z.object({
 export const updateUserConfigSchema = userConfigSchema.partial();
 
 export const changePasswordSchema = z.object({
-    currentPassword: z.string().optional(),
+    currentPassword: z.string().min(1, "Senha atual é obrigatória"),
+    newPassword: z.string().min(6, "A nova senha deve ter no mínimo 6 caracteres"),
+    confirmPassword: z.string().min(6, "Confirmação de senha é obrigatória"),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+    message: "As senhas não coincidem",
+    path: ["confirmPassword"],
+});
+
+export const setPasswordSchema = z.object({
     newPassword: z.string().min(6, "A nova senha deve ter no mínimo 6 caracteres"),
     confirmPassword: z.string().min(6, "Confirmação de senha é obrigatória"),
 }).refine((data) => data.newPassword === data.confirmPassword, {
@@ -34,5 +42,6 @@ export const verify2FASchema = z.object({
 export type UserConfigDTO = z.infer<typeof userConfigSchema>;
 export type UpdateUserConfigDTO = z.infer<typeof updateUserConfigSchema>;
 export type ChangePasswordDTO = z.infer<typeof changePasswordSchema>;
+export type SetPasswordDTO = z.infer<typeof setPasswordSchema>;
 export type Toggle2FADTO = z.infer<typeof toggle2FASchema>;
 export type Verify2FADTO = z.infer<typeof verify2FASchema>;

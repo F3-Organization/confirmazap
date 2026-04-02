@@ -316,6 +316,7 @@ export const pt = {
       title: 'Segurança & Privacidade',
       description: 'Proteja sua conta com camadas extras de defesa. Gerencie sua senha e ative a autenticação em duas etapas para garantir que apenas você tenha acesso aos seus dados de agendamento.',
       changePassword: 'Alterar Senha',
+      setPassword: 'Definir Senha',
       currentPassword: 'Senha Atual',
       newPassword: 'Nova Senha',
       confirmPassword: 'Confirmar Nova Senha',

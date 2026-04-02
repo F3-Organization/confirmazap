@@ -2,11 +2,13 @@ import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { GetUserConfigUseCase } from "../../usecase/user/get-user-config.usecase";
 import { UpdateUserConfigUseCase } from "../../usecase/user/update-user-config.usecase";
 import { ChangePasswordUseCase } from "../../usecase/user/change-password.usecase";
+import { SetPasswordUseCase } from "../../usecase/user/set-password.usecase";
 import { Toggle2FAUseCase } from "../../usecase/user/toggle-2fa.usecase";
 import { Verify2FAUseCase } from "../../usecase/user/verify-2fa.usecase";
 import { 
     updateUserConfigSchema, 
-    changePasswordSchema, 
+    changePasswordSchema,
+    setPasswordSchema,
     toggle2FASchema,
     verify2FASchema
 } from "../../../shared/schemas/user.schema";
@@ -18,6 +20,7 @@ export class UserController {
         private readonly getUserConfigUseCase: GetUserConfigUseCase,
         private readonly updateUserConfigUseCase: UpdateUserConfigUseCase,
         private readonly changePasswordUseCase: ChangePasswordUseCase,
+        private readonly setPasswordUseCase: SetPasswordUseCase,
         private readonly toggle2FAUseCase: Toggle2FAUseCase,
         private readonly verify2FAUseCase: Verify2FAUseCase
     ) {
@@ -41,6 +44,12 @@ export class UserController {
             "POST",
             "/user/change-password",
             this.changePassword.bind(this)
+        );
+        
+        this.fastifyAdapter.addProtectedRoute(
+            "POST",
+            "/user/set-password",
+            this.setPassword.bind(this)
         );
 
         this.fastifyAdapter.addProtectedRoute(
@@ -80,6 +89,18 @@ export class UserController {
             reply.status(200).send({ message: "Senha alterada com sucesso" });
         } catch (error: any) {
             reply.status(400).send({ error: error.message });
+        }
+    }
+
+    async setPassword(request: FastifyRequest, reply: FastifyReply): Promise<void> {
+        const userId = (request.user as any).id;
+        const data = setPasswordSchema.parse(request.body);
+
+        try {
+            await this.setPasswordUseCase.execute(userId, data);
+            reply.status(200).send({ message: "Senha definida com sucesso" });
+        } catch (error: any) {
+            reply.status(error.statusCode || 400).send({ error: error.message });
         }
     }
 

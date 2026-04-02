@@ -26,6 +26,7 @@ export class GetUserConfigUseCase {
             silentWindowEnd: config?.silentWindowEnd ?? "08:00",
             syncEnabled: config?.syncEnabled ?? true,
             twoFactorEnabled: user.twoFactorEnabled ?? false,
+            hasPassword: !!user.password,
         };
     }
 }

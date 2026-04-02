@@ -108,6 +108,19 @@ export const SettingsPage = () => {
     }
   });
 
+  const setPasswordMutation = useMutation({
+    mutationFn: async (data: any) => {
+      await apiClient.post('/user/set-password', data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['user-config'] });
+      showSuccess("Senha definida com sucesso!");
+    },
+    onError: (error: any) => {
+      showError(error.response?.data?.error || "Erro ao definir senha");
+    }
+  });
+
   const showSuccess = (msg: string) => {
     setSuccessMessage(msg);
     setTimeout(() => setSuccessMessage(null), 3000);
@@ -157,7 +170,16 @@ export const SettingsPage = () => {
       return;
     }
 
-    changePasswordMutation.mutate({ currentPassword, newPassword, confirmPassword });
+    if (userConfig?.hasPassword) {
+      if (!currentPassword) {
+        showError("Senha atual é obrigatória");
+        return;
+      }
+      changePasswordMutation.mutate({ currentPassword, newPassword, confirmPassword });
+    } else {
+      setPasswordMutation.mutate({ newPassword, confirmPassword });
+    }
+    
     e.currentTarget.reset();
   };
 
@@ -373,23 +395,25 @@ export const SettingsPage = () => {
                     <div className="w-14 h-14 rounded-3xl bg-orange-500/10 flex items-center justify-center text-orange-400 group-hover/pwd:scale-110 transition-transform shadow-2xl ring-1 ring-orange-500/20">
                       <KeyRound className="w-7 h-7" />
                     </div>
-                    <h3 className="font-black text-lg tracking-tight">{t('settings.security.changePassword', 'Alterar Senha')}</h3>
+                    <h3 className="font-black text-lg tracking-tight">{userConfig?.hasPassword ? t('settings.security.changePassword', 'Alterar Senha') : t('settings.security.setPassword', 'Definir Senha')}</h3>
                   </div>
 
                   <form onSubmit={handlePasswordChange} className="space-y-6">
-                    <div className="space-y-3">
-                      <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 pl-2">{t('settings.security.currentPassword', 'Senha Atual')}</label>
-                      <div className="relative group/input">
-                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/30 group-focus-within/input:text-orange-400 transition-colors" />
-                        <Input
-                          name="currentPassword"
-                          type="password"
-                          className="pl-12 h-14 bg-black/40 border-white/5 focus:bg-orange-500/5 focus:border-orange-500/30 transition-all rounded-2xl"
-                          placeholder={t('settings.security.passwordPlaceholder', '••••••••')}
-                          required
-                        />
+                    {userConfig?.hasPassword && (
+                      <div className="space-y-3">
+                        <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 pl-2">{t('settings.security.currentPassword', 'Senha Atual')}</label>
+                        <div className="relative group/input">
+                          <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/30 group-focus-within/input:text-orange-400 transition-colors" />
+                          <Input
+                            name="currentPassword"
+                            type="password"
+                            className="pl-12 h-14 bg-black/40 border-white/5 focus:bg-orange-500/5 focus:border-orange-500/30 transition-all rounded-2xl"
+                            placeholder={t('settings.security.passwordPlaceholder', '••••••••')}
+                            required={userConfig?.hasPassword}
+                          />
+                        </div>
                       </div>
-                    </div>
+                    )}
 
                     <div className="space-y-3">
                       <label className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground/40 pl-2">{t('settings.security.newPassword', 'Nova Senha')}</label>
@@ -424,7 +448,7 @@ export const SettingsPage = () => {
                       variant="ghost"
                       className="w-full mt-8 border border-white/10 hover:bg-orange-500/10 hover:text-orange-400 transition-all font-black uppercase text-[10px] tracking-[0.3em] h-14 shadow-inner rounded-2xl"
                     >
-                      {changePasswordMutation.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : t('settings.security.updatePassword', 'Atualizar Senha')}
+                      {changePasswordMutation.isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : userConfig?.hasPassword ? t('settings.security.updatePassword', 'Atualizar Senha') : t('settings.security.setPassword', 'Definir Senha')}
                     </Button>
                   </form>
                 </div>
@@ -491,8 +515,8 @@ export const SettingsPage = () => {
 
         {/* Setup 2FA Modal */}
         {isSetupModalOpen && setupData && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-black/95 backdrop-blur-3xl animate-in fade-in duration-700">
-            <Card variant="glass" className="w-full max-w-lg p-12 relative shadow-[0_0_150px_rgba(0,0,0,0.9)] border-primary/30 animate-in zoom-in-95 duration-500 rounded-[3.5rem]">
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/95 backdrop-blur-3xl animate-in fade-in duration-700">
+            <Card variant="glass" className="w-full max-w-lg p-12 relative shadow-[0_0_150px_rgba(0,0,0,0.9)] border-primary/30 animate-in zoom-in-95 duration-500 rounded-[3.5rem] max-h-[85vh] overflow-y-auto">
               <button 
                 onClick={() => setIsSetupModalOpen(false)}
                 className="absolute top-10 right-10 p-4 rounded-2xl hover:bg-white/10 text-muted-foreground/40 hover:text-foreground transition-all active:scale-90"
@@ -563,7 +587,7 @@ export const SettingsPage = () => {
         )}
 
         {/* Global Notifications Island */}
-        <div className="fixed bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-8 px-12 py-7 glass-island z-[100] animate-in fade-in slide-in-from-bottom-20 duration-1000 ring-2 ring-white/5 group shadow-[0_20px_50px_rgba(0,0,0,0.6)]">
+        <div className="fixed bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-8 px-12 py-7 glass-island z-[50] animate-in fade-in slide-in-from-bottom-20 duration-1000 ring-2 ring-white/5 group shadow-[0_20px_50px_rgba(0,0,0,0.6)]">
           {successMessage ? (
             <div className="flex items-center gap-4 text-emerald-400">
               <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
