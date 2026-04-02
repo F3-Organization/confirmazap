@@ -29,6 +29,7 @@ export const en = {
     contactSales: 'Contact Sales',
     currentPlan: 'Current Plan',
     activePlan: 'ACTIVE PLAN',
+    completePayment: 'Complete Payment',
     fullName: 'Full Name',
     signUp: 'Sign Up',
     alreadyHaveAccount: 'Already have an account?',
@@ -237,7 +238,8 @@ export const en = {
       title: 'Need a custom enterprise solution?',
       description: 'We offer tailor-made pricing for large scale operations with multiple locations and thousands of daily confirmations.',
       button: 'Schedule Demo',
-    }
+    },
+    enterpriseMessage: 'Hello, I would like to know more about the ConfirmaZap Enterprise plan',
   },
   landing: {
     heroTitle: 'Say goodbye to manual follow-ups.',
@@ -313,7 +315,7 @@ export const en = {
       twoFactorStatus: '2FA Status',
       twoFactorDesc: 'Add an extra layer of security to your account. When enabled, you will need a code from your authenticator app to log in.',
       setupScanner: 'Setup Authenticator App',
-      centerTitle: 'AgendaOk Security Center',
+      centerTitle: 'ConfirmaZap Security Center',
     },
     messages: {
       saveSuccess: 'Settings saved successfully!',
@@ -335,5 +337,34 @@ export const en = {
       invalidCode: 'Invalid or expired code. Please try again.',
       placeholder: '000000',
     }
+  },
+  checkout: {
+    title: 'Review Your Order',
+    subtitle: 'You are one step away from unlocking the full potential of your business on WhatsApp.',
+    backButton: 'Back to plans',
+    selectedPlan: 'SELECTED PLAN',
+    perMonth: 'per month',
+    perYear: 'per year',
+    unlimitedNotifications: 'Unlimited WhatsApp Notifications',
+    googleSync: 'Google Calendar Sync',
+    fiscalAutomation: 'Fiscal Automation (NFS-e FocusNFe)',
+    confirmButton: 'Confirm & Pay Securely',
+    loadingButton: 'Preparing Checkout...',
+    sslSecure: 'SSL Secure',
+    cloudEncrypted: 'Cloud Encrypted',
+    recurringBilling: 'Recurring Billing',
+    nextSteps: {
+        title: 'What happens now?',
+        activationTitle: 'Instant Activation',
+        activationDesc: 'As soon as the payment is confirmed via AbacatePay, your Pro plan will be activated immediately.',
+        syncTitle: 'Automatic Sync',
+        syncDesc: 'Your next appointments will start being confirmed magically on WhatsApp.',
+        invoiceTitle: 'Automatic Invoice',
+        invoiceDesc: 'Receive your NFS-e by email on every renewal, without the bureaucracy.',
+    },
+    securePaymentFooter: 'Secure Payment via',
+    paymentCreditCard: 'Card',
+    paymentPix: 'PIX',
+    footerNote: '*Automatic recurring billing processed securely. We accept Credit Card and PIX for your convenience.'
   }
 };

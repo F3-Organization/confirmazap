@@ -23,13 +23,21 @@ export class CreateSubscriptionCheckoutUseCase {
         let subscription = await this.subscriptionRepository.findByUserId(userId);
 
         if (subscription?.status === SubscriptionStatus.ACTIVE) {
-            return { url: subscription.checkoutUrl || `${baseUrl}/dashboard` };
+            return { 
+                url: subscription.checkoutUrl || `${baseUrl}/dashboard`,
+                planName: env.abacatePay.planName,
+                amount: env.abacatePay.planPrice
+            };
         }
 
         if (subscription) {
             const pendingPayment = await this.paymentRepository.findPendingByUser(subscription.id);
             if (pendingPayment && pendingPayment.checkoutUrl) {
-                return { url: pendingPayment.checkoutUrl };
+                return { 
+                    url: pendingPayment.checkoutUrl,
+                    planName: env.abacatePay.planName,
+                    amount: env.abacatePay.planPrice
+                };
             }
         }
 
@@ -39,7 +47,19 @@ export class CreateSubscriptionCheckoutUseCase {
         }
 
         let customerId = userConfig.billingCustomerId;
-        if (!customerId) {
+        let customerExists = false;
+
+        if (customerId) {
+            // Validar se o cliente ainda existe no AbacatePay (evita IDs obsoletos)
+            const existingCustomer = await this.paymentGateway.getCustomer(customerId);
+            if (existingCustomer) {
+                customerExists = true;
+            } else {
+                console.warn(`[Checkout] Customer ID ${customerId} found in DB but not in AbacatePay. Re-creating...`);
+            }
+        }
+
+        if (!customerId || !customerExists) {
             const customer = await this.paymentGateway.createCustomer({
                 name: user.name,
                 email: user.email,
@@ -52,23 +72,11 @@ export class CreateSubscriptionCheckoutUseCase {
             await this.userConfigRepository.update(userConfig.id, { billingCustomerId: customerId });
         }
 
-        // 2. Garantir que o Produto existe no AbacatePay
-        let product = await this.paymentGateway.findProductByName(env.abacatePay.planName);
-        let productId = product?.id;
-
-        if (!productId) {
-            const newProduct = await this.paymentGateway.createProduct(
-                env.abacatePay.planName,
-                env.abacatePay.planPrice,
-                "MONTHLY"
-            );
-            productId = newProduct.id;
-        }
-
-        // 3. Criar Assinatura (Recorrência)
+        // 2. Criar Assinatura (Recorrência) diretamente via Billing (V1)
         const subscriptionCheckout = await this.paymentGateway.createSubscription(
             customerId,
-            productId,
+            env.abacatePay.planName,
+            env.abacatePay.planPrice,
             `${baseUrl}/subscription`
         );
 
@@ -93,6 +101,10 @@ export class CreateSubscriptionCheckoutUseCase {
             checkoutUrl: subscriptionCheckout.url
         });
 
-        return { url: subscriptionCheckout.url };
+        return { 
+            url: subscriptionCheckout.url,
+            planName: env.abacatePay.planName,
+            amount: env.abacatePay.planPrice
+        };
     }
 }

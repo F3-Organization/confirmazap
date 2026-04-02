@@ -9,6 +9,7 @@ import { GoogleCallbackPage } from '../pages/GoogleCallbackPage';
 import { EmailVerificationPage } from '../pages/EmailVerificationPage';
 import { LandingPage } from '../pages/LandingPage';
 import { TwoFactorLoginPage } from '../pages/TwoFactorLoginPage';
+import { CheckoutPage } from '../pages/CheckoutPage';
 
 export const AppRouter = () => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -20,6 +21,11 @@ export const AppRouter = () => {
       <Route path="/auth/verify" element={<EmailVerificationPage />} />
       <Route path="/auth/2fa" element={<TwoFactorLoginPage />} />
       <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
+
+      <Route 
+        path="/checkout" 
+        element={isAuthenticated ? <CheckoutPage /> : <Navigate to="/login" />} 
+      />
 
       
       {/* Protected Routes */}

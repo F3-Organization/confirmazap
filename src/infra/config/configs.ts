@@ -17,7 +17,7 @@ export const env = {
         port: parseInt(process.env.DB_PORT || '5432'),
         user: process.env.DB_USER || 'postgres',
         password: process.env.DB_PASSWORD!,
-        database: process.env.DB_NAME || 'agendaok',
+        database: process.env.DB_NAME || 'confirmazap',
     },
     redis: {
         host: process.env.REDIS_HOST || 'redis',
@@ -28,7 +28,7 @@ export const env = {
         apiUrl: process.env.EVOLUTION_API_URL || 'http://evolution-api:8080',
         apiKey: process.env.EVO_API_KEY!,
         serverUrl: process.env.EVO_SERVER_URL || 'http://localhost:8080',
-        systemBotInstance: process.env.SYSTEM_BOT_INSTANCE || 'AgendaOk-Admin',
+        systemBotInstance: process.env.SYSTEM_BOT_INSTANCE || 'ConfirmaZap-Admin',
         webhookUrl: `${process.env.APP_INTERNAL_URL || 'http://api:3000'}/api/webhook/evolution`,
     },
     google: {
@@ -38,7 +38,7 @@ export const env = {
     },
     abacatePay: {
         token: process.env.ABACATE_PAY_TOKEN || '',
-        baseUrl: process.env.ABACATE_PAY_URL || 'https://api.abacatepay.com/v2',
+        baseUrl: process.env.ABACATE_PAY_URL || 'https://api.abacatepay.com/v1',
         planName: process.env.PLAN_NAME || 'ConfirmaZap Pro',
         planPrice: parseInt(process.env.PLAN_PRICE_CENTS || '4990'),
         webhookSecret: process.env.ABACATE_WEBHOOK_SECRET || '',
@@ -52,7 +52,7 @@ export const env = {
         port: parseInt(process.env.SMTP_PORT || '587'),
         user: process.env.SMTP_USER || '',
         pass: process.env.SMTP_PASS || '',
-        from: process.env.SMTP_FROM || 'no-reply@agendaok.com.br',
+        from: process.env.SMTP_FROM || 'no-reply@confirmazap.com.br',
     },
     company: {
         name: process.env.COMPANY_NAME || 'ConfirmaZap',

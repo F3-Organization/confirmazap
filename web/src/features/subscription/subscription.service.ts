@@ -6,6 +6,8 @@ export interface SubscriptionStatus {
   messageCount: number;
   currentPeriodEnd?: string;
   checkoutUrl?: string;
+  amount?: number;
+  planName?: string;
 }
 
 export interface SubscriptionPayment {
@@ -22,7 +24,7 @@ export const subscriptionService = {
     return response.data;
   },
 
-  createCheckout: async (): Promise<{ url: string }> => {
+  createCheckout: async (): Promise<{ url: string; planName: string; amount: number }> => {
     const response = await apiClient.post('/subscription/checkout');
     return response.data;
   },

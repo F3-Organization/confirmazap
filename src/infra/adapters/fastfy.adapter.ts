@@ -66,7 +66,7 @@ export class FastifyAdapter implements ITokenService {
             openapi: {
                 openapi: '3.0.0',
                 info: {
-                    title: 'AgendaOk API',
+                    title: 'ConfirmaZap API',
                     description: 'Solução SaaS pragmática para automação de agendamentos e notificações via WhatsApp integrando Google Calendar e Evolution API.',
                     version: '1.0.0',
                 },

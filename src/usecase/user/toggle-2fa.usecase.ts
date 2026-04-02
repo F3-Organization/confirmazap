@@ -33,7 +33,7 @@ export class Toggle2FAUseCase {
 
         const otpauthUrl = authenticator.keyuri(
             user.email,
-            "AgendaOk",
+            "ConfirmaZap",
             user.twoFactorSecret
         );
 

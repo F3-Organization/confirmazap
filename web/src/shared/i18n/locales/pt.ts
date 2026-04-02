@@ -29,6 +29,7 @@ export const pt = {
     contactSales: 'Falar com Vendas',
     currentPlan: 'Plano Atual',
     activePlan: 'PLANO ATIVO',
+    completePayment: 'Concluir Pagamento',
     fullName: 'Nome Completo',
     signUp: 'Cadastrar',
     alreadyHaveAccount: 'Já tem uma conta?',
@@ -247,7 +248,8 @@ export const pt = {
       title: 'Precisa de uma solução enterprise personalizada?',
       description: 'Oferecemos preços sob medida para operações de grande escala com várias unidades e milhares de confirmações diárias.',
       button: 'Agendar Demo',
-    }
+    },
+    enterpriseMessage: 'Olá, gostaria de saber mais sobre o plano Enterprise do ConfirmaZap',
   },
   landing: {
     heroTitle: 'Diga adeus ao acompanhamento manual.',
@@ -323,7 +325,7 @@ export const pt = {
       twoFactorStatus: 'Status do 2FA',
       twoFactorDesc: 'Adicione uma camada extra de segurança à sua conta. Ao ativar, você precisará de um código do seu aplicativo autenticador para fazer login.',
       setupScanner: 'Configurar App Autenticador',
-      centerTitle: 'Central de Segurança AgendaOk',
+      centerTitle: 'Central de Segurança ConfirmaZap',
     },
     messages: {
       saveSuccess: 'Configurações salvas com sucesso!',
@@ -345,5 +347,34 @@ export const pt = {
       invalidCode: 'Código inválido ou expirado. Tente novamente.',
       placeholder: '000000',
     }
+  },
+  checkout: {
+    title: 'Revisar seu Pedido',
+    subtitle: 'Você está a um passo de desbloquear o potencial máximo do seu negócio no WhatsApp.',
+    backButton: 'Voltar aos planos',
+    selectedPlan: 'PLANO SELECIONADO',
+    perMonth: 'por mês',
+    perYear: 'por ano',
+    unlimitedNotifications: 'Notificações Ilimitadas no WhatsApp',
+    googleSync: 'Sincronização com Google Calendar',
+    fiscalAutomation: 'Automação Fiscal (NFS-e FocusNFe)',
+    confirmButton: 'Confirmar e Pagar com Segurança',
+    loadingButton: 'Preparando Checkout...',
+    sslSecure: 'SSL Seguro',
+    cloudEncrypted: 'Criptografia em Nuvem',
+    recurringBilling: 'Cobrança Recorrente',
+    nextSteps: {
+        title: 'O que acontece agora?',
+        activationTitle: 'Ativação Instantânea',
+        activationDesc: 'Assim que o pagamento for confirmado via AbacatePay, seu plano Pro será ativado na hora.',
+        syncTitle: 'Sincronização Automática',
+        syncDesc: 'Seus próximos agendamentos começarão a ser confirmados magicamente no WhatsApp.',
+        invoiceTitle: 'Nota Fiscal Automática',
+        invoiceDesc: 'Receba sua NFS-e por e-mail em cada renovação, sem burocracia.',
+    },
+    securePaymentFooter: 'Pagamento Seguro via',
+    paymentCreditCard: 'Cartão',
+    paymentPix: 'PIX',
+    footerNote: '*Cobrança recorrente automática processada com segurança. Aceitamos Cartão de Crédito e PIX para sua comodidade.'
   }
 };

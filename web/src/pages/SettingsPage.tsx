@@ -530,7 +530,7 @@ export const SettingsPage = () => {
             <div className="flex items-center gap-3">
               <Shield className="w-5 h-5 text-primary" />
               <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest">
-                {t('settings.security.centerTitle', 'Central de Segurança AgendaOk')}
+                {t('settings.security.centerTitle', 'Central de Segurança ConfirmaZap')}
               </p>
             </div>
           )}

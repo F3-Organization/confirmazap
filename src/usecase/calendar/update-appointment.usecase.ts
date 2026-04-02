@@ -59,7 +59,7 @@ export class UpdateAppointmentUseCase {
             throw new Error("Token de acesso do Google indisponível.");
         }
 
-        const description = `Gerado via AgendaOk\nCliente: ${input.clientName}\nTelefone: ${input.clientPhone}`;
+        const description = `Gerado via ConfirmaZap\nCliente: ${input.clientName}\nTelefone: ${input.clientPhone}`;
 
         const eventDetails = {
             summary: input.title,

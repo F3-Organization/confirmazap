@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery, useMutation } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { subscriptionService } from '../subscription.service';
 
 export const useSubscription = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [showSuccessBanner, setShowSuccessBanner] = useState(false);
   const prevStatusRef = useRef<string | undefined>(undefined);
 
@@ -43,15 +45,34 @@ export const useSubscription = () => {
   const checkoutMutation = useMutation({
     mutationFn: subscriptionService.createCheckout,
     onSuccess: (data) => {
-      window.location.href = data.url;
+      // Navega para a página de resumo própria em vez de redirecionar direto
+      navigate('/checkout', { 
+        state: { 
+          checkoutUrl: data.url,
+          planName: data.planName,
+          amount: data.amount,
+          billingCycle: 'MONTHLY'
+        } 
+      });
     },
   });
 
   const handlePlanAction = (planId: string) => {
     if (planId === 'PRO') {
-      checkoutMutation.mutate();
+      if (subStatus?.status === 'PENDING' && subStatus.checkoutUrl) {
+        navigate('/checkout', {
+          state: {
+            checkoutUrl: subStatus.checkoutUrl,
+            planName: subStatus.planName || t('subscription.plans.pro.name'),
+            amount: subStatus.amount || 4990,
+            billingCycle: 'MONTHLY'
+          }
+        });
+      } else {
+        checkoutMutation.mutate();
+      }
     } else if (planId === 'ENTERPRISE') {
-      const message = encodeURIComponent('Olá, gostaria de saber mais sobre o plano Enterprise do ConfirmaZap');
+      const message = encodeURIComponent(t('subscription.enterpriseMessage'));
       window.open(`https://wa.me/${SUPPORT_WHATSAPP}?text=${message}`, '_blank');
     }
   };
@@ -92,12 +113,12 @@ export const useSubscription = () => {
         t('subscription.features.apiAccess'),
         t('subscription.features.branding')
       ],
-      current: subStatus?.plan === 'PRO' || subStatus?.status === 'PENDING',
-      disabled: subStatus?.status === 'PENDING',
+      current: subStatus?.plan === 'PRO',
+      disabled: false,
       cta: subStatus?.plan === 'PRO'
         ? t('common.currentPlan')
         : subStatus?.status === 'PENDING'
-          ? t('common.pending')
+          ? t('common.completePayment')
           : t('common.connect')
     },
     {

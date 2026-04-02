@@ -80,7 +80,7 @@ export class HandleAbacatePayWebhookUseCase {
                                 tomador,
                                 servico: {
                                     aliquota: 2, // Ex: 2% ISS
-                                    discriminacao: `Assinatura Mensal AgendaOk - Plano PRO`,
+                                    discriminacao: `Assinatura Mensal ConfirmaZap - Plano PRO`,
                                     iss_retido: false,
                                     item_lista_servico: "01.07", // Suporte técnico/SaaS
                                     valor_servicos: env.abacatePay.planPrice / 100 // Converte centavos para reais

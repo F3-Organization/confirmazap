@@ -1,6 +1,7 @@
 import { SubscriptionStatus } from "../../infra/database/entities/subscription.entity";
 import { ISubscriptionRepository } from "../repositories/isubscription-repository";
 import { IScheduleRepository } from "../repositories/ischedule-repository";
+import { env } from "../../infra/config/configs";
 
 export interface SubscriptionStatusResponse {
     status: SubscriptionStatus;
@@ -8,6 +9,8 @@ export interface SubscriptionStatusResponse {
     messageCount: number;
     currentPeriodEnd?: Date | undefined;
     checkoutUrl?: string | undefined;
+    amount?: number;
+    planName?: string;
 }
 
 
@@ -38,7 +41,9 @@ export class GetSubscriptionStatusUseCase {
             plan: subscription.plan,
             messageCount,
             currentPeriodEnd: subscription.currentPeriodEnd,
-            checkoutUrl: subscription.checkoutUrl
+            checkoutUrl: subscription.checkoutUrl,
+            amount: env.abacatePay.planPrice,
+            planName: env.abacatePay.planName
         };
     }
 }
