@@ -39,9 +39,11 @@ Este diretório contém a "verdade" técnica e de negócio do projeto, dividida 
 
 ### Recurso Compartilhado
 - **[shared.md](./shared.md):** Documentação sobre o diretório `/shared` (Zod schemas/Types).
+- **[git-workflow.md](./git-workflow.md):** Padrões de versionamento (Git Flow e Conventional Commits).
 
 ## 5. Mentalidade de Desenvolvimento
 Ao trabalhar neste projeto, priorize:
 1. **Segurança de Dados:** Nunca permita que um usuário acesse dados de outro.
 2. **Logs e Observabilidade:** Tudo o que acontece nas filas e notificações deve ser rastreável.
 3. **Clean Code:** Siga rigorosamente as regras de [code-style.md](/.agent/backend/code-style.md).
+4. **Versionamento:** Siga rigorosamente o [git-workflow.md](/.agent/git-workflow.md) para commits e branches.
