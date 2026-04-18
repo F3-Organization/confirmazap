@@ -8,6 +8,7 @@ export const GoogleCallbackPage = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const setAuth = useAuthStore((state) => state.setAuth);
+  const setCompanies = useAuthStore((state) => state.setCompanies);
   const isExchanging = useRef(false);
 
   useEffect(() => {
@@ -28,7 +29,8 @@ export const GoogleCallbackPage = () => {
                   user: data.user,
                   token: data.token,
                   status: data.status,
-                  tempToken: data.tempToken
+                  tempToken: data.tempToken,
+                  companies: data.companies,
                 }
               },
               window.location.origin
@@ -40,7 +42,8 @@ export const GoogleCallbackPage = () => {
               return;
             }
             setAuth(data.user!, data.token!);
-            navigate('/dashboard');
+            if (data.companies) setCompanies(data.companies);
+            navigate(data.companies && data.companies.length > 0 ? '/select-company' : '/create-company');
           }
         })
         .catch((err) => {

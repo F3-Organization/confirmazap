@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import type { Company } from '../company/company.types';
+import { companyService } from '../company/company.service';
 
 interface User {
   id: string;
@@ -18,16 +20,23 @@ interface AuthState {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
+  companies: Company[];
+  selectedCompany: Company | null;
   setAuth: (user: User, token: string) => void;
+  setCompanies: (companies: Company[]) => void;
+  selectCompany: (companyId: string) => Promise<void>;
+  addCompany: (company: Company) => void;
   logout: () => void;
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       token: null,
       isAuthenticated: false,
+      companies: [],
+      selectedCompany: null,
       setAuth: (user, token) => {
         if (!token) {
           console.warn('[AuthStore] Attempted to setAuth without a token.');
@@ -36,9 +45,22 @@ export const useAuthStore = create<AuthState>()(
         localStorage.setItem('auth_token', token);
         set({ user, token, isAuthenticated: true });
       },
+      setCompanies: (companies) => {
+        set({ companies });
+      },
+      selectCompany: async (companyId: string) => {
+        const { data } = await companyService.select(companyId);
+        localStorage.setItem('auth_token', data.token);
+        const companies = get().companies;
+        const company = companies.find((c) => c.id === companyId) ?? data.company;
+        set({ token: data.token, selectedCompany: company });
+      },
+      addCompany: (company: Company) => {
+        set((state) => ({ companies: [...state.companies, company] }));
+      },
       logout: () => {
         localStorage.removeItem('auth_token');
-        set({ user: null, token: null, isAuthenticated: false });
+        set({ user: null, token: null, isAuthenticated: false, companies: [], selectedCompany: null });
       },
     }),
     {

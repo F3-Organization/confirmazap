@@ -366,6 +366,46 @@ export const pt = {
       placeholder: '000000',
     }
   },
+  company: {
+    select: {
+      title: 'Selecione sua Empresa',
+      subtitle: 'Escolha a empresa que deseja acessar',
+      newCompany: 'Nova Empresa',
+    },
+    create: {
+      title: 'Criar Empresa',
+      subtitle: 'Crie sua empresa para começar a usar o ConfirmaZap',
+      nameLabel: 'Nome da Empresa',
+      namePlaceholder: 'Ex: Clínica Dr. Silva',
+      nameMinLength: 'O nome deve ter pelo menos 2 caracteres',
+      submitButton: 'Criar Empresa',
+      back: 'Voltar para seleção de empresa',
+      error: 'Erro ao criar empresa. Tente novamente.',
+    },
+    switcher: {
+      newCompany: 'Nova Empresa',
+    },
+    settings: {
+      title: 'Configurações da Empresa',
+      subtitle: 'Gerencie as configurações da sua empresa',
+      navLabel: 'Empresa',
+      islandTitle: 'Configurações da Empresa',
+      whatsapp: {
+        title: 'WhatsApp',
+        description: 'Configure o número de WhatsApp e as janelas de silêncio para esta empresa.',
+        numberLabel: 'Número do WhatsApp',
+      },
+      billing: {
+        title: 'Cobrança',
+        description: 'Dados fiscais e informações do plano desta empresa.',
+        planLabel: 'Plano Atual',
+      },
+      messages: {
+        saveSuccess: 'Configurações salvas com sucesso!',
+        saveError: 'Erro ao salvar configurações',
+      },
+    },
+  },
   checkout: {
     title: 'Revisar seu Pedido',
     subtitle: 'Você está a um passo de desbloquear o potencial máximo do seu negócio no WhatsApp.',

@@ -356,6 +356,46 @@ export const en = {
       placeholder: '000000',
     }
   },
+  company: {
+    select: {
+      title: 'Select your Company',
+      subtitle: 'Choose the company you want to access',
+      newCompany: 'New Company',
+    },
+    create: {
+      title: 'Create Company',
+      subtitle: 'Create your company to start using ConfirmaZap',
+      nameLabel: 'Company Name',
+      namePlaceholder: 'Ex: Dr. Silva Clinic',
+      nameMinLength: 'Name must be at least 2 characters',
+      submitButton: 'Create Company',
+      back: 'Back to company selection',
+      error: 'Failed to create company. Please try again.',
+    },
+    switcher: {
+      newCompany: 'New Company',
+    },
+    settings: {
+      title: 'Company Settings',
+      subtitle: 'Manage your company settings',
+      navLabel: 'Company',
+      islandTitle: 'Company Settings',
+      whatsapp: {
+        title: 'WhatsApp',
+        description: 'Configure the WhatsApp number and silent windows for this company.',
+        numberLabel: 'WhatsApp Number',
+      },
+      billing: {
+        title: 'Billing',
+        description: 'Tax details and plan information for this company.',
+        planLabel: 'Current Plan',
+      },
+      messages: {
+        saveSuccess: 'Settings saved successfully!',
+        saveError: 'Error saving settings',
+      },
+    },
+  },
   checkout: {
     title: 'Review Your Order',
     subtitle: 'You are one step away from unlocking the full potential of your business on WhatsApp.',
