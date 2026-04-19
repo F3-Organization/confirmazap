@@ -17,19 +17,17 @@ export class ListCompaniesUseCase {
     async execute(userId: string): Promise<CompanyWithSubscription[]> {
         const companies = await this.companyRepository.findByOwnerId(userId);
 
-        const result: CompanyWithSubscription[] = [];
-        for (const company of companies) {
-            const subscription = await this.subscriptionRepository.findByCompanyId(company.id);
-            result.push({
-                id: company.id,
-                name: company.name,
-                slug: company.slug,
-                subscription: subscription
-                    ? { plan: subscription.plan, status: subscription.status }
-                    : null
-            });
-        }
+        // Subscription belongs to the user, not the company — fetch once
+        const subscription = await this.subscriptionRepository.findByUserId(userId);
+        const subscriptionData = subscription
+            ? { plan: subscription.plan, status: subscription.status }
+            : null;
 
-        return result;
+        return companies.map(company => ({
+            id: company.id,
+            name: company.name,
+            slug: company.slug,
+            subscription: subscriptionData
+        }));
     }
 }

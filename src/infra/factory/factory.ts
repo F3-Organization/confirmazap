@@ -131,7 +131,8 @@ const getUseCase = {
     
     checkUsageLimit: () => new CheckUsageLimitUseCase(
         getRepo.subscription(),
-        getRepo.schedule()
+        getRepo.schedule(),
+        getRepo.company()
     ),
 
     notifyUpcomingAppointments: () => new NotifyUpcomingAppointmentsUseCase(

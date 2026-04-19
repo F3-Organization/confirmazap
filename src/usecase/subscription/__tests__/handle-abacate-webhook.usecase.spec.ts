@@ -16,7 +16,7 @@ describe("HandleAbacatePayWebhookUseCase", () => {
         subscriptionRepository = {
             findByBillingId: vi.fn(),
             updateStatus: vi.fn(),
-            findByCompanyId: vi.fn(),
+            findByUserId: vi.fn(),
             createOrUpdate: vi.fn(),
             deactivateOthers: vi.fn()
         } as any;
@@ -62,7 +62,7 @@ describe("HandleAbacatePayWebhookUseCase", () => {
             data: { id: "billing-123" }
         };
 
-        const mockSubscription = { id: "sub-1", companyId: "company-1" };
+        const mockSubscription = { id: "sub-1", userId: "user-1" };
         vi.mocked(subscriptionRepository.findByBillingId).mockResolvedValueOnce(mockSubscription as any);
         paymentRepository.findByBillingId.mockResolvedValueOnce({ id: "pay-1" });
 
@@ -70,7 +70,7 @@ describe("HandleAbacatePayWebhookUseCase", () => {
 
         expect(subscriptionRepository.updateStatus).toHaveBeenCalledWith(
             "sub-1",
-            "company-1",
+            "user-1",
             SubscriptionStatus.ACTIVE,
             expect.any(Date),
             "PRO"

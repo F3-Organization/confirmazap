@@ -30,8 +30,13 @@ graph TD
 ### 📂 `src/infra` (Infraestrutura)
 - **O Mundo Externo e Dados**: Implementações técnicas e persistência.
     - **database/entities/**: Contém as entidades do TypeORM (Modelos do Banco).
-        - `User`, `Client`, `Schedule`, `UserConfig`.
-        - `Subscription`: Dados da assinatura PRO atual.
+        - `User`: Dados de autenticação e perfil do profissional.
+        - `Company`: Empresa/negócio do profissional (cada user pode ter múltiplas).
+        - `CompanyConfig`: Configurações operacionais da empresa (WhatsApp, sincronização, horários de silêncio).
+        - `Integration`: Tokens e credenciais de serviços externos (Google OAuth), vinculados à Company.
+        - `Client`: Base de clientes de cada empresa.
+        - `Schedule`: Agendamentos sincronizados por empresa.
+        - `Subscription`: Dados da assinatura PRO, vinculada ao **User** (não à Company).
         - `SubscriptionPayment`: Histórico detalhado de pagamentos e cobranças.
     - **database/repositories/**: Contém as implementações concretas de persistência de dados.
     - **adapters/**: Adaptadores para bibliotecas externas (ex: `FastifyAdapter`, `GoogleCalendarAdapter`, `AbacatePayAdapter`).
@@ -41,7 +46,32 @@ graph TD
 
 ---
 
-## 2. Injeção de Dependências & Lazy Loading (Factory)
+## 2. Modelo de Dados Multi-Tenant
+
+```mermaid
+erDiagram
+    User ||--o{ Company : "owns (ownerId)"
+    User ||--o| Subscription : "has (userId)"
+    Company ||--o| CompanyConfig : "has (companyId)"
+    Company ||--o{ Integration : "has (companyId)"
+    Company ||--o{ Schedule : "has (companyId)"
+    Company ||--o{ Client : "has (companyId)"
+    Subscription ||--o{ SubscriptionPayment : "has"
+```
+
+### Regras de Scoping
+| Entidade | Chave de Isolamento | Descrição |
+|---|---|---|
+| `Subscription` | `userId` | Plano pertence ao usuário, não à empresa |
+| `Company` | `ownerId` (userId) | Cada user pode ter até 3 companies (PRO) |
+| `CompanyConfig` | `companyId` | Config operacional por empresa |
+| `Integration` | `companyId` + `provider` | Tokens OAuth por empresa/provedor |
+| `Schedule` | `companyId` | Agendamentos isolados por empresa |
+| `Client` | `companyId` | Base de clientes por empresa |
+
+---
+
+## 3. Injeção de Dependências & Lazy Loading (Factory)
 
 Para evitar erros de inicialização (como o famoso "No metadata for [Entity] was found"), utilizamos um padrão de **Lazy Loading Factory** em `src/infra/factory/factory.ts`.
 
@@ -52,7 +82,7 @@ Para evitar erros de inicialização (como o famoso "No metadata for [Entity] wa
 
 ---
 
-## 3. Fluxo de Inicialização (Bootstrap)
+## 4. Fluxo de Inicialização (Bootstrap)
 
 O ciclo de vida da aplicação segue uma sequência rigorosa em `src/bootstrap.ts`:
 
@@ -64,7 +94,7 @@ O ciclo de vida da aplicação segue uma sequência rigorosa em `src/bootstrap.t
 
 ---
 
-## 4. Sincronização do Banco de Dados (Schema Sync)
+## 5. Sincronização do Banco de Dados (Schema Sync)
 
 O projeto **NÃO** utiliza arquivos de migration. A evolução do banco de dados é feita através da sincronização direta das Entidades do TypeORM.
 
@@ -74,7 +104,7 @@ O projeto **NÃO** utiliza arquivos de migration. A evolução do banco de dados
 
 ---
 
-## 5. API Routing & Middleware
+## 6. API Routing & Middleware
 
 - **Prefixo de Rota**: Todas as rotas de API são automaticamente prefixadas com `/api` pelo `FastifyAdapter`.
 - **Autenticação**: 

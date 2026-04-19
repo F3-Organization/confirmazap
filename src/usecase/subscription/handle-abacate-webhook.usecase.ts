@@ -31,7 +31,7 @@ export class HandleAbacatePayWebhookUseCase {
             // Se não encontrou pelo billingId, tenta pelo userId vindo no metadata (cobranças recorrentes automáticas)
             if (!subscription && metadataUserId) {
                 console.log(`[Subscription] Billing ${billingId} not found by ID. Searching by metadata.userId: ${metadataUserId}`);
-                subscription = await this.subscriptionRepository.findByCompanyId(metadataUserId);
+                subscription = await this.subscriptionRepository.findByUserId(metadataUserId);
             }
 
             if (subscription) {
@@ -62,17 +62,18 @@ export class HandleAbacatePayWebhookUseCase {
 
                 await this.subscriptionRepository.updateStatus(
                     subscription.id, 
-                    subscription.companyId,
+                    subscription.userId,
                     SubscriptionStatus.ACTIVE,
                     periodEnd,
                     "PRO"
                 );
 
-                await this.subscriptionRepository.deactivateOthers(subscription.companyId, subscription.id);
+                await this.subscriptionRepository.deactivateOthers(subscription.userId, subscription.id);
 
                 // 4. Enviar notificação por e-mail
-                const user = await this.userRepository.findById(subscription.companyId);
-                const userConfig = await this.companyConfigRepository.findByCompanyId(subscription.companyId);
+                const user = await this.userRepository.findById(subscription.userId);
+                // Para NF, buscar config da primeira company do user (taxId)
+                const userConfig = await this.companyConfigRepository.findByCompanyId(subscription.userId);
                 
                 if (user) {
                     await this.notificationService.notifyPaymentSuccess(user.email, user.name, "PRO");
@@ -114,7 +115,7 @@ export class HandleAbacatePayWebhookUseCase {
                     }
                 }
 
-                console.log(`[Subscription] User ${subscription.companyId} activated via Abacate Pay.`);
+                console.log(`[Subscription] User ${subscription.userId} activated via Abacate Pay.`);
             }
         } else if (event === "billing.expired" || event === "billing.abandoned") {
             const billingId = data.id;
@@ -132,12 +133,12 @@ export class HandleAbacatePayWebhookUseCase {
                 if (subscription.status === SubscriptionStatus.PENDING) {
                     await this.subscriptionRepository.updateStatus(
                         subscription.id,
-                        subscription.companyId,
+                        subscription.userId,
                         SubscriptionStatus.INACTIVE
                     );
 
                     // Notificar expiração/cancelamento
-                    const user = await this.userRepository.findById(subscription.companyId);
+                    const user = await this.userRepository.findById(subscription.userId);
                     if (user) {
                         await this.notificationService.notifySubscriptionExpired(user.email, user.name);
                     }
@@ -158,12 +159,12 @@ export class HandleAbacatePayWebhookUseCase {
                 // Plano reembolsado perde o acesso PRO
                 await this.subscriptionRepository.updateStatus(
                     subscription.id,
-                    subscription.companyId,
+                    subscription.userId,
                     SubscriptionStatus.CANCELLED
                 );
 
                 // Notificar reembolso
-                const user = await this.userRepository.findById(subscription.companyId);
+                const user = await this.userRepository.findById(subscription.userId);
                 if (user) {
                     await this.notificationService.notifySubscriptionRefunded(user.email, user.name);
                 }

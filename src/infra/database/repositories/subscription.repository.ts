@@ -10,35 +10,35 @@ export class SubscriptionRepository implements ISubscriptionRepository {
         this.repository = AppDataSource.getRepository(Subscription);
     }
 
-    async findByCompanyId(companyId: string): Promise<Subscription | null> {
+    async findByUserId(userId: string): Promise<Subscription | null> {
         return await this.repository.findOne({ 
-            where: { companyId },
+            where: { userId },
             order: { status: "ASC", createdAt: "DESC" }
         });
     }
 
-    async findActiveByCompanyId(companyId: string): Promise<Subscription | null> {
-        return await this.repository.findOne({ where: { companyId, status: SubscriptionStatus.ACTIVE } });
+    async findActiveByUserId(userId: string): Promise<Subscription | null> {
+        return await this.repository.findOne({ where: { userId, status: SubscriptionStatus.ACTIVE } });
     }
 
     async save(subscription: Partial<Subscription>): Promise<Subscription> {
         return await this.repository.save(this.repository.create(subscription));
     }
 
-    async createOrUpdate(companyId: string, data: Partial<Subscription>): Promise<Subscription> {
-        let subscription = await this.findByCompanyId(companyId);
+    async createOrUpdate(userId: string, data: Partial<Subscription>): Promise<Subscription> {
+        let subscription = await this.findByUserId(userId);
         if (subscription) {
             Object.assign(subscription, data);
             return await this.repository.save(subscription);
         }
-        return await this.save({ companyId, ...data });
+        return await this.save({ userId, ...data });
     }
 
     async findByBillingId(billingId: string): Promise<Subscription | null> {
         return await this.repository.findOne({ where: { abacateBillingId: billingId } });
     }
 
-    async updateStatus(id: string, companyId: string, status: SubscriptionStatus, periodEnd?: Date, plan?: string): Promise<void> {
+    async updateStatus(id: string, userId: string, status: SubscriptionStatus, periodEnd?: Date, plan?: string): Promise<void> {
         const updateData: Partial<Subscription> = { status };
         if (periodEnd) {
             updateData.currentPeriodEnd = periodEnd;
@@ -46,14 +46,14 @@ export class SubscriptionRepository implements ISubscriptionRepository {
         if (plan) {
             updateData.plan = plan;
         }
-        await this.repository.update({ id, companyId }, updateData as any);
+        await this.repository.update({ id, userId }, updateData as any);
     }
 
-    async deactivateOthers(companyId: string, activeId: string): Promise<void> {
+    async deactivateOthers(userId: string, activeId: string): Promise<void> {
         await this.repository.createQueryBuilder()
             .update(Subscription)
             .set({ status: SubscriptionStatus.INACTIVE })
-            .where("company_id = :companyId AND id != :activeId", { companyId, activeId })
+            .where("user_id = :userId AND id != :activeId", { userId, activeId })
             .execute();
     }
 }

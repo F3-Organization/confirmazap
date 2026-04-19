@@ -52,14 +52,14 @@ export class GenerateInvoicePdfUseCase {
         return extenso.charAt(0).toUpperCase() + extenso.slice(1);
     }
 
-    async execute(paymentId: string, companyId: string): Promise<Buffer> {
+    async execute(paymentId: string, userId: string): Promise<Buffer> {
         const payment = await this.paymentRepository.findById(paymentId);
         if (!payment) throw new Error("Payment not found");
 
-        const user = await this.userRepository.findById(companyId);
+        const user = await this.userRepository.findById(userId);
         if (!user) throw new Error("User not found");
 
-        const userConfig = await this.companyConfigRepository.findByCompanyId(companyId);
+        const userConfig = await this.companyConfigRepository.findByCompanyId(userId);
 
         const paymentShortId = payment.id.split('-')[0]?.toUpperCase() || 'INVALID';
         const createdAt = payment.createdAt;

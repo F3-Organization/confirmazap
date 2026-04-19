@@ -23,7 +23,7 @@ describe("CreateSubscriptionCheckoutUseCase", () => {
         } as any;
 
         subscriptionRepository = {
-            findByCompanyId: vi.fn(),
+            findByUserId: vi.fn(),
             createOrUpdate: vi.fn(),
             save: vi.fn()
         } as any;
@@ -61,17 +61,17 @@ describe("CreateSubscriptionCheckoutUseCase", () => {
     it("deve lançar erro se o usuário não for encontrado", async () => {
         vi.mocked(userRepository.findById).mockResolvedValueOnce(null);
 
-        await expect(sut.execute("company-1")).rejects.toThrow("User not found");
+        await expect(sut.execute("user-1")).rejects.toThrow("User not found");
     });
 
     it("deve retornar URL existente se a assinatura já estiver ativa", async () => {
         vi.mocked(userRepository.findById).mockResolvedValueOnce({ id: "user-1" } as any);
-        vi.mocked(subscriptionRepository.findByCompanyId).mockResolvedValueOnce({
+        vi.mocked(subscriptionRepository.findByUserId).mockResolvedValueOnce({
             status: SubscriptionStatus.ACTIVE,
             checkoutUrl: "https://checkout.url"
         } as any);
 
-        const result = await sut.execute("company-1");
+        const result = await sut.execute("user-1");
 
         expect(result.url).toBe("https://checkout.url");
         expect(paymentGateway.createCustomer).not.toHaveBeenCalled();
@@ -79,7 +79,7 @@ describe("CreateSubscriptionCheckoutUseCase", () => {
 
     it("deve criar novo customer se não existir um customerId", async () => {
         vi.mocked(userRepository.findById).mockResolvedValueOnce({ id: "user-1", name: "User", email: "user@test.com" } as any);
-        vi.mocked(subscriptionRepository.findByCompanyId).mockResolvedValueOnce(null);
+        vi.mocked(subscriptionRepository.findByUserId).mockResolvedValueOnce(null);
         vi.mocked(companyConfigRepository.findByCompanyId).mockResolvedValueOnce({
             whatsappNumber: "5511999999999",
             taxId: "123.456.789-00"
@@ -89,7 +89,7 @@ describe("CreateSubscriptionCheckoutUseCase", () => {
         (paymentGateway as any).getCustomer.mockResolvedValueOnce(null);
         vi.mocked(subscriptionRepository.save).mockResolvedValueOnce({ id: "sub-1" } as any);
 
-        const result = await sut.execute("company-1");
+        const result = await sut.execute("user-1");
 
         expect(paymentGateway.createCustomer).toHaveBeenCalledWith(expect.objectContaining({
             name: "User",
@@ -100,7 +100,7 @@ describe("CreateSubscriptionCheckoutUseCase", () => {
 
     it("deve usar o customerId existente se disponível", async () => {
         vi.mocked(userRepository.findById).mockResolvedValueOnce({ id: "user-1" } as any);
-        vi.mocked(subscriptionRepository.findByCompanyId).mockResolvedValueOnce({
+        vi.mocked(subscriptionRepository.findByUserId).mockResolvedValueOnce({
             id: "sub-1",
             abacateCustomerId: "customer-existente",
             status: SubscriptionStatus.INACTIVE
@@ -109,7 +109,7 @@ describe("CreateSubscriptionCheckoutUseCase", () => {
             checkoutUrl: "https://pending-checkout.url"
         });
 
-        const result = await sut.execute("company-1");
+        const result = await sut.execute("user-1");
 
         expect(result.url).toBe("https://pending-checkout.url");
     });

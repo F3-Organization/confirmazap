@@ -15,12 +15,12 @@ export class CreateSubscriptionCheckoutUseCase {
         private readonly paymentGateway: IPaymentGateway,
         private readonly paymentRepository: ISubscriptionPaymentRepository
     ) { }
-    async execute(companyId: string) {
-        const user = await this.userRepository.findById(companyId);
+    async execute(userId: string) {
+        const user = await this.userRepository.findById(userId);
         if (!user) throw new Error("User not found");
 
         const baseUrl = env.domain.startsWith('http') ? env.domain : `https://${env.domain}`;
-        let subscription = await this.subscriptionRepository.findByCompanyId(companyId);
+        let subscription = await this.subscriptionRepository.findByUserId(userId);
 
         if (subscription?.status === SubscriptionStatus.ACTIVE) {
             return { 
@@ -41,7 +41,9 @@ export class CreateSubscriptionCheckoutUseCase {
             }
         }
 
-        const userConfig = await this.companyConfigRepository.findByCompanyId(companyId);
+        // Para checkout, buscar taxId/whatsapp de qualquer company config do user
+        // TODO: Futuramente mover taxId para o perfil do User
+        const userConfig = await this.companyConfigRepository.findByCompanyId(userId);
         if (!userConfig?.whatsappNumber || !userConfig?.taxId) {
             throw new Error("User must configure WhatsApp Number and Tax ID (CPF/CNPJ) before checkout.");
         }
@@ -78,12 +80,12 @@ export class CreateSubscriptionCheckoutUseCase {
             env.abacatePay.planName,
             env.abacatePay.planPrice,
             `${baseUrl}/subscription`,
-            { companyId }
+            { userId }
         );
 
         // Criar NOVO registro de assinatura PRO como PENDING
         const newSubscriptionData: any = {
-            companyId,
+            userId,
             abacateBillingId: subscriptionCheckout.id,
             abacateCustomerId: customerId,
             checkoutUrl: subscriptionCheckout.url,

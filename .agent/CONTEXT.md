@@ -11,12 +11,30 @@ A **ConfirmaZap** é uma plataforma SaaS **Multi-Tenant** projetada para profiss
 - **Interatividade:** Permitir que o cliente final confirme ou cancele o agendamento respondendo diretamente pelo WhatsApp, com atualização automática no calendário do profissional.
 - **Escalabilidade:** Operar como um SaaS robusto, com planos Free e Pro, integrando pagamentos e gestão de assinaturas.
 
-## 3. Pilares Arquiteturais
-- **Isolamento de Dados (Multi-Tenancy):** Rigoroso isolamento por `userId` em todas as tabelas e fluxos.
+## 3. Modelo Multi-Tenant
+
+O sistema adota um modelo multi-tenant com dois níveis de isolamento:
+
+```
+User (userId)
+ ├── Subscription (userId) — plano FREE/PRO do usuário
+ └── Companies (ownerId → userId) — até 3 empresas no plano PRO
+      ├── CompanyConfig — configurações da empresa (WhatsApp, sincronização, etc.)
+      ├── Integrations — tokens de serviços externos (Google, etc.)
+      ├── Schedules — agendamentos isolados por company
+      └── Clients — base de clientes por company
+```
+
+- **Subscription é do User:** O plano PRO pertence ao usuário, não à empresa. Um user PRO pode ter até 3 companies.
+- **Dados operacionais são da Company:** Agendamentos, clientes, configs e integrações são isolados por `companyId`.
+- **JWT contém `companyId`:** Após login e seleção de empresa, o token JWT inclui o `companyId` ativo para scoping das operações.
+
+## 4. Pilares Arquiteturais
+- **Isolamento de Dados (Multi-Tenancy):** Rigoroso isolamento por `companyId` em todas as tabelas operacionais (schedules, clients, configs, integrations). Assinatura isolada por `userId`.
 - **Resiliência:** Uso de filas (BullMQ/Redis) para garantir o envio de mensagens mesmo sob falhas de rede ou limites de API.
 - **Facilidade de Uso:** O profissional deve ser capaz de conectar seu WhatsApp e Calendário com poucos cliques.
 
-## 4. Guia de Documentos (.agent)
+## 5. Guia de Documentos (.agent)
 Este diretório contém a "verdade" técnica e de negócio do projeto, dividida por contexto:
 
 ### Backend
@@ -41,9 +59,9 @@ Este diretório contém a "verdade" técnica e de negócio do projeto, dividida 
 - **[shared.md](./shared.md):** Documentação sobre o diretório `/shared` (Zod schemas/Types).
 - **[git-workflow.md](./git-workflow.md):** Padrões de versionamento (Git Flow e Conventional Commits).
 
-## 5. Mentalidade de Desenvolvimento
+## 6. Mentalidade de Desenvolvimento
 Ao trabalhar neste projeto, priorize:
-1. **Segurança de Dados:** Nunca permita que um usuário acesse dados de outro.
+1. **Segurança de Dados:** Nunca permita que uma empresa acesse dados de outra. Sempre filtre por `companyId`.
 2. **Logs e Observabilidade:** Tudo o que acontece nas filas e notificações deve ser rastreável.
 3. **Clean Code:** Siga rigorosamente as regras de [code-style.md](/.agent/backend/code-style.md).
 4. **Versionamento:** Siga rigorosamente o [git-workflow.md](/.agent/git-workflow.md) para commits e branches.

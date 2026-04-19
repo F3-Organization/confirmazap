@@ -1,5 +1,5 @@
 import { Entity, Column, ManyToOne, JoinColumn, OneToMany, Index } from "typeorm";
-import { Company } from "./company.entity";
+import { User } from "./user.entity";
 import { SubscriptionPayment } from "./subscription-payment.entity";
 import { BaseEntity } from "./base.entity";
 
@@ -13,14 +13,14 @@ export enum SubscriptionStatus {
 }
 
 @Entity("subscriptions")
-@Index(["companyId"])
+@Index(["userId"])
 export class Subscription extends BaseEntity {
-    @Column({ name: "company_id" })
-    companyId!: string;
+    @Column({ name: "user_id" })
+    userId!: string;
 
-    @ManyToOne(() => Company)
-    @JoinColumn({ name: "company_id" })
-    company!: Company;
+    @ManyToOne(() => User)
+    @JoinColumn({ name: "user_id" })
+    user!: User;
 
     @Column({ name: "abacate_billing_id", nullable: true })
     abacateBillingId?: string;

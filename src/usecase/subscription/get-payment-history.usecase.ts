@@ -7,8 +7,8 @@ export class GetSubscriptionPaymentHistoryUseCase {
         private readonly paymentRepository: ISubscriptionPaymentRepository
     ) {}
 
-    async execute(companyId: string) {
-        const subscription = await this.subscriptionRepository.findByCompanyId(companyId);
+    async execute(userId: string) {
+        const subscription = await this.subscriptionRepository.findByUserId(userId);
         if (!subscription) {
             return [];
         }
