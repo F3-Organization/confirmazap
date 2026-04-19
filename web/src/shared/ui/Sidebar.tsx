@@ -10,7 +10,9 @@ import {
   LogOut,
   Zap,
   X,
-  Building2
+  Building2,
+  Users,
+  Bot
 } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -35,6 +37,8 @@ export const Sidebar = ({ isOpen, onClose }: SidebarProps) => {
   const navigation = [
     { name: t('common.dashboard'), href: '/dashboard', icon: LayoutDashboard },
     { name: t('common.appointments'), href: '/appointments', icon: Calendar },
+    { name: t('professionals.title', 'Profissionais'), href: '/professionals', icon: Users },
+    { name: t('botConfig.nav', 'Bot IA'), href: '/bot-config', icon: Bot },
     { name: t('common.whatsapp'), href: '/whatsapp', icon: MessageCircle },
     { name: t('common.subscription'), href: '/subscription', icon: CreditCard },
     { name: t('company.settings.navLabel', 'Empresa'), href: '/company/settings', icon: Building2 },

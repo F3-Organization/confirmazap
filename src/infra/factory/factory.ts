@@ -3,6 +3,7 @@ import { EvolutionApiAdapter } from "../adapters/evolution-api.adapter";
 import { GoogleCalendarAdapter } from "../adapters/google-calendar.adapter";
 import { AbacatePayAdapter } from "../adapters/abacatepay.adapter";
 import { FocusNFeAdapter } from "../adapters/focus-nfe.adapter";
+import { GeminiAdapter } from "../adapters/gemini.adapter";
 import { adminMiddleware } from "../middleware/auth.middleware";
 import { AppController } from "../controller/app.controller";
 import { AuthController } from "../controller/auth.controller";
@@ -10,6 +11,7 @@ import { CalendarController } from "../controller/calendar.controller";
 import { CompanyController } from "../controller/company.controller";
 import { EvolutionWebhookController } from "../controller/evolution-webhook.controller";
 import { SubscriptionController } from "../controller/subscription.controller";
+import { ProfessionalController } from "../controller/professional.controller";
 import { GetUserConfigUseCase } from "../../usecase/user/get-user-config.usecase";
 import { UpdateUserConfigUseCase } from "../../usecase/user/update-user-config.usecase";
 import { ChangePasswordUseCase } from "../../usecase/user/change-password.usecase";
@@ -27,6 +29,7 @@ import { UserConfigRepository } from "../database/repositories/user-config.repos
 import { SubscriptionRepository } from "../database/repositories/subscription.repository";
 import { SubscriptionPaymentRepository } from "../database/repositories/subscription-payment.repository";
 import { IntegrationRepository } from "../database/repositories/integration.repository";
+import { ProfessionalRepository } from "../database/repositories/professional.repository";
 import { GenerateGoogleAuthUrlUseCase } from "../../usecase/auth/generate-google-auth-url.usecase";
 import { ExchangeGoogleCodeUseCase } from "../../usecase/auth/exchange-google-code.usecase";
 import { SyncCalendarUseCase } from "../../usecase/calendar/sync-calendar.usecase";
@@ -61,6 +64,9 @@ import { ListCompaniesUseCase } from "../../usecase/company/list-companies.useca
 import { SelectCompanyUseCase } from "../../usecase/company/select-company.usecase";
 import { UpdateCompanyUseCase } from "../../usecase/company/update-company.usecase";
 import { DeleteCompanyUseCase } from "../../usecase/company/delete-company.usecase";
+import { ManageProfessionalsUseCase } from "../../usecase/company/manage-professionals.usecase";
+import { ManageBotConfigUseCase } from "../../usecase/company/manage-bot-config.usecase";
+import { ConversationService } from "../../usecase/chatbot/conversation.service";
 
 import { SyncCalendarQueue } from "../queue/sync-calendar.queue";
 import { SyncCalendarWorker } from "../queue/sync-calendar.worker";
@@ -82,8 +88,10 @@ const evolutionAdapter = new EvolutionApiAdapter();
 const googleCalendarAdapter = new GoogleCalendarAdapter();
 const abacatePayAdapter = new AbacatePayAdapter();
 const focusNFeAdapter = new FocusNFeAdapter();
+const geminiAdapter = new GeminiAdapter();
 const mailAdapter = new NodemailerAdapter();
 const redisService = new RedisService();
+const conversationService = new ConversationService(redisService);
 
 // Lazy Instances
 let userRepository: UserRepository;
@@ -95,6 +103,7 @@ let userConfigRepository: UserConfigRepository;
 let subscriptionRepository: SubscriptionRepository;
 let subscriptionPaymentRepository: SubscriptionPaymentRepository;
 let integrationRepository: IntegrationRepository;
+let professionalRepository: ProfessionalRepository;
 
 let syncCalendarQueue: SyncCalendarQueue;
 let notifyQueue: NotifyQueue;
@@ -108,7 +117,8 @@ const getRepo = {
     userConfig: () => userConfigRepository || (userConfigRepository = new UserConfigRepository()),
     subscription: () => subscriptionRepository || (subscriptionRepository = new SubscriptionRepository()),
     subscriptionPayment: () => subscriptionPaymentRepository || (subscriptionPaymentRepository = new SubscriptionPaymentRepository()),
-    integration: () => integrationRepository || (integrationRepository = new IntegrationRepository())
+    integration: () => integrationRepository || (integrationRepository = new IntegrationRepository()),
+    professional: () => professionalRepository || (professionalRepository = new ProfessionalRepository())
 };
 
 const getUseCase = {
@@ -163,7 +173,11 @@ const getUseCase = {
         getUseCase.cancelAppointment(),
         getUseCase.acceptInvite(),
         evolutionAdapter,
-        getUseCase.checkUsageLimit()
+        getUseCase.checkUsageLimit(),
+        geminiAdapter,
+        conversationService,
+        getRepo.professional(),
+        getRepo.company()
     ),
     createSubscriptionCheckout: () => new CreateSubscriptionCheckoutUseCase(
         getRepo.user(),
@@ -294,6 +308,13 @@ const getUseCase = {
     deleteCompany: () => new DeleteCompanyUseCase(
         getRepo.company(),
         getRepo.companyConfig()
+    ),
+    // Professional & Bot use cases
+    manageProfessionals: () => new ManageProfessionalsUseCase(
+        getRepo.professional()
+    ),
+    manageBotConfig: () => new ManageBotConfigUseCase(
+        getRepo.companyConfig()
     )
 };
 
@@ -307,7 +328,8 @@ export const factory = {
         fastify: () => adapterInstance,
         evolution: () => evolutionAdapter,
         google: () => googleCalendarAdapter,
-        abacate: () => abacatePayAdapter
+        abacate: () => abacatePayAdapter,
+        gemini: () => geminiAdapter
     },
     repositories: getRepo,
     controller: {
@@ -381,6 +403,11 @@ export const factory = {
             getUseCase.toggle2FA(),
             getUseCase.verify2FA(),
             getRepo.company()
+        ),
+        professional: () => new ProfessionalController(
+            adapterInstance,
+            getUseCase.manageProfessionals(),
+            getUseCase.manageBotConfig()
         )
     },
     queues: {

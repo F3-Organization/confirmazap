@@ -1,5 +1,7 @@
 import { ICompanyConfigRepository } from "../repositories/icompany-config-repository";
 import { IScheduleRepository } from "../repositories/ischedule-repository";
+import { IProfessionalRepository } from "../repositories/iprofessional-repository";
+import { ICompanyRepository } from "../repositories/icompany-repository";
 import { IEvolutionService } from "../ports/ievolution-service";
 import { ConfirmAppointmentUseCase } from "../calendar/confirm-appointment.usecase";
 import { CancelAppointmentUseCase } from "../calendar/cancel-appointment.usecase";
@@ -9,6 +11,8 @@ import { env } from "../../infra/config/configs";
 import { CheckUsageLimitUseCase } from "../subscription/check-usage-limit.usecase";
 import { isWithinSilentWindow } from "../../shared/utils/time.util";
 import { CompanyConfig } from "../../infra/database/entities/company-config.entity";
+import { GeminiAdapter } from "../../infra/adapters/gemini.adapter";
+import { ConversationService } from "../chatbot/conversation.service";
 
 export class HandleEvolutionWebhookUseCase {
     constructor(
@@ -18,7 +22,11 @@ export class HandleEvolutionWebhookUseCase {
         private readonly cancelAppointment: CancelAppointmentUseCase,
         private readonly acceptInvite: AcceptInviteUseCase,
         private readonly evolutionService: IEvolutionService,
-        private readonly checkUsageLimit: CheckUsageLimitUseCase
+        private readonly checkUsageLimit: CheckUsageLimitUseCase,
+        private readonly geminiAdapter: GeminiAdapter,
+        private readonly conversationService: ConversationService,
+        private readonly professionalRepository: IProfessionalRepository,
+        private readonly companyRepository: ICompanyRepository
     ) {}
 
     async execute(payload: EvolutionWebhookPayload): Promise<void> {
@@ -85,22 +93,74 @@ export class HandleEvolutionWebhookUseCase {
             return;
         }
 
-        const isConfirmation = this.isConfirmation(text) || this.isCancellation(text);
-        if (!isConfirmation && isWithinSilentWindow(config.silentWindowStart ?? "23:59", config.silentWindowEnd ?? "08:00")) {
+        // Check if the message is a direct confirmation/cancellation response to a notification
+        const isDirectResponse = this.isConfirmation(text) || this.isCancellation(text);
+
+        if (!isDirectResponse && isWithinSilentWindow(config.silentWindowStart ?? "23:59", config.silentWindowEnd ?? "08:00")) {
             return;
         }
 
+        // Handle direct confirmation/cancellation (keyword-based fallback)
         if (this.isConfirmation(text)) {
             try {
                 await this.confirmAppointment.execute(config.companyId, senderNumber);
                 await this.evolutionService.sendText(instanceName, fullJid, "✅ Ótimo! Seu agendamento foi confirmado com sucesso. Te esperamos!");
-            } catch (error) {}
+                return;
+            } catch (error) {
+                // If no appointment to confirm, fall through to AI
+            }
         } else if (this.isCancellation(text)) {
             try {
                 await this.cancelAppointment.execute(config.companyId, senderNumber);
                 await this.evolutionService.sendText(instanceName, fullJid, "❌ Certo, seu agendamento foi cancelado. Entre em contato para remarcar quando puder.");
-            } catch (error) {}
+                return;
+            } catch (error) {
+                // If no appointment to cancel, fall through to AI
+            }
         }
+
+        // AI-powered response (only for PRO users with bot enabled)
+        if (usage.plan === "PRO" && config.botEnabled && env.gemini.apiKey) {
+            try {
+                await this.handleAIResponse(config, instanceName, senderNumber, fullJid, text);
+            } catch (error) {
+                console.error("[HandleWebhook] AI response failed, skipping:", error);
+                // Don't send any fallback message — silent failure
+            }
+        }
+    }
+
+    private async handleAIResponse(
+        config: CompanyConfig,
+        instanceName: string,
+        senderNumber: string,
+        fullJid: string,
+        text: string
+    ): Promise<void> {
+        // Load company info
+        const company = await this.companyRepository.findById(config.companyId);
+        const companyName = company?.name || "Empresa";
+
+        // Load professionals
+        const professionals = await this.professionalRepository.findActiveByCompanyId(config.companyId);
+
+        // Get conversation history
+        const history = await this.conversationService.getHistory(config.companyId, senderNumber);
+
+        // Call Gemini
+        const response = await this.geminiAdapter.chat(
+            config,
+            companyName,
+            professionals,
+            history,
+            text
+        );
+
+        // Save conversation history
+        await this.conversationService.addMessages(config.companyId, senderNumber, text, response.text);
+
+        // Send response via WhatsApp
+        await this.evolutionService.sendText(instanceName, fullJid, response.text);
     }
 
     private async handleSystemBotMessage(

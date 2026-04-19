@@ -17,10 +17,15 @@ describe("HandleEvolutionWebhookUseCase", () => {
     let acceptInvite: AcceptInviteUseCase;
     let evolutionService: any;
     let checkUsageLimit: CheckUsageLimitUseCase;
+    let geminiAdapter: any;
+    let conversationService: any;
+    let professionalRepository: any;
+    let companyRepository: any;
 
     const mockConfig = {
         companyId: "company-1",
-        whatsappInstanceName: "instancia-1"
+        whatsappInstanceName: "instancia-1",
+        botEnabled: false
     } as CompanyConfig;
 
     beforeEach(() => {
@@ -64,6 +69,24 @@ describe("HandleEvolutionWebhookUseCase", () => {
             execute: vi.fn().mockResolvedValue({ canSend: true, plan: "FREE", count: 0 })
         } as any;
 
+        geminiAdapter = {
+            chat: vi.fn().mockResolvedValue({ text: "Resposta do bot" })
+        };
+
+        conversationService = {
+            getHistory: vi.fn().mockResolvedValue([]),
+            addMessages: vi.fn(),
+            clearHistory: vi.fn()
+        };
+
+        professionalRepository = {
+            findActiveByCompanyId: vi.fn().mockResolvedValue([])
+        };
+
+        companyRepository = {
+            findById: vi.fn().mockResolvedValue({ name: "Test Company" })
+        };
+
         sut = new HandleEvolutionWebhookUseCase(
             companyConfigRepository,
             scheduleRepository,
@@ -71,7 +94,11 @@ describe("HandleEvolutionWebhookUseCase", () => {
             cancelAppointment,
             acceptInvite,
             evolutionService,
-            checkUsageLimit
+            checkUsageLimit,
+            geminiAdapter,
+            conversationService,
+            professionalRepository,
+            companyRepository
         );
     });
 

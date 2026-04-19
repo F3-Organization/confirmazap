@@ -14,6 +14,8 @@ import { CheckoutPage } from '../pages/CheckoutPage';
 import { SelectCompanyPage } from '../pages/SelectCompanyPage';
 import { CreateCompanyPage } from '../pages/CreateCompanyPage';
 import { CompanySettingsPage } from '../pages/CompanySettingsPage';
+import { ProfessionalsPage } from '../pages/ProfessionalsPage';
+import { BotConfigPage } from '../pages/BotConfigPage';
 
 export const AppRouter = () => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -100,6 +102,26 @@ export const AppRouter = () => {
           isAuthenticated
             ? selectedCompany
               ? <CompanySettingsPage />
+              : <Navigate to="/select-company" />
+            : <Navigate to="/login" />
+        }
+      />
+      <Route
+        path="/professionals"
+        element={
+          isAuthenticated
+            ? selectedCompany
+              ? <ProfessionalsPage />
+              : <Navigate to="/select-company" />
+            : <Navigate to="/login" />
+        }
+      />
+      <Route
+        path="/bot-config"
+        element={
+          isAuthenticated
+            ? selectedCompany
+              ? <BotConfigPage />
               : <Navigate to="/select-company" />
             : <Navigate to="/login" />
         }

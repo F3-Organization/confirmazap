@@ -37,4 +37,29 @@ export class CompanyConfig extends BaseEntity {
 
     @Column({ type: "boolean", name: "sync_enabled", default: true })
     syncEnabled?: boolean;
+
+    // Bot AI Configuration
+    @Column({ type: "varchar", name: "business_type", nullable: true })
+    businessType?: string;
+
+    @Column({ type: "text", name: "business_description", nullable: true })
+    businessDescription?: string;
+
+    @Column({ type: "text", name: "bot_greeting", nullable: true })
+    botGreeting?: string;
+
+    @Column({ type: "text", name: "bot_instructions", nullable: true })
+    botInstructions?: string;
+
+    @Column({ type: "varchar", name: "address", nullable: true })
+    address?: string;
+
+    @Column({ type: "jsonb", name: "working_hours", nullable: true })
+    workingHours?: Record<string, Array<{ start: string; end: string }>>;
+
+    @Column({ type: "jsonb", name: "services_offered", nullable: true })
+    servicesOffered?: string[];
+
+    @Column({ type: "boolean", name: "bot_enabled", default: false })
+    botEnabled?: boolean;
 }
