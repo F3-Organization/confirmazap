@@ -16,6 +16,8 @@ import { CreateCompanyPage } from '../pages/CreateCompanyPage';
 import { CompanySettingsPage } from '../pages/CompanySettingsPage';
 import { ProfessionalsPage } from '../pages/ProfessionalsPage';
 import { BotConfigPage } from '../pages/BotConfigPage';
+import { PrivacyPolicyPage } from '../pages/PrivacyPolicyPage';
+import { TermsOfServicePage } from '../pages/TermsOfServicePage';
 
 export const AppRouter = () => {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
@@ -29,6 +31,8 @@ export const AppRouter = () => {
       <Route path="/auth/verify" element={<EmailVerificationPage />} />
       <Route path="/auth/2fa" element={<TwoFactorLoginPage />} />
       <Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
+      <Route path="/privacy" element={<PrivacyPolicyPage />} />
+      <Route path="/terms" element={<TermsOfServicePage />} />
 
       {/* Authenticated but company not yet selected */}
       <Route
