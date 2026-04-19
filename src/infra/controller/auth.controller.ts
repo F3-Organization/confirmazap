@@ -378,8 +378,15 @@ export class AuthController {
             }
 
             try {
-                // Use companyId from JWT if available, fallback to userId for backward compat
-                const companyId = user.companyId || user.id;
+                // Resolve real companyId — never fallback to userId
+                let companyId = user.companyId;
+                if (!companyId) {
+                    const companies = await this.companyRepo.findByOwnerId(user.id);
+                    companyId = companies[0]?.id;
+                }
+                if (!companyId) {
+                    return reply.code(400).send({ error: "No company found for user. Please re-login." });
+                }
                 await this.updateUserConfig.execute(user.id, companyId, parseResult.data);
                 reply.send({ message: "Configuration updated successfully" });
             } catch (error: any) {

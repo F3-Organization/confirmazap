@@ -375,7 +375,8 @@ export const factory = {
             getUseCase.changePassword(),
             getUseCase.setPassword(),
             getUseCase.toggle2FA(),
-            getUseCase.verify2FA()
+            getUseCase.verify2FA(),
+            getRepo.company()
         )
     },
     queues: {
