@@ -394,7 +394,15 @@ export const DashboardPage = () => {
                   if (dashboardStats?.calendarConnected) {
                     syncMutation.mutate();
                   } else {
-                    window.location.href = `${apiClient.defaults.baseURL}/auth/google`;
+                    const width = 500;
+                    const height = 600;
+                    const left = window.screenX + (window.outerWidth - width) / 2;
+                    const top = window.screenY + (window.outerHeight - height) / 2;
+                    window.open(
+                      `${apiClient.defaults.baseURL}/auth/google`,
+                      'google_calendar',
+                      `width=${width},height=${height},left=${left},top=${top},toolbar=0,scrollbars=1,status=1,resizable=1,location=1,menuBar=0`
+                    );
                   }
                 }}
                 disabled={syncMutation.isPending}
