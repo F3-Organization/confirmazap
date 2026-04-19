@@ -371,6 +371,7 @@ export const pt = {
       title: 'Selecione sua Empresa',
       subtitle: 'Escolha a empresa que deseja acessar',
       newCompany: 'Nova Empresa',
+      limitReached: 'Limite de empresas atingido no plano atual',
     },
     create: {
       title: 'Criar Empresa',
@@ -390,6 +391,11 @@ export const pt = {
       subtitle: 'Gerencie as configurações da sua empresa',
       navLabel: 'Empresa',
       islandTitle: 'Configurações da Empresa',
+      identity: {
+        title: 'Identidade',
+        description: 'Nome e informações básicas da empresa.',
+        nameLabel: 'Nome da Empresa',
+      },
       whatsapp: {
         title: 'WhatsApp',
         description: 'Configure o número de WhatsApp e as janelas de silêncio para esta empresa.',
@@ -400,9 +406,20 @@ export const pt = {
         description: 'Dados fiscais e informações do plano desta empresa.',
         planLabel: 'Plano Atual',
       },
+      danger: {
+        title: 'Zona de Perigo',
+        description: 'Ações irreversíveis. Tenha cuidado.',
+        deleteTitle: 'Excluir Empresa',
+        deleteDescription: 'Todos os dados, agendamentos e configurações serão perdidos permanentemente.',
+        deleteButton: 'Excluir',
+        confirmDelete: 'Confirmar Exclusão',
+      },
       messages: {
         saveSuccess: 'Configurações salvas com sucesso!',
         saveError: 'Erro ao salvar configurações',
+        renameSuccess: 'Nome atualizado com sucesso!',
+        renameError: 'Erro ao renomear',
+        deleteError: 'Erro ao excluir empresa',
       },
     },
   },

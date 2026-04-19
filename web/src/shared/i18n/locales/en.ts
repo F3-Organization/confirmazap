@@ -361,6 +361,7 @@ export const en = {
       title: 'Select your Company',
       subtitle: 'Choose the company you want to access',
       newCompany: 'New Company',
+      limitReached: 'Company limit reached on current plan',
     },
     create: {
       title: 'Create Company',
@@ -380,6 +381,11 @@ export const en = {
       subtitle: 'Manage your company settings',
       navLabel: 'Company',
       islandTitle: 'Company Settings',
+      identity: {
+        title: 'Identity',
+        description: 'Company name and basic information.',
+        nameLabel: 'Company Name',
+      },
       whatsapp: {
         title: 'WhatsApp',
         description: 'Configure the WhatsApp number and silent windows for this company.',
@@ -390,9 +396,20 @@ export const en = {
         description: 'Tax details and plan information for this company.',
         planLabel: 'Current Plan',
       },
+      danger: {
+        title: 'Danger Zone',
+        description: 'Irreversible actions. Proceed with caution.',
+        deleteTitle: 'Delete Company',
+        deleteDescription: 'All data, appointments, and settings will be permanently lost.',
+        deleteButton: 'Delete',
+        confirmDelete: 'Confirm Deletion',
+      },
       messages: {
         saveSuccess: 'Settings saved successfully!',
         saveError: 'Error saving settings',
+        renameSuccess: 'Name updated successfully!',
+        renameError: 'Error renaming company',
+        deleteError: 'Error deleting company',
       },
     },
   },

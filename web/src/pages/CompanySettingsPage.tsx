@@ -65,10 +65,10 @@ export const CompanySettingsPage = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['company-config', selectedCompany?.id] });
-      showSuccess(t('company.settings.messages.saveSuccess', 'Configurações salvas com sucesso!'));
+      showSuccess(t('company.settings.messages.saveSuccess'));
     },
     onError: (error: any) => {
-      showError(error.response?.data?.error || t('company.settings.messages.saveError', 'Erro ao salvar configurações'));
+      showError(error.response?.data?.error || t('company.settings.messages.saveError'));
     },
   });
 
@@ -82,10 +82,10 @@ export const CompanySettingsPage = () => {
       setCompanies(updated);
       useAuthStore.setState({ selectedCompany: { ...selectedCompany!, name: companyName } });
       setIsEditingName(false);
-      showSuccess(t('company.settings.messages.renameSuccess', 'Nome atualizado com sucesso!'));
+      showSuccess(t('company.settings.messages.renameSuccess'));
     },
     onError: (error: any) => {
-      showError(error.response?.data?.message || t('company.settings.messages.renameError', 'Erro ao renomear'));
+      showError(error.response?.data?.message || t('company.settings.messages.renameError'));
     },
   });
 
@@ -100,7 +100,7 @@ export const CompanySettingsPage = () => {
       navigate(remaining.length > 0 ? '/select-company' : '/create-company');
     },
     onError: (error: any) => {
-      showError(error.response?.data?.message || t('company.settings.messages.deleteError', 'Erro ao excluir empresa'));
+      showError(error.response?.data?.message || t('company.settings.messages.deleteError'));
       setShowDeleteConfirm(false);
     },
   });
@@ -132,8 +132,8 @@ export const CompanySettingsPage = () => {
 
   return (
     <PageLayout
-      title={t('company.settings.title', 'Configurações da Empresa')}
-      subtitle={selectedCompany?.name ?? t('company.settings.subtitle', 'Gerencie as configurações da sua empresa')}
+      title={t('company.settings.title')}
+      subtitle={selectedCompany?.name ?? t('company.settings.subtitle')}
     >
       <div className="max-w-4xl mx-auto space-y-24 pb-40 relative">
         <div className="absolute top-0 -right-20 w-80 h-80 bg-primary/10 rounded-full blur-[100px] -z-10 pointer-events-none" />
@@ -146,17 +146,17 @@ export const CompanySettingsPage = () => {
               <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20">
                 <Building2 className="w-5 h-5" />
               </div>
-              <h2 className="text-2xl font-black tracking-tight">{t('company.settings.identity.title', 'Identidade')}</h2>
+              <h2 className="text-2xl font-black tracking-tight">{t('company.settings.identity.title')}</h2>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-2xl opacity-70">
-              {t('company.settings.identity.description', 'Nome e informações básicas da empresa.')}
+              {t('company.settings.identity.description')}
             </p>
           </div>
 
           <Card variant="glass" className="p-8 space-y-6 border-white/5">
             <div className="space-y-3">
               <label className="text-[10px] font-black text-muted-foreground/50 uppercase tracking-[0.3em] ml-1">
-                {t('company.settings.identity.nameLabel', 'Nome da Empresa')}
+                {t('company.settings.identity.nameLabel')}
               </label>
               {isEditingName ? (
                 <div className="flex gap-3">
@@ -177,7 +177,7 @@ export const CompanySettingsPage = () => {
                     onClick={() => { setIsEditingName(false); setCompanyName(selectedCompany?.name ?? ''); }}
                     className="h-12 px-4 rounded-lg"
                   >
-                    {t('common.cancel', 'Cancelar')}
+                    {t('common.cancel')}
                   </Button>
                 </div>
               ) : (
@@ -203,17 +203,17 @@ export const CompanySettingsPage = () => {
                 <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20">
                   <Phone className="w-5 h-5" />
                 </div>
-                <h2 className="text-2xl font-black tracking-tight">{t('company.settings.whatsapp.title', 'WhatsApp')}</h2>
+                <h2 className="text-2xl font-black tracking-tight">{t('company.settings.whatsapp.title')}</h2>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed max-w-2xl opacity-70">
-                {t('company.settings.whatsapp.description', 'Configure o número de WhatsApp e as janelas de silêncio para esta empresa.')}
+                {t('company.settings.whatsapp.description')}
               </p>
             </div>
 
             <Card variant="glass" className="p-8 space-y-8 border-white/5">
               <div className="space-y-3">
                 <label className="text-[10px] font-black text-muted-foreground/50 uppercase tracking-[0.3em] ml-1">
-                  {t('company.settings.whatsapp.numberLabel', 'Número do WhatsApp')}
+                  {t('company.settings.whatsapp.numberLabel')}
                 </label>
                 <div className="relative group/input">
                   <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40 group-focus-within/input:text-primary transition-colors" />
@@ -232,8 +232,8 @@ export const CompanySettingsPage = () => {
                     <RefreshCw className="w-7 h-7" />
                   </div>
                   <div>
-                    <h3 className="font-black text-lg tracking-tight">{t('settings.automation.syncTitle', 'Sincronização Ativa')}</h3>
-                    <p className="text-xs text-muted-foreground/60 mt-0.5 font-medium">{t('settings.automation.syncDesc', 'Habilite ou desabilite a automação total com o Google Calendar')}</p>
+                    <h3 className="font-black text-lg tracking-tight">{t('settings.automation.syncTitle')}</h3>
+                    <p className="text-xs text-muted-foreground/60 mt-0.5 font-medium">{t('settings.automation.syncDesc')}</p>
                   </div>
                 </div>
                 <div className="flex items-center scale-110 pr-2">
@@ -250,13 +250,13 @@ export const CompanySettingsPage = () => {
               <div className="space-y-8">
                 <div className="flex items-center gap-3 px-1 font-black tracking-[0.4em] text-muted-foreground/40 text-[9px] uppercase">
                   <BellOff className="w-4 h-4" />
-                  {t('settings.automation.silentWindow', 'Janela de Silêncio')}
+                  {t('settings.automation.silentWindow')}
                 </div>
 
                 <div className="flex flex-col lg:flex-row gap-12 items-center">
                   <div className="flex-1 space-y-4">
                     <p className="text-xs text-muted-foreground/50 leading-relaxed italic border-l-4 border-primary/20 pl-6 py-2">
-                      {t('settings.automation.silentWindowDesc', 'Defina o horário em que o sistema NÃO enviará mensagens automáticas pelo WhatsApp para seus clientes.')}
+                      {t('settings.automation.silentWindowDesc')}
                     </p>
                   </div>
 
@@ -264,7 +264,7 @@ export const CompanySettingsPage = () => {
                     <div className="flex-1 space-y-3">
                       <label className="text-[9px] font-black uppercase tracking-[0.3em] text-muted-foreground/40 flex items-center gap-2 ml-1">
                         <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]" />
-                        {t('settings.automation.start', 'Início')}
+                        {t('settings.automation.start')}
                       </label>
                       <div className="relative group/input">
                         <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/30 group-focus-within/input:text-primary transition-colors" />
@@ -284,7 +284,7 @@ export const CompanySettingsPage = () => {
                     <div className="flex-1 space-y-3">
                       <label className="text-[9px] font-black uppercase tracking-[0.3em] text-muted-foreground/40 flex items-center gap-2 ml-1">
                         <div className="w-1.5 h-1.5 rounded-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.8)]" />
-                        {t('settings.automation.end', 'Término')}
+                        {t('settings.automation.end')}
                       </label>
                       <div className="relative group/input">
                         <Clock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/30 group-focus-within/input:text-primary transition-colors" />
@@ -309,10 +309,10 @@ export const CompanySettingsPage = () => {
                 <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20">
                   <CreditCard className="w-5 h-5" />
                 </div>
-                <h2 className="text-2xl font-black tracking-tight">{t('company.settings.billing.title', 'Cobrança')}</h2>
+                <h2 className="text-2xl font-black tracking-tight">{t('company.settings.billing.title')}</h2>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed max-w-2xl opacity-70">
-                {t('company.settings.billing.description', 'Dados fiscais e informações do plano desta empresa.')}
+                {t('company.settings.billing.description')}
               </p>
             </div>
 
@@ -320,7 +320,7 @@ export const CompanySettingsPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-3">
                   <label className="text-[10px] font-black text-muted-foreground/50 uppercase tracking-[0.3em] ml-1">
-                    {t('settings.profile.taxId', 'CPF / CNPJ')}
+                    {t('settings.profile.taxId')}
                   </label>
                   <div className="relative group/input">
                     <FileText className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/40 group-focus-within/input:text-primary transition-colors" />
@@ -335,7 +335,7 @@ export const CompanySettingsPage = () => {
 
                 <div className="space-y-3">
                   <label className="text-[10px] font-black text-muted-foreground/50 uppercase tracking-[0.3em] ml-1">
-                    {t('company.settings.billing.planLabel', 'Plano Atual')}
+                    {t('company.settings.billing.planLabel')}
                   </label>
                   <div className="flex items-center h-12 px-4 rounded-lg bg-black/40 border border-white/5">
                     <Building2 className="w-4 h-4 text-muted-foreground/40 mr-3" />
@@ -360,7 +360,7 @@ export const CompanySettingsPage = () => {
                 ) : (
                   <>
                     <Save className="w-6 h-6 fill-current" />
-                    {t('settings.messages.savePreferences', 'Salvar Preferências')}
+                    {t('settings.messages.savePreferences')}
                   </>
                 )}
               </Button>
@@ -375,19 +375,19 @@ export const CompanySettingsPage = () => {
               <div className="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center border border-red-500/20">
                 <Trash2 className="w-5 h-5" />
               </div>
-              <h2 className="text-2xl font-black tracking-tight">{t('company.settings.danger.title', 'Zona de Perigo')}</h2>
+              <h2 className="text-2xl font-black tracking-tight">{t('company.settings.danger.title')}</h2>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-2xl opacity-70">
-              {t('company.settings.danger.description', 'Ações irreversíveis. Tenha cuidado.')}
+              {t('company.settings.danger.description')}
             </p>
           </div>
 
           <Card variant="glass" className="p-8 border-red-500/10">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-bold text-foreground">{t('company.settings.danger.deleteTitle', 'Excluir Empresa')}</h3>
+                <h3 className="font-bold text-foreground">{t('company.settings.danger.deleteTitle')}</h3>
                 <p className="text-sm text-muted-foreground/60 mt-1">
-                  {t('company.settings.danger.deleteDescription', 'Todos os dados, agendamentos e configurações serão perdidos permanentemente.')}
+                  {t('company.settings.danger.deleteDescription')}
                 </p>
               </div>
               {!showDeleteConfirm ? (
@@ -397,7 +397,7 @@ export const CompanySettingsPage = () => {
                   className="h-10 px-6 border border-red-500/20 text-red-400 hover:bg-red-500/10 text-xs font-bold tracking-widest uppercase rounded-lg"
                 >
                   <Trash2 className="w-4 h-4 mr-2" />
-                  {t('company.settings.danger.deleteButton', 'Excluir')}
+                  {t('company.settings.danger.deleteButton')}
                 </Button>
               ) : (
                 <div className="flex items-center gap-3">
@@ -406,7 +406,7 @@ export const CompanySettingsPage = () => {
                     onClick={() => setShowDeleteConfirm(false)}
                     className="h-10 px-4 text-xs font-bold uppercase rounded-lg"
                   >
-                    {t('common.cancel', 'Cancelar')}
+                    {t('common.cancel')}
                   </Button>
                   <Button
                     onClick={() => deleteMutation.mutate()}
@@ -416,7 +416,7 @@ export const CompanySettingsPage = () => {
                     {deleteMutation.isPending ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
                     ) : (
-                      t('company.settings.danger.confirmDelete', 'Confirmar Exclusão')
+                      t('company.settings.danger.confirmDelete')
                     )}
                   </Button>
                 </div>
@@ -448,7 +448,7 @@ export const CompanySettingsPage = () => {
               </div>
               <div className="flex flex-col">
                 <p className="text-xs text-foreground font-black uppercase tracking-[0.4em] opacity-80 italic">
-                  {t('company.settings.islandTitle', 'Configurações da Empresa')}
+                  {t('company.settings.islandTitle')}
                 </p>
                 <p className="text-[10px] text-muted-foreground/40 font-black uppercase tracking-[0.25em] mt-1 font-mono">
                   {selectedCompany?.name ?? ''}

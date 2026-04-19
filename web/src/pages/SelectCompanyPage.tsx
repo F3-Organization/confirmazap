@@ -55,10 +55,10 @@ export const SelectCompanyPage = () => {
             <Zap className="w-7 h-7 text-primary-foreground fill-current" />
           </div>
           <h1 className="text-3xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-foreground to-foreground/70">
-            {t('company.select.title', 'Selecione sua Empresa')}
+            {t('company.select.title')}
           </h1>
           <p className="text-muted-foreground text-sm font-medium">
-            {t('company.select.subtitle', 'Escolha a empresa que deseja acessar')}
+            {t('company.select.subtitle')}
           </p>
         </div>
 
@@ -113,12 +113,12 @@ export const SelectCompanyPage = () => {
             className="w-full h-12 border border-outline-variant/50 hover:border-primary/30 hover:bg-primary/5 font-bold text-sm gap-2"
           >
             <Plus className="w-4 h-4" />
-            {t('company.select.newCompany', 'Nova Empresa')}
+            {t('company.select.newCompany')}
           </Button>
         ) : (
           <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-surface-high/30 text-muted-foreground/50 text-xs font-medium">
             <Lock className="w-3.5 h-3.5" />
-            {t('company.select.limitReached', `Limite de ${maxCompanies} empresa(s) no plano atual`)}
+            {t('company.select.limitReached')}
           </div>
         )}
       </div>
