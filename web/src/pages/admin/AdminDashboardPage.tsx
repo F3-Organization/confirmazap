@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Users, Building2, Briefcase, CalendarDays, TrendingUp, DollarSign, Loader2 } from 'lucide-react';
 import { AdminLayout } from '../../shared/ui/AdminLayout';
@@ -24,6 +25,30 @@ export const AdminDashboardPage = () => {
     refetchInterval: 30000,
   });
 
+  const planCounts: Record<string, number> = {};
+  stats?.subscriptionsByPlan?.forEach(s => {
+    planCounts[`${s.plan}_${s.status}`] = parseInt(s.count);
+  });
+
+  const growthData = useMemo(() => {
+    const dataMap = new Map<string, number>();
+    (stats?.recentUsers ?? []).forEach(d => dataMap.set(d.date, parseInt(d.count)));
+
+    const days: Array<{ date: string; count: number }> = [];
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const key = d.toISOString().slice(0, 10);
+      days.push({ date: key, count: dataMap.get(key) ?? 0 });
+    }
+
+    return {
+      days,
+      maxCount: Math.max(...days.map(d => d.count), 1),
+      total: days.reduce((sum, d) => sum + d.count, 0),
+    };
+  }, [stats?.recentUsers]);
+
   if (isLoading) {
     return (
       <AdminLayout>
@@ -33,11 +58,6 @@ export const AdminDashboardPage = () => {
       </AdminLayout>
     );
   }
-
-  const planCounts: Record<string, number> = {};
-  stats?.subscriptionsByPlan?.forEach(s => {
-    planCounts[`${s.plan}_${s.status}`] = parseInt(s.count);
-  });
 
   return (
     <AdminLayout>
@@ -106,55 +126,36 @@ export const AdminDashboardPage = () => {
                 <p className="text-xs text-muted-foreground">Novos registros por dia</p>
               </div>
             </div>
-            {(() => {
-              // Build full 30-day dataset, filling in zeros for missing days
-              const dataMap = new Map<string, number>();
-              (stats?.recentUsers ?? []).forEach(d => dataMap.set(d.date, parseInt(d.count)));
-              const days: Array<{ date: string; count: number }> = [];
-              for (let i = 29; i >= 0; i--) {
-                const d = new Date();
-                d.setDate(d.getDate() - i);
-                const key = d.toISOString().slice(0, 10);
-                days.push({ date: key, count: dataMap.get(key) ?? 0 });
-              }
-              const maxCount = Math.max(...days.map(d => d.count), 1);
-              const totalRegisters = days.reduce((sum, d) => sum + d.count, 0);
-
-              return (
-                <>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-2xl font-extrabold text-foreground">{totalRegisters}</span>
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">registros</span>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-2xl font-extrabold text-foreground">{growthData.total}</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">registros</span>
+            </div>
+            <div className="flex items-end gap-[2px] h-20">
+              {growthData.days.map((day, i) => {
+                const height = day.count > 0 ? Math.max((day.count / growthData.maxCount) * 100, 8) : 3;
+                const dateLabel = new Date(day.date + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+                return (
+                  <div key={i} className="flex-1 h-full flex flex-col items-center justify-end group cursor-pointer">
+                    <span className="text-[8px] font-mono text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity mb-0.5">
+                      {day.count > 0 ? day.count : ''}
+                    </span>
+                    <div
+                      className={`w-full rounded-sm transition-all duration-200 ${
+                        day.count > 0
+                          ? 'bg-primary/60 hover:bg-primary'
+                          : 'bg-outline-variant/20 hover:bg-outline-variant/40'
+                      }`}
+                      style={{ height: `${height}%` }}
+                      title={`${dateLabel}: ${day.count} registros`}
+                    />
                   </div>
-                  <div className="flex items-end gap-[2px] h-20">
-                    {days.map((day, i) => {
-                      const height = day.count > 0 ? Math.max((day.count / maxCount) * 100, 8) : 3;
-                      const dateLabel = new Date(day.date + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-                      return (
-                        <div key={i} className="flex-1 h-full flex flex-col items-center justify-end group cursor-pointer">
-                          <span className="text-[8px] font-mono text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity mb-0.5">
-                            {day.count > 0 ? day.count : ''}
-                          </span>
-                          <div
-                            className={`w-full rounded-sm transition-all duration-200 ${
-                              day.count > 0
-                                ? 'bg-primary/60 hover:bg-primary'
-                                : 'bg-outline-variant/20 hover:bg-outline-variant/40'
-                            }`}
-                            style={{ height: `${height}%` }}
-                            title={`${dateLabel}: ${day.count} registros`}
-                          />
-                        </div>
-                      );
-                    })}
-                  </div>
-                  <div className="flex justify-between mt-2">
-                    <span className="text-[9px] text-muted-foreground">30 dias atrás</span>
-                    <span className="text-[9px] text-muted-foreground">Hoje</span>
-                  </div>
-                </>
-              );
-            })()}
+                );
+              })}
+            </div>
+            <div className="flex justify-between mt-2">
+              <span className="text-[9px] text-muted-foreground">30 dias atrás</span>
+              <span className="text-[9px] text-muted-foreground">Hoje</span>
+            </div>
           </Card>
         </div>
 

@@ -13,9 +13,9 @@ export const AdminLayout = ({ children }: { children: ReactNode }) => {
   const location = useLocation();
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="flex h-screen overflow-hidden bg-background text-foreground">
       {/* Sidebar */}
-      <aside className="w-64 border-r border-outline-variant/30 bg-surface-dim/30 flex flex-col">
+      <aside className="w-64 border-r border-outline-variant/30 bg-surface-dim/30 flex flex-col h-full shrink-0">
         {/* Logo */}
         <div className="p-6 border-b border-outline-variant/30">
           <div className="flex items-center gap-3">
@@ -30,7 +30,7 @@ export const AdminLayout = ({ children }: { children: ReactNode }) => {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-4 space-y-1">
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           {NAV_ITEMS.map((item) => {
             const isActive = item.path === '/admin' 
               ? location.pathname === '/admin'
@@ -65,8 +65,8 @@ export const AdminLayout = ({ children }: { children: ReactNode }) => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto">
-        <div className="max-w-7xl mx-auto p-8">
+      <main className="flex-1 overflow-y-auto overflow-x-hidden no-scrollbar">
+        <div className="max-w-7xl mx-auto p-4 sm:p-10">
           {children}
         </div>
       </main>

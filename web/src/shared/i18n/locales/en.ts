@@ -238,9 +238,9 @@ export const en = {
       sent: 'sent',
       limitReached: 'Limit reached!',
       limitReachedTitle: 'Message Limit Reached',
-      limitReachedDesc: 'Your monthly quota of 50 messages has been reached. Upgrade to PRO to continue confirming appointments.',
+      limitReachedDesc: 'Your monthly message quota has been reached. Upgrade to PRO to continue confirming appointments.',
       limitWarningTitle: 'You have only {{count}} messages left',
-      limitWarningDesc: "Your monthly limit of 50 messages is almost over. Don't leave your appointments unconfirmed!",
+      limitWarningDesc: "Your monthly message limit is almost over. Don't leave your appointments unconfirmed!",
       upgradeButton: 'Upgrade to PRO now',
     },
     enterpriseCta: {

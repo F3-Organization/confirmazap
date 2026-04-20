@@ -39,9 +39,9 @@ export const SubscriptionPage = () => {
   } = useSubscription();
 
   const messageCount = subStatus?.messageCount ?? 0;
-  const isUnlimited = subStatus?.messageLimit === null;
-  const messageLimit = isUnlimited ? null : (subStatus?.messageLimit ?? 50);
-  const isAtLimit = !isUnlimited && messageCount >= (messageLimit ?? 50);
+  const isUnlimited = subStatus?.messageLimit === null || subStatus?.messageLimit === undefined;
+  const messageLimit = subStatus?.messageLimit;
+  const isAtLimit = !isUnlimited && messageLimit != null && messageCount >= messageLimit;
 
   if (isStatusLoading) {
     return (
@@ -129,7 +129,7 @@ export const SubscriptionPage = () => {
                         ? 'bg-gradient-to-r from-red-600 to-red-400 shadow-[0_0_20px_rgba(239,68,68,0.4)]'
                         : 'bg-gradient-to-r from-primary-dim to-primary'
                       }`}
-                    style={{ width: `${Math.min((messageCount / (messageLimit ?? 50)) * 100, 100)}%` }}
+                    style={{ width: `${Math.min((messageCount / (messageLimit!)) * 100, 100)}%` }}
                   >
                     <div className="absolute inset-0 bg-white/20 animate-pulse-slow rounded-full" />
                   </div>

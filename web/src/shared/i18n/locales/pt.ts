@@ -126,8 +126,8 @@ export const pt = {
       connectedButton: 'Sincronizar Agora'
     },
     onboarding: {
-      phoneTitle: 'Complete seu Perfil',
-      phoneDescription: 'Para você receber notificações e alertas de agendamentos, precisamos do seu número de WhatsApp com DDD.',
+      phoneTitle: 'Complete o perfil da Empresa',
+      phoneDescription: 'Para a empresa receber notificações e alertas de agendamentos, precisamos do número de WhatsApp da empresa com DDD.',
       phonePlaceholder: 'Ex: 11999999999',
       phoneButton: 'Salvar Telefone',
       phoneSuccess: 'Telefone salvo com sucesso!'
@@ -248,9 +248,9 @@ export const pt = {
       sent: 'enviadas',
       limitReached: 'Limite atingido!',
       limitReachedTitle: 'Limite de Mensagens Atingido',
-      limitReachedDesc: 'Sua cota mensal de 50 mensagens foi atingida. Faça o upgrade para PRO para continuar confirmando agendamentos.',
+      limitReachedDesc: 'Sua cota mensal de mensagens foi atingida. Faça o upgrade para PRO para continuar confirmando agendamentos.',
       limitWarningTitle: 'Você tem apenas {{count}} mensagens restantes',
-      limitWarningDesc: 'Seu limite de 50 mensagens mensais está quase no fim. Não deixe seus agendamentos sem confirmação!',
+      limitWarningDesc: 'Seu limite de mensagens mensais está quase no fim. Não deixe seus agendamentos sem confirmação!',
       upgradeButton: 'Migrar para PRO agora',
     },
     enterpriseCta: {
