@@ -121,11 +121,6 @@ export const en = {
       title: 'Sync Calendar',
       description: 'Connect your Google Calendar to automatically send WhatsApp reminders for every new booking created.',
       button: 'Connect Google Calendar',
-    },
-    newConnection: {
-      title: 'New Connection?',
-      subtitle: 'Setup another WhatsApp instance',
-      button: 'Start Setup',
     }
   },
   whatsapp: {

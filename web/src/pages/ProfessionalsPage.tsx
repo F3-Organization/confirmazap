@@ -321,7 +321,7 @@ export const ProfessionalsPage = () => {
                 <input
                   value={form.specialty}
                   onChange={(e) => setForm({ ...form, specialty: e.target.value })}
-                  placeholder="Cardiologista, Dentista, etc."
+                  placeholder="Ex: Dentista, Barbeiro, Personal..."
                   className="w-full px-4 py-3 bg-surface-low border border-outline-variant/30 rounded-xl text-sm focus:outline-none focus:border-primary/50 transition-colors"
                 />
               </div>

@@ -417,20 +417,8 @@ export const DashboardPage = () => {
             </div>
           </Card>
 
-          <Card variant="base" className="p-8 bg-surface-low border-dashed border-2">
-            <div className="flex flex-col items-center text-center space-y-4">
-              <div className="w-10 h-10 rounded-full bg-surface-high flex items-center justify-center">
-                <ArrowUpRight className="w-5 h-5 text-muted-foreground" />
-              </div>
-              <div>
-                <h4 className="font-bold text-sm tracking-tight mb-1">{t('dashboard.newConnection.title')}</h4>
-                <p className="text-xs text-muted-foreground">{t('dashboard.newConnection.subtitle')}</p>
-              </div>
-              <Button variant="ghost" size="sm" className="w-full font-bold uppercase text-[10px] tracking-widest border border-outline-variant/30">
-                {t('dashboard.newConnection.button')}
-              </Button>
-            </div>
-          </Card>
+
+
         </div>
       </div>
       

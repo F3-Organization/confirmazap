@@ -131,11 +131,6 @@ export const pt = {
       phonePlaceholder: 'Ex: 11999999999',
       phoneButton: 'Salvar Telefone',
       phoneSuccess: 'Telefone salvo com sucesso!'
-    },
-    newConnection: {
-      title: 'Nova Conexão?',
-      subtitle: 'Configurar outra instância de WhatsApp',
-      button: 'Iniciar Configuração',
     }
   },
   whatsapp: {

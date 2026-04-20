@@ -24,7 +24,10 @@ export interface BotConfig {
 }
 
 export const professionalService = {
-  list: () => apiClient.get<Professional[]>('/company/professionals'),
+  list: async () => {
+    const { data } = await apiClient.get<Professional[]>('/company/professionals');
+    return data;
+  },
   create: (data: Partial<Professional>) => apiClient.post<Professional>('/company/professionals', data),
   update: (id: string, data: Partial<Professional>) => apiClient.put<void>(`/company/professionals/${id}`, data),
   delete: (id: string) => apiClient.delete(`/company/professionals/${id}`),
