@@ -106,28 +106,55 @@ export const AdminDashboardPage = () => {
                 <p className="text-xs text-muted-foreground">Novos registros por dia</p>
               </div>
             </div>
-            <div className="flex items-end gap-1 h-24">
-              {(stats?.recentUsers ?? []).map((day, i) => {
-                const count = parseInt(day.count);
-                const maxCount = Math.max(...(stats?.recentUsers ?? []).map(d => parseInt(d.count)), 1);
-                const height = Math.max((count / maxCount) * 100, 4);
-                return (
-                  <div key={i} className="flex-1 flex flex-col items-center justify-end gap-1 group">
-                    <span className="text-[9px] font-mono text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity">
-                      {count}
-                    </span>
-                    <div
-                      className="w-full bg-primary/30 hover:bg-primary/60 rounded-t transition-all duration-200 min-w-[4px]"
-                      style={{ height: `${height}%` }}
-                      title={`${day.date}: ${count} registros`}
-                    />
+            {(() => {
+              // Build full 30-day dataset, filling in zeros for missing days
+              const dataMap = new Map<string, number>();
+              (stats?.recentUsers ?? []).forEach(d => dataMap.set(d.date, parseInt(d.count)));
+              const days: Array<{ date: string; count: number }> = [];
+              for (let i = 29; i >= 0; i--) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                const key = d.toISOString().slice(0, 10);
+                days.push({ date: key, count: dataMap.get(key) ?? 0 });
+              }
+              const maxCount = Math.max(...days.map(d => d.count), 1);
+              const totalRegisters = days.reduce((sum, d) => sum + d.count, 0);
+
+              return (
+                <>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-2xl font-extrabold text-foreground">{totalRegisters}</span>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">registros</span>
                   </div>
-                );
-              })}
-            </div>
-            {(stats?.recentUsers?.length ?? 0) === 0 && (
-              <p className="text-xs text-muted-foreground text-center py-8">Nenhum dado nos últimos 30 dias</p>
-            )}
+                  <div className="flex items-end gap-[2px] h-20">
+                    {days.map((day, i) => {
+                      const height = day.count > 0 ? Math.max((day.count / maxCount) * 100, 8) : 3;
+                      const dateLabel = new Date(day.date + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+                      return (
+                        <div key={i} className="flex-1 h-full flex flex-col items-center justify-end group cursor-pointer">
+                          <span className="text-[8px] font-mono text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity mb-0.5">
+                            {day.count > 0 ? day.count : ''}
+                          </span>
+                          <div
+                            className={`w-full rounded-sm transition-all duration-200 ${
+                              day.count > 0
+                                ? 'bg-primary/60 hover:bg-primary'
+                                : 'bg-outline-variant/20 hover:bg-outline-variant/40'
+                            }`}
+                            style={{ height: `${height}%` }}
+                            title={`${dateLabel}: ${day.count} registros`}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="flex justify-between mt-2">
+                    <span className="text-[9px] text-muted-foreground">30 dias atrás</span>
+                    <span className="text-[9px] text-muted-foreground">Hoje</span>
+                  </div>
+                </>
+              );
+            })()}
           </Card>
         </div>
 
@@ -136,7 +163,7 @@ export const AdminDashboardPage = () => {
           <h3 className="font-bold text-sm mb-4">Assinaturas por Plano</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {stats?.subscriptionsByPlan?.map((item, i) => (
-              <div key={i} className="p-4 rounded-xl bg-surface-high/50 border border-outline-variant/20">
+              <div key={i} className="p-4 rounded-lg bg-surface-high/50 border border-outline-variant/20">
                 <span className={`inline-block text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full mb-2 ${
                   item.plan === 'PRO' ? 'bg-primary/20 text-primary' : 'bg-surface-high text-muted-foreground'
                 }`}>
