@@ -30,22 +30,17 @@ function validateEnv() {
 
 async function bootstrap() {
     try {
-        // 1. Validate required env vars before doing anything
         validateEnv();
 
-        // 2. Initialize Database
         await AppDataSource.initialize();
         console.log("[Bootstrap] Data Source has been initialized!");
         await seedPlansIfEmpty();
         await seedPaymentMethods();
 
-        // 3. Setup API Adapter (Swagger, etc.)
         const adapter = factory.adapters.fastify();
         await adapter.setup();
         console.log("[Bootstrap] Fastify Adapter setup complete.");
 
-        // 3. Initialize Controllers (Register Routes)
-        // Note: These must be called AFTER adapter.setup() to ensure decorations are ready
         console.log("[Bootstrap] Registering controllers...");
         factory.controller.app();
         factory.controller.auth();
@@ -61,13 +56,10 @@ async function bootstrap() {
         console.log("[Bootstrap] Controllers and routes registered.");
 
 
-        // 4. Start Background Workers
-        // We call the worker factory methods to instantiate the bullmq workers
         factory.workers.sync();
         factory.workers.notify();
         console.log("[Bootstrap] Background workers started.");
 
-        // 5. Start the server
         await adapter.listen();
         console.log("[Bootstrap] Server is listening...");
 
