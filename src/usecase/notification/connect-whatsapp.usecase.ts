@@ -17,19 +17,20 @@ export class ConnectWhatsappUseCase {
 
         const instanceName = `agent_${companyId.replace(/-/g, "").substring(0, 10)}`;
 
-        let instanceToken: string | undefined;
         try {
-            const instanceResponse = await this.evolutionService.createInstance(instanceName);
-            instanceToken = instanceResponse.hash?.apikey;
+            await this.evolutionService.createInstance(instanceName);
             await new Promise(resolve => setTimeout(resolve, 2000));
         } catch (error) {
+            // Instance may already exist, continue
         }
 
-        const webhookUrl = env.evolution.webhookUrl;
+        // Always fetch the token from the Evolution API (works for new and existing instances)
+        const instanceToken = await this.evolutionService.fetchInstanceToken(instanceName);
 
+        const webhookUrl = env.evolution.webhookUrl;
         await this.evolutionService.setWebhook(instanceName, webhookUrl);
 
-        const updateData: Record<string, unknown> = {
+        const updateData: Partial<Record<string, string>> = {
             whatsappInstanceName: instanceName
         };
         if (instanceToken) {

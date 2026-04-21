@@ -119,6 +119,18 @@ export class EvolutionApiAdapter implements IEvolutionService {
         return cleaned;
     }
 
+    async fetchInstanceToken(instanceName: string): Promise<string | null> {
+        try {
+            const instances = await this.request<any[]>(`/instance/fetchInstances?instanceName=${instanceName}`, "GET");
+            if (instances && instances.length > 0) {
+                return instances[0].token || null;
+            }
+            return null;
+        } catch {
+            return null;
+        }
+    }
+
     async setWebhook(instanceName: string, url: string): Promise<void> {
         await this.request(`/webhook/set/${instanceName}`, "POST", {
             webhook: {

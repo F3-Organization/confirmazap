@@ -31,12 +31,12 @@ export const updateProfessionalSchema = z.object({
 });
 
 export const updateBotConfigSchema = z.object({
-    businessType: z.string().optional(),
-    businessDescription: z.string().optional(),
-    botGreeting: z.string().optional(),
-    botInstructions: z.string().optional(),
-    address: z.string().optional(),
-    workingHours: workingHoursSchema,
-    servicesOffered: z.array(z.string()).optional(),
+    businessType: z.string().nullable().optional(),
+    businessDescription: z.string().nullable().optional(),
+    botGreeting: z.string().nullable().optional(),
+    botInstructions: z.string().nullable().optional(),
+    address: z.string().nullable().optional(),
+    workingHours: workingHoursSchema.nullable(),
+    servicesOffered: z.array(z.string()).nullable().optional(),
     botEnabled: z.boolean().optional(),
 });

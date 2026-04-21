@@ -56,7 +56,10 @@ describe("NotifyUpcomingAppointmentsUseCase", () => {
             connectInstance: vi.fn(),
             setWebhook: vi.fn(),
             logoutInstance: vi.fn(),
-            deleteInstance: vi.fn()
+            deleteInstance: vi.fn(),
+            fetchInstance: vi.fn(),
+            fetchInstanceToken: vi.fn().mockResolvedValue(null),
+            health: vi.fn()
         };
 
         clientRepository = {

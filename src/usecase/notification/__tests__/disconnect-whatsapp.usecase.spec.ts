@@ -29,7 +29,10 @@ describe("DisconnectWhatsappUseCase", () => {
             connectInstance: vi.fn(),
             sendText: vi.fn(),
             logoutInstance: vi.fn().mockResolvedValue(undefined),
-            deleteInstance: vi.fn().mockResolvedValue(undefined)
+            deleteInstance: vi.fn().mockResolvedValue(undefined),
+            fetchInstance: vi.fn(),
+            fetchInstanceToken: vi.fn().mockResolvedValue(null),
+            health: vi.fn()
         };
 
         sut = new DisconnectWhatsappUseCase(companyConfigRepository, evolutionService);
@@ -41,7 +44,8 @@ describe("DisconnectWhatsappUseCase", () => {
         expect(evolutionService.logoutInstance).toHaveBeenCalledWith("instancia-teste");
         expect(evolutionService.deleteInstance).toHaveBeenCalledWith("instancia-teste");
         expect(companyConfigRepository.updateByCompanyId).toHaveBeenCalledWith("user-1", {
-            whatsappInstanceName: null
+            whatsappInstanceName: null,
+            whatsappInstanceToken: null
         });
     });
 
@@ -73,7 +77,8 @@ describe("DisconnectWhatsappUseCase", () => {
         await sut.execute("user-1");
 
         expect(companyConfigRepository.updateByCompanyId).toHaveBeenCalledWith("user-1", {
-            whatsappInstanceName: null
+            whatsappInstanceName: null,
+            whatsappInstanceToken: null
         });
     });
 });

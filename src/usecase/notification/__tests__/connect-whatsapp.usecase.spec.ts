@@ -29,7 +29,10 @@ describe("ConnectWhatsappUseCase", () => {
             connectInstance: vi.fn().mockResolvedValue({ base64: "qr-code-64" }),
             sendText: vi.fn(),
             logoutInstance: vi.fn(),
-            deleteInstance: vi.fn()
+            deleteInstance: vi.fn(),
+            fetchInstance: vi.fn(),
+            fetchInstanceToken: vi.fn().mockResolvedValue(null),
+            health: vi.fn()
         };
 
         sut = new ConnectWhatsappUseCase(companyConfigRepository, evolutionService);
