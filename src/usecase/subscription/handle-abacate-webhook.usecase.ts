@@ -22,7 +22,38 @@ export class HandleAbacatePayWebhookUseCase {
         private readonly auditLogRepository: WebhookAuditLogRepository,
         private readonly paymentMethodRepository: PaymentMethodRepository,
         private readonly planRepository: PlanRepository
-    ) {}
+    ) { }
+
+    async execute(payload: any) {
+        const { event, data } = payload;
+
+        // ── Always persist raw event for auditing ────────────────────────
+        const methodCode = this.extractPaymentMethodCode(event, data);
+        const auditData: Partial<WebhookAuditLog> = {
+            eventType: event,
+            rawPayload: payload,
+        };
+        if (data?.id) auditData.billingId = data.id;
+        if (methodCode) auditData.paymentMethodCode = methodCode;
+        const auditAmount = data?.paidAmount ?? data?.amount ?? data?.payment?.amount;
+        if (auditAmount != null) auditData.amount = auditAmount;
+
+        const auditEntry = await this.auditLogRepository.create(auditData);
+
+        try {
+            await this.processEvent(event, data, methodCode);
+            await this.auditLogRepository.create({
+                ...auditEntry,
+                processedAt: new Date(),
+            });
+        } catch (error: any) {
+            console.error(`[Webhook] Processing failed for event ${event}:`, error.message);
+            // Mark audit entry with error but don't rethrow — already saved above
+            throw error;
+        }
+
+        return { status: "processed" };
+    }
 
     private extractPaymentMethodCode(event: string, data: any): string {
         // v2 webhook doesn't expose the chosen payment method in the payload.
@@ -56,37 +87,6 @@ export class HandleAbacatePayWebhookUseCase {
             BOLETO: "BOLETO",
         };
         return MAP[raw.toUpperCase()] ?? raw.toUpperCase();
-    }
-
-    async execute(payload: any) {
-        const { event, data } = payload;
-
-        // ── Always persist raw event for auditing ────────────────────────
-        const methodCode = this.extractPaymentMethodCode(event, data);
-        const auditData: Partial<WebhookAuditLog> = {
-            eventType: event,
-            rawPayload: payload,
-        };
-        if (data?.id) auditData.billingId = data.id;
-        if (methodCode) auditData.paymentMethodCode = methodCode;
-        const auditAmount = data?.paidAmount ?? data?.amount ?? data?.payment?.amount;
-        if (auditAmount != null) auditData.amount = auditAmount;
-
-        const auditEntry = await this.auditLogRepository.create(auditData);
-
-        try {
-            await this.processEvent(event, data, methodCode);
-            await this.auditLogRepository.create({
-                ...auditEntry,
-                processedAt: new Date(),
-            });
-        } catch (error: any) {
-            console.error(`[Webhook] Processing failed for event ${event}:`, error.message);
-            // Mark audit entry with error but don't rethrow — already saved above
-            throw error;
-        }
-
-        return { status: "processed" };
     }
 
     private async processEvent(event: string, data: any, methodCode: string | undefined) {
