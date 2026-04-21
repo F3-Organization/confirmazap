@@ -208,7 +208,7 @@ export const LandingPage = () => {
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
               <div className="text-sm font-bold tracking-widest uppercase text-muted-foreground/60 transition-colors hover:text-muted-foreground flex items-center h-14">
-                {t('landing.ctaTryFree')}
+                {t('landing.ctaNoCard')}
               </div>
             </div>
 

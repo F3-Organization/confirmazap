@@ -1,8 +1,6 @@
 import { AppDataSource } from "./infra/config/data-source";
 import { factory } from "./infra/factory/factory";
 import { env } from "./infra/config/configs";
-import { Plan } from "./infra/database/entities/plan.entity";
-import { PaymentMethod } from "./infra/database/entities/payment-method.entity";
 import { seedPaymentMethods } from "./infra/database/seeders/payment-methods.seed";
 import { seedPlansIfEmpty } from "./infra/database/seeders/plans.seed";
 

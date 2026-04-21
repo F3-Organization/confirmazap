@@ -256,13 +256,14 @@ export class HandleAbacatePayWebhookUseCase {
 
         if (!subscription) return;
 
+        const trialDays = data.trialDays ?? 7;
         const periodEnd = new Date();
-        periodEnd.setDate(periodEnd.getDate() + 7); // trial = 7 days default
+        periodEnd.setDate(periodEnd.getDate() + trialDays);
 
         await this.subscriptionRepository.updateStatus(
             subscription.id,
             subscription.userId,
-            SubscriptionStatus.ACTIVE,
+            SubscriptionStatus.TRIAL,
             periodEnd,
             subscription.plan
         );
@@ -272,7 +273,7 @@ export class HandleAbacatePayWebhookUseCase {
             await this.notificationService.notifyPaymentSuccess(user.email, user.name, subscription.plan);
         }
 
-        console.log(`[Subscription] Trial started for user ${subscription.userId}.`);
+        console.log(`[Subscription] Trial started (${trialDays}d) for user ${subscription.userId}.`);
     }
 
     private async handleSubscriptionCancelled(data: any) {

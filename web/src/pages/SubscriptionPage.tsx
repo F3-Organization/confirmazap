@@ -14,6 +14,7 @@ import {
   Banknote,
   Smartphone,
   QrCode,
+  Clock,
 } from 'lucide-react';
 import { PageLayout } from '../shared/ui/PageLayout';
 import { Card } from '../shared/ui/Card';
@@ -56,7 +57,9 @@ export const SubscriptionPage = () => {
     showBillingModal,
     setShowBillingModal,
     handleUpdateBillingInfo,
-    updateBillingConfigMutation
+    updateBillingConfigMutation,
+    isTrial,
+    trialEndsAt,
   } = useSubscription();
 
   const messageCount = subStatus?.messageCount ?? 0;
@@ -114,6 +117,51 @@ export const SubscriptionPage = () => {
           </div>
         </Card>
       )}
+
+      {isTrial && !showSuccessBanner && (() => {
+        const endsAt = trialEndsAt ? new Date(trialEndsAt) : null;
+        const now = new Date();
+        const daysLeft = endsAt ? Math.max(0, Math.ceil((endsAt.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))) : 0;
+        const isExpiringSoon = daysLeft <= 2;
+
+        return (
+          <Card variant="glass" className={`mb-8 p-6 items-center flex gap-4 animate-in fade-in slide-in-from-top-4 duration-500 ${
+            isExpiringSoon
+              ? 'border-orange-500/30 bg-orange-500/5'
+              : 'border-violet-500/30 bg-violet-500/5'
+          }`}>
+            <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${
+              isExpiringSoon ? 'bg-orange-500/20' : 'bg-violet-500/20'
+            }`}>
+              <Clock className={`w-6 h-6 ${
+                isExpiringSoon ? 'text-orange-500' : 'text-violet-500'
+              }`} />
+            </div>
+            <div className="flex-1">
+              <h3 className={`text-lg font-bold leading-tight ${
+                isExpiringSoon ? 'text-orange-500' : 'text-violet-500'
+              }`}>
+                {t('subscription.trial.bannerTitle')}
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                {t('subscription.trial.bannerDescription', { days: daysLeft })}
+              </p>
+            </div>
+            <div className={`text-right shrink-0 px-4 py-2 rounded-xl border ${
+              isExpiringSoon
+                ? 'bg-orange-500/10 border-orange-500/20'
+                : 'bg-violet-500/10 border-violet-500/20'
+            }`}>
+              <span className={`text-3xl font-black tabular-nums ${
+                isExpiringSoon ? 'text-orange-400' : 'text-violet-400'
+              }`}>{daysLeft}</span>
+              <p className={`text-[10px] font-bold tracking-widest uppercase ${
+                isExpiringSoon ? 'text-orange-400/60' : 'text-violet-400/60'
+              }`}>{t('subscription.trial.daysLeft')}</p>
+            </div>
+          </Card>
+        );
+      })()}
 
       {/* Usage Progress Section */}
       {subStatus && (
@@ -184,9 +232,13 @@ export const SubscriptionPage = () => {
             className={`p-10 flex flex-col relative overflow-hidden group shadow-2xl transition-all border border-outline-variant ${plan.current ? 'ring-2 ring-primary scale-[1.02] z-10' : 'opacity-80 hover:opacity-100 hover:scale-[1.01]'}`}
           >
             {plan.current && (
-              <div className="absolute top-4 right-4 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary-dim text-[10px] font-bold tracking-widest uppercase flex items-center gap-1.5">
-                <Star className="w-3 h-3 fill-current" />
-                {t('common.activePlan')}
+              <div className={`absolute top-4 right-4 px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase flex items-center gap-1.5 ${
+                isTrial
+                  ? 'bg-violet-500/10 border border-violet-500/20 text-violet-400'
+                  : 'bg-primary/10 border border-primary/20 text-primary-dim'
+              }`}>
+                {isTrial ? <Clock className="w-3 h-3" /> : <Star className="w-3 h-3 fill-current" />}
+                {isTrial ? t('subscription.trial.currentPlan') : t('common.activePlan')}
               </div>
             )}
 

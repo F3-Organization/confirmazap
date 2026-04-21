@@ -25,6 +25,7 @@ export interface SubscriptionStatus {
   planName?: string;
   taxId?: string;
   whatsappNumber?: string;
+  trialEndsAt?: string;
 }
 
 export interface SubscriptionPayment {

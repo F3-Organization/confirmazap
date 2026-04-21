@@ -47,17 +47,19 @@ export const useSubscription = () => {
   });
 
   useEffect(() => {
-    // Detectar transição de PENDING para ACTIVE
-    if (prevStatusRef.current === 'PENDING' && subStatus?.status === 'ACTIVE') {
-      toast.success(t('subscription.billing.successTitle'), {
-        duration: 8000,
-        position: 'top-center',
-      });
+    const prev = prevStatusRef.current;
+    const curr = subStatus?.status;
+
+    if (prev === 'PENDING' && (curr === 'ACTIVE' || curr === 'TRIAL')) {
+      const isTrial = curr === 'TRIAL';
+      toast.success(
+        isTrial ? t('subscription.trial.activatedTitle') : t('subscription.billing.successTitle'),
+        { duration: 8000, position: 'top-center' }
+      );
       setShowSuccessBanner(true);
-      // Ocultar banner após 30 segundos
       setTimeout(() => setShowSuccessBanner(false), 30000);
     }
-    prevStatusRef.current = subStatus?.status;
+    prevStatusRef.current = curr;
   }, [subStatus?.status, t]);
 
   const checkoutMutation = useMutation({
@@ -140,6 +142,8 @@ export const useSubscription = () => {
     }
   };
 
+  const isTrialOrActive = subStatus?.status === 'ACTIVE' || subStatus?.status === 'TRIAL';
+
   const mappedPlans = plans.map((plan: Plan) => {
     const isCurrent = subStatus?.plan === plan.slug || (!subStatus && plan.slug === 'FREE');
     const priceDisplay = plan.priceInCents === 0
@@ -148,7 +152,7 @@ export const useSubscription = () => {
 
     let cta: string;
     if (isCurrent) {
-      cta = t('common.currentPlan');
+      cta = subStatus?.status === 'TRIAL' ? t('subscription.trial.currentPlan') : t('common.currentPlan');
     } else if (plan.isPurchasable) {
       cta = subStatus?.status === 'PENDING' ? t('common.completePayment') : t('common.connect');
     } else {
@@ -184,7 +188,9 @@ export const useSubscription = () => {
     showBillingModal,
     setShowBillingModal,
     handleUpdateBillingInfo,
-    updateBillingConfigMutation
+    updateBillingConfigMutation,
+    isTrial: subStatus?.status === 'TRIAL',
+    trialEndsAt: subStatus?.trialEndsAt,
   };
 };
 

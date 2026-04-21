@@ -16,6 +16,7 @@ export interface SubscriptionStatusResponse {
     planName?: string | undefined;
     taxId?: string | undefined;
     whatsappNumber?: string | undefined;
+    trialEndsAt?: Date | undefined;
 }
 
 export class GetSubscriptionStatusUseCase {
@@ -71,6 +72,10 @@ export class GetSubscriptionStatusUseCase {
             plan: subscription.plan,
             currentPeriodEnd: subscription.currentPeriodEnd,
             checkoutUrl: subscription.checkoutUrl,
+            trialEndsAt: subscription.status === SubscriptionStatus.TRIAL
+                ? subscription.currentPeriodEnd
+                : undefined,
         };
     }
 }
+
