@@ -10,6 +10,7 @@ import { WebhookAuditLog } from "../../infra/database/entities/webhook-audit-log
 import { WebhookAuditLogRepository } from "../../infra/database/repositories/webhook-audit-log.repository";
 import { PaymentMethodRepository } from "../../infra/database/repositories/payment-method.repository";
 import { PlanRepository } from "../../infra/database/repositories/plan.repository";
+import { env } from "../../infra/config/configs";
 
 export class HandleAbacatePayWebhookUseCase {
     constructor(
@@ -233,13 +234,24 @@ export class HandleAbacatePayWebhookUseCase {
         console.log(`[Subscription] User ${subscription.userId} activated via Abacate Pay.`);
     }
 
+    /**
+     * Handles the subscription.trial_started webhook from Abacate Pay.
+     *
+     * The trial period is configured on the Abacate Pay product dashboard
+     * (not via API). When trial starts, the webhook delivers `data.trialDays`.
+     * We use `env.abacatePay.trialDays` (TRIAL_DAYS env var) as fallback
+     * in case the field is missing from the payload.
+     *
+     * No NFS-e is emitted during trial — fiscal invoice is only generated
+     * upon actual payment (subscription.completed / subscription.renewed).
+     */
     private async handleTrialStarted(data: any) {
         const billingId = data.id;
         const subscription = await this.subscriptionRepository.findByBillingId(billingId);
 
         if (!subscription) return;
 
-        const trialDays = data.trialDays ?? 7;
+        const trialDays = data.trialDays ?? env.abacatePay.trialDays;
         const periodEnd = new Date();
         periodEnd.setDate(periodEnd.getDate() + trialDays);
 
@@ -253,7 +265,12 @@ export class HandleAbacatePayWebhookUseCase {
 
         const user = await this.userRepository.findById(subscription.userId);
         if (user) {
-            await this.notificationService.notifyPaymentSuccess(user.email, user.name, subscription.plan);
+            await this.notificationService.notifyTrialStarted(
+                user.email,
+                user.name,
+                subscription.plan,
+                trialDays
+            );
         }
 
         console.log(`[Subscription] Trial started (${trialDays}d) for user ${subscription.userId}.`);

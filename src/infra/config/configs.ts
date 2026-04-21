@@ -43,6 +43,7 @@ export const env = {
         planName: process.env.PLAN_NAME || 'ConfirmaZap Pro',
         planPrice: parseInt(process.env.PLAN_PRICE_CENTS || '4990'),
         webhookSecret: process.env.ABACATE_WEBHOOK_SECRET || '',
+        trialDays: parseInt(process.env.TRIAL_DAYS || '7'),
     },
     brasilNfe: {
         token: process.env.BRASIL_NFE_TOKEN,

@@ -42,7 +42,8 @@ describe("HandleAbacatePayWebhookUseCase", () => {
         notificationService = {
             notifyPaymentSuccess: vi.fn(),
             notifySubscriptionExpired: vi.fn(),
-            notifySubscriptionRefunded: vi.fn()
+            notifySubscriptionRefunded: vi.fn(),
+            notifyTrialStarted: vi.fn()
         };
 
         fiscalService = {
@@ -97,6 +98,35 @@ describe("HandleAbacatePayWebhookUseCase", () => {
             expect.any(Date),
             "PRO"
         );
+        expect(result.status).toBe("processed");
+    });
+
+    it("deve iniciar trial e enviar notificação específica de trial", async () => {
+        const payload = {
+            event: "subscription.trial_started",
+            data: { id: "billing-456", trialDays: 7 }
+        };
+
+        const mockSubscription = { id: "sub-2", userId: "user-2", plan: "PRO" };
+        vi.mocked(subscriptionRepository.findByBillingId).mockResolvedValueOnce(mockSubscription as any);
+        userRepository.findById.mockResolvedValueOnce({ id: "user-2", name: "Trial User", email: "trial@test.com" });
+
+        const result = await sut.execute(payload);
+
+        expect(subscriptionRepository.updateStatus).toHaveBeenCalledWith(
+            "sub-2",
+            "user-2",
+            SubscriptionStatus.TRIAL,
+            expect.any(Date),
+            "PRO"
+        );
+        expect(notificationService.notifyTrialStarted).toHaveBeenCalledWith(
+            "trial@test.com",
+            "Trial User",
+            "PRO",
+            7
+        );
+        expect(notificationService.notifyPaymentSuccess).not.toHaveBeenCalled();
         expect(result.status).toBe("processed");
     });
 

@@ -58,4 +58,27 @@ export class SubscriptionNotificationService {
         `;
         await this.mailService.sendMail(userEmail, subject, body);
     }
+
+    async notifyTrialStarted(userEmail: string, userName: string, planName: string, trialDays: number): Promise<void> {
+        const subject = `Período de teste ${planName} ativado – ${trialDays} dias grátis!`;
+        const body = `
+            <div style="font-family: sans-serif; line-height: 1.6; color: #333;">
+                <h2>Olá, ${userName}!</h2>
+                <p>Seu período de teste do plano <strong>${planName}</strong> foi ativado com sucesso!</p>
+                <div style="margin: 20px 0; padding: 15px; background: #ede9fe; border-radius: 8px; border-left: 4px solid #7c3aed;">
+                    <strong>🕐 Período de Teste</strong><br>
+                    <p style="margin: 8px 0 0 0;">Você tem <strong>${trialDays} dias</strong> para explorar todas as funcionalidades do plano ${planName} sem nenhum custo.</p>
+                </div>
+                <div style="margin: 20px 0; padding: 15px; background: #f4f4f4; border-radius: 8px;">
+                    <strong>Plano:</strong> ${planName}<br>
+                    <strong>Status:</strong> Período de Teste<br>
+                    <strong>Duração:</strong> ${trialDays} dias
+                </div>
+                <p style="color: #6b7280; font-size: 13px;">📄 Nenhuma cobrança foi realizada durante o período de teste. A NFS-e será emitida somente após a confirmação do primeiro pagamento.</p>
+                <p>Aproveite ao máximo suas notificações automáticas!</p>
+                <p>Equipe ${env.company.name}</p>
+            </div>
+        `;
+        await this.mailService.sendMail(userEmail, subject, body);
+    }
 }
