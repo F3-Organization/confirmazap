@@ -1,13 +1,15 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { FastifyAdapter } from "../adapters/fastfy.adapter";
 import { HandleEvolutionWebhookUseCase } from "../../usecase/notification/handle-evolution-webhook.usecase";
-import { env } from "../config/configs";
+import { ICompanyConfigRepository } from "../../usecase/repositories/icompany-config-repository";
 import { EvolutionWebhookSchema } from "../../../shared/schemas/evolution.schema";
+import { decrypt } from "../../shared/utils/cryptography";
 
 export class EvolutionWebhookController {
     constructor(
         private readonly fastify: FastifyAdapter,
-        private readonly handleWebhook: HandleEvolutionWebhookUseCase
+        private readonly handleWebhook: HandleEvolutionWebhookUseCase,
+        private readonly companyConfigRepository: ICompanyConfigRepository
     ) {
         this.fastify.logInfo("[EvolutionWebhookController] Initializing...");
         this.registerRoutes();
@@ -30,7 +32,15 @@ export class EvolutionWebhookController {
             const payload = parseResult.data;
             
             try {
-                if (payload.apikey !== env.evolution.apiKey) {
+                const config = await this.companyConfigRepository.findByInstanceName(payload.instance);
+                if (!config?.whatsappInstanceToken) {
+                    this.fastify.logInfo("[EvolutionWebhookController] No config/token found for instance", { instance: payload.instance });
+                    return reply.code(401).send({ error: "Unauthorized webhook call" });
+                }
+
+                const storedToken = decrypt(config.whatsappInstanceToken);
+                if (payload.apikey !== storedToken) {
+                    this.fastify.logInfo("[EvolutionWebhookController] Token mismatch", { instance: payload.instance });
                     return reply.code(401).send({ error: "Unauthorized webhook call" });
                 }
 

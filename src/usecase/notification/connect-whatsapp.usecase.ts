@@ -1,6 +1,7 @@
 import { IEvolutionService, EvolutionConnectResponse } from "../ports/ievolution-service";
 import { ICompanyConfigRepository } from "../repositories/icompany-config-repository";
 import { env } from "../../infra/config/configs";
+import { encrypt } from "../../shared/utils/cryptography";
 
 export class ConnectWhatsappUseCase {
     constructor(
@@ -16,8 +17,10 @@ export class ConnectWhatsappUseCase {
 
         const instanceName = `agent_${companyId.replace(/-/g, "").substring(0, 10)}`;
 
+        let instanceToken: string | undefined;
         try {
-            await this.evolutionService.createInstance(instanceName);
+            const instanceResponse = await this.evolutionService.createInstance(instanceName);
+            instanceToken = instanceResponse.hash?.apikey;
             await new Promise(resolve => setTimeout(resolve, 2000));
         } catch (error) {
         }
@@ -26,9 +29,14 @@ export class ConnectWhatsappUseCase {
 
         await this.evolutionService.setWebhook(instanceName, webhookUrl);
 
-        await this.companyConfigRepository.updateByCompanyId(companyId, {
+        const updateData: Record<string, unknown> = {
             whatsappInstanceName: instanceName
-        });
+        };
+        if (instanceToken) {
+            updateData.whatsappInstanceToken = encrypt(instanceToken);
+        }
+
+        await this.companyConfigRepository.updateByCompanyId(companyId, updateData);
 
         return await this.evolutionService.connectInstance(instanceName);
     }

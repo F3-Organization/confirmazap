@@ -23,7 +23,8 @@ export class DisconnectWhatsappUseCase {
         }
 
         await this.companyConfigRepository.updateByCompanyId(companyId, {
-            whatsappInstanceName: null as unknown as string 
+            whatsappInstanceName: null as unknown as string,
+            whatsappInstanceToken: null as unknown as string
         });
     }
 }

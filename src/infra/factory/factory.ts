@@ -382,7 +382,8 @@ export const factory = {
         ),
         webhook: () => new EvolutionWebhookController(
             adapterInstance,
-            getUseCase.handleEvolutionWebhook()
+            getUseCase.handleEvolutionWebhook(),
+            getRepo.companyConfig()
         ),
         subscription: () => new SubscriptionController(
             adapterInstance,

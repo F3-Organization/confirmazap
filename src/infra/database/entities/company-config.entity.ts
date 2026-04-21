@@ -17,6 +17,9 @@ export class CompanyConfig extends BaseEntity {
     @Column({ type: "varchar", name: "whatsapp_instance_name", nullable: true })
     whatsappInstanceName?: string;
 
+    @Column({ type: "varchar", name: "whatsapp_instance_token", nullable: true })
+    whatsappInstanceToken?: string;
+
     @Column({ type: "varchar", name: "whatsapp_lid", nullable: true })
     whatsappLid?: string;
 
